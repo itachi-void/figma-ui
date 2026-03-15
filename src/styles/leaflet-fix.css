@@ -1,0 +1,47 @@
+/* Fix Leaflet default marker icons */
+.leaflet-default-icon-path {
+  background-image: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png');
+}
+
+/* Ensure map container has proper dimensions */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+/* Fix marker positioning */
+.leaflet-marker-icon {
+  display: block;
+}
+
+/* Smooth transitions for markers */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Custom popup styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+  font-family: inherit;
+}
+
+.leaflet-popup-content strong {
+  color: #10b981;
+  font-size: 14px;
+}
+
+/* Circle marker animations */
+.leaflet-interactive {
+  transition: all 0.2s ease-in-out;
+}
+
+.leaflet-interactive:hover {
+  transform: scale(1.1);
+}

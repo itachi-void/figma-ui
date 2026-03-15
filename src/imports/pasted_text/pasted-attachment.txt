@@ -1,0 +1,197 @@
+import { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Polyline,
+  Popup,
+  CircleMarker
+} from "react-leaflet";
+import L from "leaflet";
+
+interface RouteData {
+  id: string;
+  name: string;
+  status: string;
+  route?: [number, number][];
+  currentPosition?: [number, number];
+}
+
+interface CollectionPoint {
+  id: number;
+  name: string;
+  lat: number;
+  lng: number;
+  status: string;
+}
+
+interface Props {
+  routesData: RouteData[];
+  collectionPoints: CollectionPoint[];
+}
+
+/* ---------- Truck Icon ---------- */
+
+const truckIcon = new L.Icon({
+  iconUrl:
+    "https://cdn-icons-png.flaticon.com/512/1995/1995574.png",
+  iconSize: [32, 32],
+});
+
+/* ---------- Status Colors ---------- */
+
+const getPointColor = (status: string) => {
+  switch (status) {
+    case "completed":
+      return "green";
+    case "active":
+      return "blue";
+    case "pending":
+      return "orange";
+    default:
+      return "gray";
+  }
+};
+
+export function LiveMapView({ routesData, collectionPoints }: Props) {
+
+  const center: [number, number] = [24.7136, 46.6753];
+
+  const [vehiclePositions, setVehiclePositions] = useState<
+    Record<string, [number, number]>
+  >({});
+
+  /* ---------- Simulation Movement ---------- */
+
+  useEffect(() => {
+
+    const interval = setInterval(() => {
+
+      setVehiclePositions(prev => {
+
+        const updated = { ...prev };
+
+        routesData.forEach(route => {
+
+          if (!route.route) return;
+
+          const path = route.route;
+
+          const currentIndex = Math.floor(
+            Math.random() * path.length
+          );
+
+          updated[route.id] = path[currentIndex];
+
+        });
+
+        return updated;
+
+      });
+
+    }, 4000);
+
+    return () => clearInterval(interval);
+
+  }, [routesData]);
+
+  return (
+    <div style={{ height: "600px", width: "100%" }}>
+
+      <MapContainer
+        center={center}
+        zoom={12}
+        style={{ height: "100%", width: "100%" }}
+      >
+
+        {/* ---------- Map Tiles ---------- */}
+
+        <TileLayer
+          attribution="© OpenStreetMap"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {/* ---------- Draw Routes ---------- */}
+
+        {routesData.map(route =>
+
+          route.route ? (
+
+            <Polyline
+              key={route.id}
+              positions={route.route}
+              pathOptions={{
+                color: route.status === "active" ? "green" : "gray",
+                weight: 4
+              }}
+            />
+
+          ) : null
+        )}
+
+        {/* ---------- Vehicles ---------- */}
+
+        {routesData.map(route => {
+
+          const position =
+            vehiclePositions[route.id] ||
+            route.currentPosition;
+
+          if (!position) return null;
+
+          return (
+
+            <Marker
+              key={route.id}
+              position={position}
+              icon={truckIcon}
+            >
+
+              <Popup>
+
+                <strong>{route.name}</strong>
+                <br />
+                Route ID: {route.id}
+                <br />
+                Status: {route.status}
+
+              </Popup>
+
+            </Marker>
+
+          );
+
+        })}
+
+        {/* ---------- Collection Points ---------- */}
+
+        {collectionPoints.map(point => (
+
+          <CircleMarker
+            key={point.id}
+            center={[point.lat, point.lng]}
+            radius={8}
+            pathOptions={{
+              color: getPointColor(point.status),
+              fillColor: getPointColor(point.status),
+              fillOpacity: 0.8
+            }}
+          >
+
+            <Popup>
+
+              <strong>{point.name}</strong>
+              <br />
+              Status: {point.status}
+
+            </Popup>
+
+          </CircleMarker>
+
+        ))}
+
+      </MapContainer>
+
+    </div>
+  );
+}

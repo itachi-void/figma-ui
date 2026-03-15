@@ -1,0 +1,2470 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Driver Tracking System - Cairo Detailed Maps</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: white;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #00b4db;
+            height: 70px;
+            flex-shrink: 0;
+        }
+        
+        .header-left h1 {
+            font-size: 22px;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-left p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .system-time {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            height: calc(100vh - 70px);
+        }
+        
+        .left-panel {
+            width: 380px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #1a1a2e;
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        /* Map Style Selector */
+        .map-style-selector {
+            position: absolute;
+            top: 10px;
+            right: 320px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            display: flex;
+            gap: 6px;
+        }
+        
+        .map-style-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #2c3e50;
+            transition: all 0.3s;
+        }
+        
+        .map-style-btn:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+        
+        .map-style-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #3498db;
+        }
+        
+        .stat-icon {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+        
+        .selection-section {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 15px;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .driver-selection, .zone-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        
+        .driver-option, .zone-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .driver-option:hover, .zone-option:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+        
+        .driver-option.selected, .zone-option.selected {
+            border-color: #2ecc71;
+            background: #f0fff4;
+        }
+        
+        .driver-avatar, .zone-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .driver-info, .zone-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .driver-name, .zone-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 2px;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .driver-details, .zone-details {
+            font-size: 11px;
+            color: #7f8c8d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .selected-info {
+            background: #fff9e6;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid #f39c12;
+            flex-shrink: 0;
+        }
+        
+        .selected-info h3 {
+            color: #2c3e50;
+            margin-bottom: 6px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .selected-info p {
+            color: #7f8c8d;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+        
+        .actions-section {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+        
+        .action-buttons {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(46, 204, 113, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .btn-disabled {
+            background: #bdc3c7;
+            color: #7f8c8d;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .btn-disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .map-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #2c3e50;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .map-btn:hover {
+            background: #f8f9fa;
+            transform: scale(1.05);
+        }
+        
+        .map-overlay {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            padding: 12px;
+        }
+        
+        .status-overlay {
+            top: 10px;
+            right: 10px;
+            width: 300px;
+        }
+        
+        .status-title {
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-details {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .status-label {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+        
+        .status-value {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .legend {
+            bottom: 10px;
+            left: 10px;
+            width: 200px;
+        }
+        
+        .legend h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-items {
+            display: grid;
+            gap: 6px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        
+        .progress-overlay {
+            bottom: 10px;
+            right: 10px;
+            width: 250px;
+        }
+        
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .progress-value {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-left: auto;
+            font-size: 12px;
+        }
+        
+        .progress-container {
+            margin-top: 12px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 11px;
+            color: #2c3e50;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        
+        .notification-container {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-width: 320px;
+        }
+        
+        .notification {
+            background: white;
+            border-radius: 6px;
+            padding: 10px 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 3px solid #3498db;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .notification-content h4 {
+            color: #2c3e50;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+        
+        .notification-content p {
+            color: #7f8c8d;
+            font-size: 11px;
+            line-height: 1.3;
+        }
+        
+        /* Speed Control Styles */
+        .speed-control-section {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .speed-control {
+            background: white;
+            border-radius: 6px;
+            padding: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .speed-btn {
+            flex: 1;
+            padding: 6px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: white;
+        }
+        
+        .speed-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .speed-btn.active {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+            transform: scale(0.98);
+        }
+        
+        .speed-slow {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+        
+        .speed-normal {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        
+        .speed-fast {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        #speedSlider {
+            -webkit-appearance: none;
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #e74c3c);
+            outline: none;
+        }
+        
+        #speedSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2c3e50;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        #speedSlider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2c3e50;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        .loading-text {
+            color: white;
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 2px;
+        }
+        
+        /* Hide routing control styles */
+        .leaflet-routing-container {
+            display: none !important;
+        }
+        
+        .leaflet-routing-alt {
+            display: none !important;
+        }
+        
+        @media (max-width: 1400px) {
+            .left-panel {
+                width: 340px;
+            }
+            
+            .status-overlay {
+                width: 280px;
+            }
+            
+            .map-style-selector {
+                right: 300px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .left-panel {
+                width: 100%;
+                height: 40vh;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+            
+            .map-overlay {
+                max-width: 90%;
+            }
+            
+            .map-style-selector {
+                right: 10px;
+                top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">Loading detailed Cairo map...</div>
+        </div>
+    </div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-map-marked-alt"></i> Cairo Advanced Tracking</h1>
+                <p>Real-time tracking with detailed Cairo maps</p>
+            </div>
+            <div class="header-right">
+                <div class="system-time">
+                    <i class="fas fa-clock"></i> <span id="currentTime">Loading...</span>
+                </div>
+                <div class="system-status">
+                    <i class="fas fa-circle" style="color: #2ecc71;"></i> Live Tracking
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Statistics -->
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-value" id="activeDrivers">6</div>
+                        <div class="stat-label">Total Drivers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-map-marked-alt"></i></div>
+                        <div class="stat-value" id="activeZones">6</div>
+                        <div class="stat-label">Total Zones</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-route"></i></div>
+                        <div class="stat-value" id="activeRoutes">0</div>
+                        <div class="stat-label">Active Routes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-road"></i></div>
+                        <div class="stat-value" id="totalDistance">0 km</div>
+                        <div class="stat-label">Total Distance</div>
+                    </div>
+                </div>
+                
+                <!-- Driver Selection -->
+                <div class="selection-section">
+                    <div class="section-title">
+                        <span><i class="fas fa-user-tie"></i> Select Driver</span>
+                    </div>
+                    <div class="driver-selection" id="driverSelection">
+                        <!-- Driver options will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Zone Selection -->
+                <div class="selection-section">
+                    <div class="section-title">
+                        <span><i class="fas fa-map-marked-alt"></i> Select Zone</span>
+                    </div>
+                    <div class="zone-selection" id="zoneSelection">
+                        <!-- Zone options will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Selected Info -->
+                <div class="selected-info" id="selectedInfo">
+                    <h3><i class="fas fa-info-circle"></i> Selection Summary</h3>
+                    <p>Select a driver and a zone to plan a route on detailed Cairo maps.</p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="actions-section">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="planRouteBtn" disabled>
+                            <i class="fas fa-route"></i> Plan Detailed Route
+                        </button>
+                        <button class="btn btn-success" id="simulateMovementBtn" disabled>
+                            <i class="fas fa-play"></i> Start Journey
+                        </button>
+                        <button class="btn btn-danger" id="stopMovementBtn" disabled>
+                            <i class="fas fa-stop"></i> Stop All
+                        </button>
+                        <button class="btn btn-secondary" id="resetSelectionBtn">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map Container -->
+            <div class="map-container">
+                <div id="map"></div>
+                
+                <!-- Map Style Selector -->
+                <div class="map-style-selector">
+                    <button class="map-style-btn" id="mapStyleStandard" title="Standard Map">
+                        <i class="fas fa-map"></i>
+                    </button>
+                    <button class="map-style-btn active" id="mapStyleSatellite" title="Satellite View">
+                        <i class="fas fa-satellite"></i>
+                    </button>
+                    <button class="map-style-btn" id="mapStyleDark" title="Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="map-style-btn" id="mapStyleTerrain" title="Terrain View">
+                        <i class="fas fa-mountain"></i>
+                    </button>
+                </div>
+                
+                <!-- Map Controls -->
+                <div class="map-controls">
+                    <button class="map-btn" id="zoomInBtn" title="Zoom In">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="map-btn" id="zoomOutBtn" title="Zoom Out">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="map-btn" id="resetViewBtn" title="Reset View">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <button class="map-btn" id="locateBtn" title="Locate Me">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
+                </div>
+                
+                <!-- Status Overlay -->
+                <div class="map-overlay status-overlay">
+                    <div class="status-title">
+                        <span><i class="fas fa-tachometer-alt"></i> Journey Status</span>
+                    </div>
+                    <div class="status-details">
+                        <div class="status-item">
+                            <span class="status-label">Selected Driver:</span>
+                            <span class="status-value" id="statusDriver">None</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Selected Zone:</span>
+                            <span class="status-value" id="statusZone">None</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Route Distance:</span>
+                            <span class="status-value" id="statusDistance">0 km</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Est. Duration:</span>
+                            <span class="status-value" id="statusTime">0 min</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Current Speed:</span>
+                            <span class="status-value" id="statusSpeed">0 km/h</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Driver Status:</span>
+                            <span class="status-value" id="statusDriverStatus">Idle</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Speed Control Section -->
+                    <div class="speed-control-section">
+                        <div class="status-title" style="margin-bottom: 8px;">
+                            <span><i class="fas fa-tachometer-alt"></i> Speed Control</span>
+                        </div>
+                        <div class="speed-control">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span class="status-label">Current Speed:</span>
+                                <span class="status-value" id="currentSpeedDisplay">0 km/h</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+                                <button class="speed-btn speed-slow" id="speedSlowBtn" title="Slow (20 km/h)">
+                                    <i class="fas fa-turtle"></i> Slow
+                                </button>
+                                <button class="speed-btn speed-normal" id="speedNormalBtn" title="Normal (40 km/h)">
+                                    <i class="fas fa-car"></i> Normal
+                                </button>
+                                <button class="speed-btn speed-fast" id="speedFastBtn" title="Fast (60 km/h)">
+                                    <i class="fas fa-running"></i> Fast
+                                </button>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="status-label" style="font-size: 11px;">Custom:</span>
+                                <input type="range" id="speedSlider" min="10" max="100" value="40" style="flex: 1;">
+                                <span class="status-value" id="speedSliderValue" style="font-size: 11px; min-width: 40px;">40</span>
+                            </div>
+                            <button class="btn btn-secondary" id="applySpeedBtn" style="margin-top: 8px; padding: 6px; font-size: 11px; width: 100%;" disabled>
+                                <i class="fas fa-bolt"></i> Apply Speed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="map-overlay legend">
+                    <h4><i class="fas fa-key"></i> Map Legend</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2ecc71;"></div>
+                            <span>Available Driver</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #3498db;"></div>
+                            <span>Moving Driver</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e74c3c;"></div>
+                            <span>Selected Zone</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f39c12;"></div>
+                            <span>Real Cairo Road</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #9b59b6;"></div>
+                            <span>Driving Progress</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Overlay -->
+                <div class="map-overlay progress-overlay">
+                    <div class="status-title">
+                        <span><i class="fas fa-ruler"></i> Journey Progress</span>
+                    </div>
+                    <div class="progress-item">
+                        <span>Progress:</span>
+                        <span class="progress-value" id="progressText">0%</span>
+                    </div>
+                    <div class="progress-item">
+                        <span>Time Remaining:</span>
+                        <span class="progress-value" id="timeRemaining">0 min</span>
+                    </div>
+                    <div class="progress-item">
+                        <span>Distance Left:</span>
+                        <span class="progress-value" id="distanceRemaining">0 km</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text">
+                            Real Road Journey: <span id="simulationTime">00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script>
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log("🚀 Initializing Cairo Advanced Tracking System...");
+            
+            // Speed control variables
+            let currentSpeedSetting = 40; // Default speed in km/h
+            
+            // Map layers
+            let baseLayers = {};
+            let currentMapStyle = 'satellite';
+            
+            // Loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            
+            function showLoading(message) {
+                loadingText.textContent = message;
+                loadingOverlay.classList.add('show');
+            }
+            
+            function hideLoading() {
+                loadingOverlay.classList.remove('show');
+            }
+            
+            // Update system time
+            function updateSystemTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                document.getElementById('currentTime').textContent = timeString;
+            }
+            
+            setInterval(updateSystemTime, 1000);
+            updateSystemTime();
+            
+            // Initialize Map with detailed Cairo view
+            showLoading('Loading detailed Cairo map...');
+            const map = L.map('map').setView([30.0444, 31.2357], 13); // Higher zoom for more detail
+            
+            // Define multiple map styles for Cairo
+            baseLayers = {
+                // Satellite View (High detail for Cairo)
+                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '© Esri, Earthstar Geographics',
+                    maxZoom: 19,
+                    minZoom: 10
+                }),
+                
+                // Standard Map
+                standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19,
+                    minZoom: 10
+                }),
+                
+                // Dark Mode
+                dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '© OpenStreetMap, © CartoDB',
+                    maxZoom: 19,
+                    minZoom: 10,
+                    subdomains: 'abcd'
+                }),
+                
+                // Terrain View
+                terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap, © OpenTopoMap',
+                    maxZoom: 17,
+                    minZoom: 10
+                }),
+                
+                // Detailed Cairo Map (ESRI Streets)
+                streets: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '© Esri',
+                    maxZoom: 19,
+                    minZoom: 10
+                }),
+                
+                // Topographic Map
+                topographic: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap, © OpenTopoMap',
+                    maxZoom: 17,
+                    minZoom: 10
+                }),
+                
+                // Navigation Map
+                navigation: L.tileLayer('https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=your-api-key', {
+                    attribution: '© Thunderforest, © OpenStreetMap',
+                    maxZoom: 19,
+                    minZoom: 10
+                })
+            };
+            
+            // Start with satellite view
+            baseLayers.satellite.addTo(map);
+            hideLoading();
+            console.log("🗺️ Detailed Cairo map initialized with satellite view");
+            
+            // Map Style Selector
+            const mapStyleStandard = document.getElementById('mapStyleStandard');
+            const mapStyleSatellite = document.getElementById('mapStyleSatellite');
+            const mapStyleDark = document.getElementById('mapStyleDark');
+            const mapStyleTerrain = document.getElementById('mapStyleTerrain');
+            
+            function setMapStyle(style) {
+                // Remove current layer
+                map.eachLayer(layer => {
+                    if (layer instanceof L.TileLayer && layer !== baseLayers[style]) {
+                        map.removeLayer(layer);
+                    }
+                });
+                
+                // Add new layer
+                baseLayers[style].addTo(map);
+                currentMapStyle = style;
+                
+                // Update active button
+                [mapStyleStandard, mapStyleSatellite, mapStyleDark, mapStyleTerrain].forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                if (style === 'standard') mapStyleStandard.classList.add('active');
+                if (style === 'satellite') mapStyleSatellite.classList.add('active');
+                if (style === 'dark') mapStyleDark.classList.add('active');
+                if (style === 'terrain') mapStyleTerrain.classList.add('active');
+                
+                showNotification('Map Style Changed', `Switched to ${style} view`, 'info');
+            }
+            
+            mapStyleStandard.addEventListener('click', () => setMapStyle('standard'));
+            mapStyleSatellite.addEventListener('click', () => setMapStyle('satellite'));
+            mapStyleDark.addEventListener('click', () => setMapStyle('dark'));
+            mapStyleTerrain.addEventListener('click', () => setMapStyle('terrain'));
+            
+            // Map Controls
+            document.getElementById('zoomInBtn').addEventListener('click', () => {
+                map.zoomIn();
+            });
+            
+            document.getElementById('zoomOutBtn').addEventListener('click', () => {
+                map.zoomOut();
+            });
+            
+            document.getElementById('resetViewBtn').addEventListener('click', () => {
+                map.setView([30.0444, 31.2357], 13);
+            });
+            
+            document.getElementById('locateBtn').addEventListener('click', () => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            map.setView([position.coords.latitude, position.coords.longitude], 15);
+                            showNotification('Location Found', 'Centered map on your location', 'info');
+                        },
+                        () => {
+                            showNotification('Location Error', 'Could not get your location', 'warning');
+                        }
+                    );
+                }
+            });
+            
+            // Initialize speed controls
+            const speedSlider = document.getElementById('speedSlider');
+            const speedSliderValue = document.getElementById('speedSliderValue');
+            const currentSpeedDisplay = document.getElementById('currentSpeedDisplay');
+            const applySpeedBtn = document.getElementById('applySpeedBtn');
+            const speedSlowBtn = document.getElementById('speedSlowBtn');
+            const speedNormalBtn = document.getElementById('speedNormalBtn');
+            const speedFastBtn = document.getElementById('speedFastBtn');
+            
+            // Update speed slider display
+            speedSlider.addEventListener('input', function() {
+                const value = this.value;
+                speedSliderValue.textContent = `${value} km/h`;
+                currentSpeedSetting = parseInt(value);
+                updateSpeedDisplay();
+                
+                // Enable apply button if a driver is moving
+                if (selectedDriver && driverMarkers[selectedDriver] && driverMarkers[selectedDriver].isAnimating) {
+                    applySpeedBtn.disabled = false;
+                    applySpeedBtn.classList.remove('btn-disabled');
+                }
+            });
+            
+            // Speed preset buttons
+            speedSlowBtn.addEventListener('click', function() {
+                setSpeedPreset(20);
+                updateSpeedButtons('slow');
+            });
+            
+            speedNormalBtn.addEventListener('click', function() {
+                setSpeedPreset(40);
+                updateSpeedButtons('normal');
+            });
+            
+            speedFastBtn.addEventListener('click', function() {
+                setSpeedPreset(60);
+                updateSpeedButtons('fast');
+            });
+            
+            function setSpeedPreset(speed) {
+                currentSpeedSetting = speed;
+                speedSlider.value = speed;
+                speedSliderValue.textContent = `${speed} km/h`;
+                updateSpeedDisplay();
+                
+                // Enable apply button if a driver is moving
+                if (selectedDriver && driverMarkers[selectedDriver] && driverMarkers[selectedDriver].isAnimating) {
+                    applySpeedBtn.disabled = false;
+                    applySpeedBtn.classList.remove('btn-disabled');
+                }
+            }
+            
+            function updateSpeedButtons(preset) {
+                [speedSlowBtn, speedNormalBtn, speedFastBtn].forEach(btn => btn.classList.remove('active'));
+                if (preset === 'slow') speedSlowBtn.classList.add('active');
+                if (preset === 'normal') speedNormalBtn.classList.add('active');
+                if (preset === 'fast') speedFastBtn.classList.add('active');
+            }
+            
+            function updateSpeedDisplay() {
+                currentSpeedDisplay.textContent = `${currentSpeedSetting} km/h`;
+            }
+            
+            // Apply speed button
+            applySpeedBtn.addEventListener('click', function() {
+                if (!selectedDriver || !driverMarkers[selectedDriver] || !driverMarkers[selectedDriver].isAnimating) {
+                    showNotification('No Active Driver', 'Please start a journey first.', 'warning');
+                    return;
+                }
+                
+                const driverData = driverMarkers[selectedDriver];
+                const driver = drivers.find(d => d.id === selectedDriver);
+                
+                if (!driverData || !driver) return;
+                
+                // Calculate new speed multiplier based on selected speed
+                const baseSpeed = 40; // Normal speed is 40 km/h
+                const newMultiplier = currentSpeedSetting / baseSpeed;
+                
+                // Update speed multiplier for current animation
+                if (driverData.animationInterval) {
+                    // Stop current animation
+                    clearInterval(driverData.animationInterval);
+                    
+                    // Calculate current progress
+                    const elapsed = Date.now() - driverData.animationStartTime;
+                    const totalTime = driverData.totalDuration * 60000; // Convert to ms
+                    const remainingTime = totalTime - elapsed;
+                    
+                    // Recalculate remaining time based on new speed
+                    const newRemainingTime = remainingTime / newMultiplier;
+                    
+                    // Calculate new total duration
+                    const newTotalDuration = elapsed + newRemainingTime;
+                    
+                    // Update driver data
+                    driverData.speedMultiplier = newMultiplier;
+                    driverData.totalDuration = newTotalDuration / 60000; // Convert to minutes
+                    driverData.remainingTime = newRemainingTime;
+                    driverData.baseTotalTime = totalTime;
+                    driverData.baseElapsedTime = elapsed;
+                    
+                    // Restart animation with new speed
+                    startDriverAnimation(selectedDriver);
+                    
+                    // Update driver's displayed speed
+                    driver.speed = currentSpeedSetting;
+                    
+                    // Update UI
+                    updateStatusOverlay();
+                    
+                    showNotification(
+                        'Speed Updated', 
+                        `${driver.name}'s speed set to ${currentSpeedSetting} km/h`, 
+                        'success'
+                    );
+                    
+                    // Disable apply button temporarily
+                    applySpeedBtn.disabled = true;
+                    applySpeedBtn.classList.add('btn-disabled');
+                }
+            });
+            
+            // Detailed Cairo Locations with real street names
+            const cairoLocations = {
+                // Downtown Cairo - Midan El-Tahrir Area
+                "Tahrir Square": [30.0444, 31.2357],
+                "Egyptian Museum Entrance": [30.0478, 31.2336],
+                "Mogamma Building": [30.0450, 31.2345],
+                "Cairo Opera House": [30.0420, 31.2235],
+                "Kasr El Nil Bridge": [30.0430, 31.2300],
+                
+                // Ramsis Area
+                "Ramsis Square": [30.0622, 31.2469],
+                "Cairo Railway Station": [30.0630, 31.2480],
+                "Maspero TV Building": [30.0600, 31.2330],
+                
+                // Zamalek - Gezira Island
+                "Cairo Tower": [30.0458, 31.2243],
+                "Zamalek Club": [30.0561, 31.2194],
+                "26th July Street": [30.0570, 31.2175],
+                "Brazil Street": [30.0580, 31.2150],
+                
+                // Heliopolis - مصر الجديدة
+                "Heliopolis Square (El-Nozha)": [30.0961, 31.3306],
+                "Nozha Street": [30.0975, 31.3220],
+                "Al-Ahram Street": [30.0830, 31.3150],
+                "Merghany Street": [30.0920, 31.3280],
+                
+                // Nasr City - مدينة نصر
+                "Abbas El-Akkad Street": [30.0620, 31.3350],
+                "Makram Ebeid Street": [30.0720, 31.3280],
+                "Nasr City Police Station": [30.0580, 31.3400],
+                "El-Tayaran Street": [30.0650, 31.3320],
+                
+                // Maadi - المعادي
+                "Road 9": [29.9650, 31.2620],
+                "Road 233": [29.9680, 31.2600],
+                "Corniche El-Maadi": [29.9600, 31.2600],
+                "Maadi Grand Mall": [29.9660, 31.2650],
+                
+                // Giza - الجيزة
+                "Giza Square": [30.0131, 31.2089],
+                "Pyramids Road (Harram)": [30.0250, 31.1950],
+                "Faisal Street": [30.0220, 31.2000],
+                "Cairo University": [30.0270, 31.2100],
+                
+                // Dokki - الدقي
+                "Dokki Square": [30.0400, 31.2150],
+                "Mohanadiseen": [30.0530, 31.2000],
+                "Lebanon Square": [30.0550, 31.2050],
+                "El-Batal Ahmed Abdel Aziz": [30.0480, 31.2100],
+                
+                // New Cairo - القاهرة الجديدة
+                "American University": [30.0190, 31.5000],
+                "Fifth Settlement": [30.0300, 31.4700],
+                "90th Street": [30.0220, 31.4800],
+                
+                // Shubra - شبرا
+                "Shubra Street": [30.0833, 31.2333],
+                "Rod El-Farag": [30.0750, 31.2400],
+                
+                // Mohandessin - المهندسين
+                "Sphinx Square": [30.0570, 31.1950],
+                "Gameat El Dowal El Arabiya": [30.0550, 31.1900],
+                
+                // Ain Shams - عين شمس
+                "Ain Shams University": [30.0770, 31.2900],
+                
+                // Mataria - المطرية
+                "Mataria Palace": [30.1300, 31.3100]
+            };
+            
+            // Define realistic starting points for drivers
+            const START_LOCATIONS = {
+                1: cairoLocations["Tahrir Square"],          // Ahmed - Downtown
+                2: cairoLocations["Ramsis Square"],          // Mohamed - Ramsis
+                3: cairoLocations["Dokki Square"],           // Omar - Dokki
+                4: cairoLocations["Giza Square"],            // Youssef - Giza
+                5: cairoLocations["Zamalek Club"],           // Karim - Zamalek
+                6: cairoLocations["Abbas El-Akkad Street"]   // Hassan - Nasr City
+            };
+            
+            // Define realistic zones with actual Cairo destinations
+            const zones = {
+                "Downtown - Tahrir & Kasr El Nil": {
+                    center: cairoLocations["Tahrir Square"],
+                    color: "#FF6384",
+                    description: "Central Cairo, Tahrir Square and Kasr El Nil area",
+                    radius: 0.004,
+                    majorStreets: ["Tahrir Square", "Kasr El Nil St", "Mohamed Mahmoud St"]
+                },
+                "Nasr City - Abbas El-Akkad": {
+                    center: cairoLocations["Abbas El-Akkad Street"],
+                    color: "#36A2EB",
+                    description: "Commercial hub on Abbas El-Akkad Street",
+                    radius: 0.006,
+                    majorStreets: ["Abbas El-Akkad St", "Makram Ebeid St", "El-Tayaran St"]
+                },
+                "Maadi - Road 9 & Road 233": {
+                    center: cairoLocations["Road 9"],
+                    color: "#FFCE56",
+                    description: "Main commercial streets in Maadi",
+                    radius: 0.005,
+                    majorStreets: ["Road 9", "Road 233", "Corniche El-Maadi"]
+                },
+                "Heliopolis - Merghany & Al-Ahram": {
+                    center: cairoLocations["Merghany Street"],
+                    color: "#4BC0C0",
+                    description: "Historic streets in Heliopolis",
+                    radius: 0.005,
+                    majorStreets: ["Merghany St", "Al-Ahram St", "Nozha St"]
+                },
+                "Zamalek - 26th July & Brazil": {
+                    center: cairoLocations["26th July Street"],
+                    color: "#9966FF",
+                    description: "Commercial streets in Zamalek island",
+                    radius: 0.003,
+                    majorStreets: ["26th July St", "Brazil St", "El-Gezira St"]
+                },
+                "Giza - Pyramids Road & Faisal": {
+                    center: cairoLocations["Pyramids Road (Harram)"],
+                    color: "#FF9F40",
+                    description: "Main roads in Giza area",
+                    radius: 0.005,
+                    majorStreets: ["Pyramids Road", "Faisal St", "El-Nil St"]
+                }
+            };
+            
+            // Store zone layers
+            const zoneLayers = {};
+            
+            // Add zones to map with detailed information
+            Object.entries(zones).forEach(([name, data]) => {
+                const zoneLayer = L.circle(data.center, {
+                    color: data.color,
+                    fillColor: data.color,
+                    fillOpacity: 0.15,
+                    radius: data.radius * 111320, // Convert to meters
+                    weight: 2
+                }).addTo(map).bindPopup(`
+                    <div style="padding: 8px; min-width: 220px;">
+                        <h3 style="margin: 0 0 8px 0; color: ${data.color};">${name}</h3>
+                        <p style="margin: 0 0 5px 0; color: #7f8c8d;">${data.description}</p>
+                        <div style="margin: 8px 0; padding: 5px; background: #f8f9fa; border-radius: 4px;">
+                            <p style="margin: 0; font-size: 11px; color: #2c3e50;">
+                                <i class="fas fa-road"></i> <strong>Major Streets:</strong><br>
+                                ${data.majorStreets.join(', ')}
+                            </p>
+                        </div>
+                        <p style="margin: 0; font-size: 11px; color: #95a5a6;">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            Detailed Cairo location
+                        </p>
+                    </div>
+                `);
+                
+                zoneLayers[name] = zoneLayer;
+                
+                // Add zone label with better styling
+                L.marker(data.center, {
+                    icon: L.divIcon({
+                        html: `<div style="
+                            background: ${data.color};
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            font-weight: bold;
+                            font-size: 11px;
+                            border: 2px solid white;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                            text-align: center;
+                            min-width: 70px;
+                        ">${name.split(' - ')[0]}</div>`,
+                        iconSize: [80, 30]
+                    })
+                }).addTo(map);
+            });
+            
+            // Define 6 Drivers with more details
+            const drivers = [
+                { 
+                    id: 1, 
+                    name: "Ahmed Hassan", 
+                    color: "#3498DB",
+                    iconColor: "#FFFFFF",
+                    vehicle: "Mercedes Sprinter 2022",
+                    license: "CAI-12345",
+                    status: "available",
+                    currentLocation: START_LOCATIONS[1],
+                    speed: 0,
+                    phone: "+20 100 123 4567"
+                },
+                { 
+                    id: 2, 
+                    name: "Mohamed Ali", 
+                    color: "#E74C3C",
+                    iconColor: "#FFFFFF",
+                    vehicle: "Ford Transit 2021",
+                    license: "CAI-67890",
+                    status: "available",
+                    currentLocation: START_LOCATIONS[2],
+                    speed: 0,
+                    phone: "+20 100 234 5678"
+                },
+                { 
+                    id: 3, 
+                    name: "Omar Khaled", 
+                    color: "#2ECC71",
+                    iconColor: "#FFFFFF",
+                    vehicle: "Volkswagen Crafter 2023",
+                    license: "CAI-54321",
+                    status: "available",
+                    currentLocation: START_LOCATIONS[3],
+                    speed: 0,
+                    phone: "+20 100 345 6789"
+                },
+                { 
+                    id: 4, 
+                    name: "Youssef Mahmoud", 
+                    color: "#9B59B6",
+                    iconColor: "#FFFFFF",
+                    vehicle: "Renault Master 2020",
+                    license: "CAI-09876",
+                    status: "available", 
+                    currentLocation: START_LOCATIONS[4],
+                    speed: 0,
+                    phone: "+20 100 456 7890"
+                },
+                { 
+                    id: 5, 
+                    name: "Karim Said", 
+                    color: "#F39C12",
+                    iconColor: "#FFFFFF",
+                    vehicle: "Toyota Hiace 2021",
+                    license: "CAI-11223",
+                    status: "available",
+                    currentLocation: START_LOCATIONS[5],
+                    speed: 0,
+                    phone: "+20 100 567 8901"
+                },
+                { 
+                    id: 6, 
+                    name: "Hassan Ibrahim", 
+                    color: "#1ABC9C",
+                    iconColor: "#FFFFFF",
+                    vehicle: "Peugeot Boxer 2022",
+                    license: "CAI-33445",
+                    status: "available",
+                    currentLocation: START_LOCATIONS[6],
+                    speed: 0,
+                    phone: "+20 100 678 9012"
+                }
+            ];
+            
+            // Store driver data
+            const driverMarkers = {};
+            let selectedDriver = null;
+            let selectedZone = null;
+            let activeRoutes = 0;
+            let totalDistance = 0;
+            let simulationTimer = null;
+            let simulationStartTime = null;
+            
+            // Create detailed driver markers
+            drivers.forEach(driver => {
+                const marker = L.marker(driver.currentLocation, {
+                    icon: L.divIcon({
+                        html: `<div style="
+                            width: 40px; 
+                            height: 40px; 
+                            background: ${driver.color};
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center;
+                            color: ${driver.iconColor};
+                            font-weight: bold;
+                            border: 3px solid white;
+                            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+                            font-size: 16px;
+                            position: relative;
+                        ">
+                            ${driver.name.charAt(0)}
+                            <div style="
+                                position: absolute;
+                                bottom: -5px;
+                                right: -5px;
+                                width: 15px;
+                                height: 15px;
+                                background: ${driver.status === 'available' ? '#2ecc71' : '#e74c3c'};
+                                border-radius: 50%;
+                                border: 2px solid white;
+                            "></div>
+                        </div>`,
+                        iconSize: [40, 40],
+                        className: 'driver-marker'
+                    }),
+                    zIndexOffset: 1000 + driver.id
+                }).addTo(map).bindPopup(`
+                    <div style="padding: 10px; min-width: 250px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <div style="
+                                width: 50px; 
+                                height: 50px; 
+                                background: ${driver.color};
+                                border-radius: 50%; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center;
+                                color: white;
+                                font-weight: bold;
+                                font-size: 20px;
+                            ">
+                                ${driver.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h3 style="margin: 0 0 5px 0; color: #2c3e50;">${driver.name}</h3>
+                                <p style="margin: 0; font-size: 12px; color: #7f8c8d;">
+                                    <i class="fas fa-car"></i> ${driver.vehicle}
+                                </p>
+                            </div>
+                        </div>
+                        <div style="background: #f8f9fa; border-radius: 6px; padding: 8px; margin-bottom: 10px;">
+                            <p style="margin: 0 0 5px 0; font-size: 11px; color: #2c3e50;">
+                                <i class="fas fa-id-card"></i> <strong>License:</strong> ${driver.license}
+                            </p>
+                            <p style="margin: 0 0 5px 0; font-size: 11px; color: #2c3e50;">
+                                <i class="fas fa-phone"></i> <strong>Phone:</strong> ${driver.phone}
+                            </p>
+                            <p style="margin: 0; font-size: 11px; color: #2c3e50;">
+                                <i class="fas fa-map-marker-alt"></i> 
+                                ${driver.currentLocation[0].toFixed(6)}, ${driver.currentLocation[1].toFixed(6)}
+                            </p>
+                        </div>
+                        <p style="margin: 0; font-size: 11px; color: #95a5a6; text-align: center;">
+                            <i class="fas fa-info-circle"></i> Click to select this driver
+                        </p>
+                    </div>
+                `);
+                
+                driverMarkers[driver.id] = {
+                    marker: marker,
+                    data: driver,
+                    isAnimating: false,
+                    currentRoute: null,
+                    progress: 0,
+                    totalDistance: 0,
+                    totalDuration: 0,
+                    animationStartTime: null,
+                    remainingTime: 0,
+                    routePath: [],
+                    animationInterval: null,
+                    speedMultiplier: 1.0,
+                    baseTotalTime: 0,
+                    baseElapsedTime: 0
+                };
+            });
+            
+            // Calculate distance between two points (Haversine formula)
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = 
+                    Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                return R * c;
+            }
+            
+            // Get real road route using multiple fallback APIs
+            async function getRealRoadRoute(start, end) {
+                try {
+                    showLoading('Calculating optimal Cairo route...');
+                    
+                    // Try OSRM first
+                    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
+                    
+                    const response = await fetch(osrmUrl);
+                    const data = await response.json();
+                    
+                    if (data.routes && data.routes.length > 0) {
+                        const route = data.routes[0];
+                        const distance = route.distance / 1000;
+                        const duration = route.duration / 60;
+                        const geometry = route.geometry;
+                        
+                        const coordinates = geometry.coordinates;
+                        const path = coordinates.map(coord => [coord[1], coord[0]]);
+                        
+                        hideLoading();
+                        
+                        return {
+                            path: path,
+                            distance: distance,
+                            duration: duration,
+                            source: 'OSRM'
+                        };
+                    }
+                } catch (error) {
+                    console.log('OSRM failed, trying GraphHopper...');
+                    try {
+                        // Fallback to GraphHopper
+                        const ghUrl = `https://graphhopper.com/api/1/route?point=${start[0]},${start[1]}&point=${end[0]},${end[1]}&vehicle=car&locale=en&key=d45e4afb-8c3c-4e0c-a9ea-90e0c5e1f4c5&instructions=false`;
+                        
+                        const ghResponse = await fetch(ghUrl);
+                        const ghData = await ghResponse.json();
+                        
+                        if (ghData.paths && ghData.paths.length > 0) {
+                            const path = ghData.paths[0].points.coordinates.map(coord => [coord[1], coord[0]]);
+                            const distance = ghData.paths[0].distance / 1000;
+                            const duration = ghData.paths[0].time / 60000;
+                            
+                            hideLoading();
+                            
+                            return {
+                                path: path,
+                                distance: distance,
+                                duration: duration,
+                                source: 'GraphHopper'
+                            };
+                        }
+                    } catch (ghError) {
+                        console.log('GraphHopper failed, using fallback');
+                    }
+                }
+                
+                // Final fallback
+                hideLoading();
+                const fallbackDistance = calculateDistance(start[0], start[1], end[0], end[1]);
+                
+                return {
+                    path: [start, end],
+                    distance: fallbackDistance,
+                    duration: fallbackDistance * 2.5,
+                    source: 'Direct'
+                };
+            }
+            
+            // Populate Driver Selection with enhanced info
+            const driverSelectionDiv = document.getElementById('driverSelection');
+            drivers.forEach(driver => {
+                const driverOption = document.createElement('div');
+                driverOption.className = 'driver-option';
+                driverOption.dataset.driverId = driver.id;
+                driverOption.innerHTML = `
+                    <div class="driver-avatar" style="background: ${driver.color};">
+                        ${driver.name.charAt(0)}
+                    </div>
+                    <div class="driver-info">
+                        <div class="driver-name">${driver.name}</div>
+                        <div class="driver-details">${driver.vehicle} • ${driver.license}</div>
+                        <div style="font-size: 10px; color: ${driver.status === 'available' ? '#2ecc71' : '#e74c3c'}">
+                            <i class="fas fa-circle" style="font-size: 6px;"></i> ${driver.status}
+                        </div>
+                    </div>
+                `;
+                
+                driverOption.addEventListener('click', () => {
+                    selectDriver(driver.id);
+                });
+                
+                driverSelectionDiv.appendChild(driverOption);
+            });
+            
+            // Populate Zone Selection with enhanced info
+            const zoneSelectionDiv = document.getElementById('zoneSelection');
+            Object.entries(zones).forEach(([name, data]) => {
+                const zoneOption = document.createElement('div');
+                zoneOption.className = 'zone-option';
+                zoneOption.dataset.zoneName = name;
+                zoneOption.innerHTML = `
+                    <div class="zone-icon" style="background: ${data.color};">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="zone-info">
+                        <div class="zone-name">${name}</div>
+                        <div class="zone-details">${data.description.substring(0, 35)}...</div>
+                        <div style="font-size: 9px; color: #95a5a6;">
+                            <i class="fas fa-road"></i> ${data.majorStreets[0]}
+                        </div>
+                    </div>
+                `;
+                
+                zoneOption.addEventListener('click', () => {
+                    selectZone(name);
+                });
+                
+                zoneSelectionDiv.appendChild(zoneOption);
+            });
+            
+            // Update statistics
+            function updateStatistics() {
+                document.getElementById('activeZones').textContent = Object.keys(zones).length;
+                document.getElementById('activeRoutes').textContent = activeRoutes;
+                document.getElementById('totalDistance').textContent = `${totalDistance.toFixed(1)} km`;
+            }
+            
+            // Show notification
+            function showNotification(title, message, type = 'info') {
+                const container = document.getElementById('notificationContainer');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div class="notification-icon" style="background: ${type === 'success' ? '#2ecc71' : type === 'warning' ? '#f39c12' : '#3498db'}">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <h4>${title}</h4>
+                        <p>${message}</p>
+                    </div>
+                `;
+                
+                container.appendChild(notification);
+                
+                setTimeout(() => notification.classList.add('show'), 10);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 500);
+                }, 4000);
+            }
+            
+            // Selection Functions
+            function selectDriver(driverId) {
+                if (selectedDriver === driverId) return;
+                
+                if (selectedDriver) {
+                    const prevOptions = document.querySelectorAll(`.driver-option[data-driver-id="${selectedDriver}"]`);
+                    prevOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    if (driverMarkers[selectedDriver]) {
+                        driverMarkers[selectedDriver].marker.setZIndexOffset(1000 + selectedDriver);
+                    }
+                }
+                
+                selectedDriver = driverId;
+                const driverOptions = document.querySelectorAll(`.driver-option[data-driver-id="${driverId}"]`);
+                driverOptions.forEach(opt => opt.classList.add('selected'));
+                
+                // Highlight driver on map
+                if (driverMarkers[driverId]) {
+                    const marker = driverMarkers[driverId].marker;
+                    marker.setZIndexOffset(2000);
+                    marker.openPopup();
+                    
+                    // Center map on driver if not animating
+                    if (!driverMarkers[driverId].isAnimating) {
+                        map.setView(marker.getLatLng(), 14);
+                    }
+                }
+                
+                updateSelectionInfo();
+                checkAssignButton();
+                updateStatusOverlay();
+                
+                const driver = drivers.find(d => d.id === driverId);
+                if (driver) {
+                    showNotification('Driver Selected', `${driver.name} is now selected.`, 'info');
+                }
+                
+                // Check if apply speed button should be enabled
+                if (driverMarkers[driverId] && driverMarkers[driverId].isAnimating) {
+                    applySpeedBtn.disabled = false;
+                    applySpeedBtn.classList.remove('btn-disabled');
+                } else {
+                    applySpeedBtn.disabled = true;
+                    applySpeedBtn.classList.add('btn-disabled');
+                }
+            }
+            
+            function selectZone(zoneName) {
+                if (selectedZone === zoneName) return;
+                
+                if (selectedZone) {
+                    const prevOptions = document.querySelectorAll(`.zone-option[data-zone-name="${selectedZone}"]`);
+                    prevOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    if (zoneLayers[selectedZone]) {
+                        zoneLayers[selectedZone].setStyle({ fillOpacity: 0.15, weight: 2 });
+                    }
+                }
+                
+                selectedZone = zoneName;
+                const zoneOptions = document.querySelectorAll(`.zone-option[data-zone-name="${zoneName}"]`);
+                zoneOptions.forEach(opt => opt.classList.add('selected'));
+                
+                // Highlight zone on map
+                if (zoneLayers[zoneName]) {
+                    zoneLayers[zoneName].setStyle({ fillOpacity: 0.3, weight: 3 });
+                    zoneLayers[zoneName].bringToFront();
+                    
+                    // Center map on zone if not animating
+                    if (!selectedDriver || !driverMarkers[selectedDriver] || !driverMarkers[selectedDriver].isAnimating) {
+                        map.setView(zones[zoneName].center, 14);
+                    }
+                }
+                
+                updateSelectionInfo();
+                checkAssignButton();
+                updateStatusOverlay();
+                
+                showNotification('Zone Selected', `${zoneName} is now selected.`, 'info');
+            }
+            
+            function updateSelectionInfo() {
+                const selectedInfoDiv = document.getElementById('selectedInfo');
+                
+                if (selectedDriver && selectedZone) {
+                    const driver = drivers.find(d => d.id === selectedDriver);
+                    const zone = zones[selectedZone];
+                    if (driver && zone) {
+                        selectedInfoDiv.innerHTML = `
+                            <h3><i class="fas fa-check-circle" style="color: #2ecc71;"></i> Ready for Cairo Route</h3>
+                            <p>
+                                <strong>Driver:</strong> ${driver.name}<br>
+                                <strong>Destination:</strong> ${selectedZone.split(' - ')[0]}<br>
+                                <strong>Vehicle:</strong> ${driver.vehicle}<br>
+                                <span style="font-size: 11px; color: #95a5a6;">
+                                    <i class="fas fa-info-circle"></i> Will follow detailed Cairo roads
+                                </span>
+                            </p>
+                        `;
+                        selectedInfoDiv.style.borderLeftColor = '#2ecc71';
+                    }
+                } else if (selectedDriver) {
+                    const driver = drivers.find(d => d.id === selectedDriver);
+                    if (driver) {
+                        selectedInfoDiv.innerHTML = `
+                            <h3><i class="fas fa-user" style="color: #3498db;"></i> Driver Selected</h3>
+                            <p>
+                                <strong>Driver:</strong> ${driver.name}<br>
+                                <strong>Vehicle:</strong> ${driver.vehicle}<br>
+                                <strong>License:</strong> ${driver.license}<br>
+                                Now select a destination zone.
+                            </p>
+                        `;
+                        selectedInfoDiv.style.borderLeftColor = '#3498db';
+                    }
+                } else if (selectedZone) {
+                    const zone = zones[selectedZone];
+                    selectedInfoDiv.innerHTML = `
+                        <h3><i class="fas fa-map-marker-alt" style="color: #f39c12;"></i> Zone Selected</h3>
+                        <p>
+                            <strong>Zone:</strong> ${selectedZone}<br>
+                            <strong>Major Streets:</strong> ${zone.majorStreets.join(', ')}<br>
+                            Now select a driver for this zone.
+                        </p>
+                    `;
+                    selectedInfoDiv.style.borderLeftColor = '#f39c12';
+                } else {
+                    selectedInfoDiv.innerHTML = `
+                        <h3><i class="fas fa-info-circle" style="color: #95a5a6;"></i> Selection Summary</h3>
+                        <p>Select a driver and a zone to plan a route on detailed Cairo maps.</p>
+                    `;
+                    selectedInfoDiv.style.borderLeftColor = '#95a5a6';
+                }
+            }
+            
+            function checkAssignButton() {
+                const planBtn = document.getElementById('planRouteBtn');
+                const simulateBtn = document.getElementById('simulateMovementBtn');
+                const stopBtn = document.getElementById('stopMovementBtn');
+                
+                if (selectedDriver && selectedZone) {
+                    planBtn.disabled = false;
+                    planBtn.classList.remove('btn-disabled');
+                    simulateBtn.disabled = false;
+                    simulateBtn.classList.remove('btn-disabled');
+                } else {
+                    planBtn.disabled = true;
+                    planBtn.classList.add('btn-disabled');
+                    simulateBtn.disabled = true;
+                    simulateBtn.classList.add('btn-disabled');
+                }
+                
+                const isAnyAnimating = Object.values(driverMarkers).some(d => d.isAnimating);
+                stopBtn.disabled = !isAnyAnimating;
+                if (isAnyAnimating) {
+                    stopBtn.classList.remove('btn-disabled');
+                } else {
+                    stopBtn.classList.add('btn-disabled');
+                }
+            }
+            
+            function updateStatusOverlay() {
+                const driver = selectedDriver ? drivers.find(d => d.id === selectedDriver) : null;
+                document.getElementById('statusDriver').textContent = driver ? driver.name : 'None';
+                document.getElementById('statusZone').textContent = selectedZone ? selectedZone.split(' - ')[0] : 'None';
+                
+                if (driver && driverMarkers[selectedDriver] && driverMarkers[selectedDriver].currentRoute) {
+                    const routeDistance = driverMarkers[selectedDriver].totalDistance || 0;
+                    const progress = driverMarkers[selectedDriver].progress || 0;
+                    const remainingTime = driverMarkers[selectedDriver].remainingTime || 0;
+                    const speed = driverMarkers[selectedDriver].data.speed || 0;
+                    const totalDuration = driverMarkers[selectedDriver].totalDuration || 0;
+                    
+                    document.getElementById('statusDistance').textContent = `${routeDistance.toFixed(1)} km`;
+                    document.getElementById('statusTime').textContent = `${Math.round(totalDuration)} min`;
+                    document.getElementById('statusSpeed').textContent = `${speed} km/h`;
+                    document.getElementById('statusDriverStatus').textContent = driverMarkers[selectedDriver].isAnimating ? 'On Road' : 'Route Planned';
+                    
+                    document.getElementById('progressText').textContent = `${progress.toFixed(1)}%`;
+                    document.getElementById('distanceRemaining').textContent = `${(routeDistance * (1 - progress/100)).toFixed(1)} km`;
+                    document.getElementById('timeRemaining').textContent = `${Math.round(remainingTime / 60000)} min`;
+                    document.getElementById('progressFill').style.width = `${progress}%`;
+                    
+                    // Update speed display
+                    document.getElementById('currentSpeedDisplay').textContent = `${speed} km/h`;
+                } else {
+                    document.getElementById('statusDistance').textContent = '0 km';
+                    document.getElementById('statusTime').textContent = '0 min';
+                    document.getElementById('statusSpeed').textContent = '0 km/h';
+                    document.getElementById('statusDriverStatus').textContent = 'Idle';
+                    
+                    document.getElementById('progressText').textContent = '0%';
+                    document.getElementById('distanceRemaining').textContent = '0 km';
+                    document.getElementById('timeRemaining').textContent = '0 min';
+                    document.getElementById('progressFill').style.width = '0%';
+                    
+                    // Reset speed display
+                    document.getElementById('currentSpeedDisplay').textContent = '0 km/h';
+                }
+            }
+            
+            // Plan Real Cairo Route Function
+            document.getElementById('planRouteBtn').addEventListener('click', async () => {
+                if (!selectedDriver || !selectedZone) {
+                    showNotification('Selection Required', 'Please select both a driver and a zone.', 'warning');
+                    return;
+                }
+                
+                const driver = drivers.find(d => d.id === selectedDriver);
+                const zone = zones[selectedZone];
+                
+                if (!driver || !zone) {
+                    showNotification('Error', 'Driver or zone data not found.', 'warning');
+                    return;
+                }
+                
+                // Remove previous route
+                if (driverMarkers[selectedDriver].currentRoute) {
+                    map.removeLayer(driverMarkers[selectedDriver].currentRoute);
+                }
+                
+                try {
+                    // Get real road route
+                    const routeData = await getRealRoadRoute(driver.currentLocation, zone.center);
+                    
+                    if (!routeData || !routeData.path) {
+                        throw new Error('No route found');
+                    }
+                    
+                    // Draw the real road route with enhanced styling
+                    const routeLayer = L.polyline(routeData.path, {
+                        color: driver.color,
+                        weight: 6,
+                        opacity: 0.9,
+                        dashArray: null,
+                        lineCap: 'round',
+                        lineJoin: 'round',
+                        className: 'real-road-route'
+                    }).addTo(map).bindPopup(`
+                        <div style="padding: 10px; min-width: 250px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <div style="
+                                    width: 40px; 
+                                    height: 40px; 
+                                    background: ${driver.color};
+                                    border-radius: 50%; 
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center;
+                                    color: white;
+                                    font-weight: bold;
+                                    font-size: 18px;
+                                ">
+                                    ${driver.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h3 style="margin: 0 0 5px 0; color: #2c3e50;">${driver.name}'s Route</h3>
+                                    <p style="margin: 0; font-size: 12px; color: #7f8c8d;">
+                                        To: ${selectedZone.split(' - ')[0]}
+                                    </p>
+                                </div>
+                            </div>
+                            <div style="background: #f8f9fa; border-radius: 6px; padding: 8px; margin-bottom: 10px;">
+                                <p style="margin: 0 0 5px 0; font-size: 11px; color: #2c3e50;">
+                                    <i class="fas fa-route"></i> <strong>Distance:</strong> ${routeData.distance.toFixed(1)} km
+                                </p>
+                                <p style="margin: 0 0 5px 0; font-size: 11px; color: #2c3e50;">
+                                    <i class="fas fa-clock"></i> <strong>Est. Time:</strong> ${Math.round(routeData.duration)} min
+                                </p>
+                                <p style="margin: 0; font-size: 11px; color: #2c3e50;">
+                                    <i class="fas fa-map"></i> <strong>Source:</strong> ${routeData.source}
+                                </p>
+                            </div>
+                            <p style="margin: 0; font-size: 11px; color: #95a5a6; text-align: center;">
+                                <i class="fas fa-road"></i> Following detailed Cairo road network
+                            </p>
+                        </div>
+                    `);
+                    
+                    // Store route data
+                    driverMarkers[selectedDriver].currentRoute = routeLayer;
+                    driverMarkers[selectedDriver].totalDistance = routeData.distance;
+                    driverMarkers[selectedDriver].totalDuration = Math.round(routeData.duration);
+                    driverMarkers[selectedDriver].progress = 0;
+                    driverMarkers[selectedDriver].remainingTime = routeData.duration * 60000;
+                    driverMarkers[selectedDriver].routePath = routeData.path;
+                    driverMarkers[selectedDriver].speedMultiplier = 1.0;
+                    driverMarkers[selectedDriver].baseTotalTime = routeData.duration * 60000;
+                    driverMarkers[selectedDriver].baseElapsedTime = 0;
+                    
+                    // Update statistics
+                    activeRoutes++;
+                    totalDistance += routeData.distance;
+                    updateStatistics();
+                    updateStatusOverlay();
+                    
+                    // Center map on route
+                    map.fitBounds(routeLayer.getBounds());
+                    
+                    showNotification(
+                        'Detailed Route Planned', 
+                        `${driver.name}'s route to ${selectedZone.split(' - ')[0]} planned.<br>
+                        <strong>Distance:</strong> ${routeData.distance.toFixed(1)} km<br>
+                        <strong>Time:</strong> ${Math.round(routeData.duration)} min<br>
+                        Using ${routeData.source} routing`, 
+                        'success'
+                    );
+                    
+                } catch (error) {
+                    console.error('Error planning route:', error);
+                    hideLoading();
+                    
+                    // Fallback to simple route
+                    const simplePath = [driver.currentLocation, zone.center];
+                    const simpleDistance = calculateDistance(
+                        driver.currentLocation[0], driver.currentLocation[1],
+                        zone.center[0], zone.center[1]
+                    );
+                    const simpleDuration = Math.round(simpleDistance * 2.5);
+                    
+                    const routeLayer = L.polyline(simplePath, {
+                        color: driver.color,
+                        weight: 4,
+                        opacity: 0.6,
+                        dashArray: '10, 10'
+                    }).addTo(map).bindPopup(`
+                        <div style="padding: 8px;">
+                            <h3 style="margin: 0 0 8px 0; color: #2c3e50;">${driver.name}'s Route</h3>
+                            <p style="margin: 0; font-size: 12px; color: #95a5a6;">
+                                <i class="fas fa-info-circle"></i> Direct route (detailed routing unavailable)
+                            </p>
+                        </div>
+                    `);
+                    
+                    // Store route data
+                    driverMarkers[selectedDriver].currentRoute = routeLayer;
+                    driverMarkers[selectedDriver].totalDistance = simpleDistance;
+                    driverMarkers[selectedDriver].totalDuration = simpleDuration;
+                    driverMarkers[selectedDriver].progress = 0;
+                    driverMarkers[selectedDriver].remainingTime = simpleDuration * 60000;
+                    driverMarkers[selectedDriver].routePath = simplePath;
+                    
+                    activeRoutes++;
+                    totalDistance += simpleDistance;
+                    updateStatistics();
+                    updateStatusOverlay();
+                    
+                    showNotification(
+                        'Route Planned (Direct)', 
+                        `${driver.name}'s direct route to ${selectedZone.split(' - ')[0]}.<br>
+                        Note: Using direct path - routing service unavailable`, 
+                        'warning'
+                    );
+                }
+            });
+            
+            // Start animation for driver
+            function startDriverAnimation(driverId) {
+                const driverData = driverMarkers[driverId];
+                const driver = drivers.find(d => d.id === driverId);
+                
+                if (!driverData || !driver || !driverData.isAnimating) return;
+                
+                // Clear any existing interval
+                if (driverData.animationInterval) {
+                    clearInterval(driverData.animationInterval);
+                }
+                
+                const marker = driverData.marker;
+                const routeData = driverData;
+                
+                const path = routeData.routePath;
+                if (!path || path.length < 2) return;
+                
+                const totalDuration = routeData.remainingTime;
+                const startTime = Date.now();
+                const startProgress = routeData.progress;
+                
+                // Calculate animation parameters based on speed multiplier
+                const updateInterval = 100;
+                const totalUpdates = totalDuration / updateInterval;
+                const progressPerUpdate = (100 - startProgress) / totalUpdates;
+                
+                // Calculate current speed based on multiplier
+                const avgSpeed = (routeData.totalDistance / (routeData.baseTotalTime / 1000)) * 3600;
+                const currentSpeed = avgSpeed * routeData.speedMultiplier;
+                driver.speed = Math.round(currentSpeed);
+                
+                // Store animation start time
+                routeData.animationStartTime = startTime - (routeData.baseElapsedTime || 0);
+                
+                // Start animation
+                routeData.animationInterval = setInterval(() => {
+                    if (!routeData.isAnimating) {
+                        clearInterval(routeData.animationInterval);
+                        return;
+                    }
+                    
+                    const elapsed = Date.now() - routeData.animationStartTime;
+                    const totalTime = routeData.baseTotalTime;
+                    
+                    // Calculate progress based on elapsed time
+                    const progress = Math.min(100, (elapsed / totalTime) * 100);
+                    
+                    routeData.progress = progress;
+                    routeData.remainingTime = Math.max(0, totalTime - elapsed);
+                    
+                    // Calculate position on path
+                    const pathIndex = Math.min(path.length - 2, Math.floor((progress / 100) * (path.length - 1)));
+                    const segmentProgress = (progress / 100) * (path.length - 1) - pathIndex;
+                    
+                    if (pathIndex < path.length - 1) {
+                        const startPoint = path[pathIndex];
+                        const endPoint = path[pathIndex + 1];
+                        
+                        const currentLat = startPoint[0] + (endPoint[0] - startPoint[0]) * segmentProgress;
+                        const currentLng = startPoint[1] + (endPoint[1] - startPoint[1]) * segmentProgress;
+                        
+                        marker.setLatLng([currentLat, currentLng]);
+                        
+                        // Add realistic speed variations
+                        const speedVariation = 0.9 + Math.random() * 0.2;
+                        driver.speed = Math.round(currentSpeed * speedVariation);
+                    }
+                    
+                    updateStatusOverlay();
+                    
+                    if (progress >= 100) {
+                        routeData.progress = 100;
+                        routeData.remainingTime = 0;
+                        routeData.isAnimating = false;
+                        clearInterval(routeData.animationInterval);
+                        
+                        driver.status = 'available';
+                        driver.speed = 0;
+                        
+                        activeRoutes = Math.max(0, activeRoutes - 1);
+                        updateStatistics();
+                        
+                        // Disable apply speed button
+                        applySpeedBtn.disabled = true;
+                        applySpeedBtn.classList.add('btn-disabled');
+                        
+                        showNotification('Journey Completed', `${driver.name} has arrived at ${selectedZone.split(' - ')[0]}!`, 'success');
+                    }
+                }, updateInterval);
+            }
+            
+            // Start Journey Function
+            document.getElementById('simulateMovementBtn').addEventListener('click', () => {
+                if (!selectedDriver || !selectedZone || !driverMarkers[selectedDriver].currentRoute) {
+                    showNotification('Route Required', 'Please plan a route first.', 'warning');
+                    return;
+                }
+                
+                const driver = drivers.find(d => d.id === selectedDriver);
+                const driverData = driverMarkers[selectedDriver];
+                
+                if (driverData.isAnimating) {
+                    showNotification('Already Moving', `${driver.name} is already on the road.`, 'warning');
+                    return;
+                }
+                
+                driverData.isAnimating = true;
+                driverData.progress = 0;
+                driverData.remainingTime = driverData.baseTotalTime;
+                driverData.animationStartTime = Date.now();
+                driverData.baseElapsedTime = 0;
+                driverData.speedMultiplier = 1.0;
+                
+                // Start simulation timer
+                simulationStartTime = Date.now();
+                if (simulationTimer) clearInterval(simulationTimer);
+                simulationTimer = setInterval(() => {
+                    const elapsed = Date.now() - simulationStartTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    document.getElementById('simulationTime').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+                
+                // Start driver animation
+                startDriverAnimation(selectedDriver);
+                
+                driver.status = 'moving';
+                updateStatistics();
+                
+                // Enable apply speed button
+                applySpeedBtn.disabled = false;
+                applySpeedBtn.classList.remove('btn-disabled');
+                
+                showNotification('Journey Started', `${driver.name} is now on the road to ${selectedZone.split(' - ')[0]}.`, 'info');
+            });
+            
+            // Stop All Movement Function
+            document.getElementById('stopMovementBtn').addEventListener('click', () => {
+                Object.values(driverMarkers).forEach(driverData => {
+                    if (driverData.animationInterval) {
+                        clearInterval(driverData.animationInterval);
+                        driverData.animationInterval = null;
+                    }
+                    
+                    if (driverData.isAnimating) {
+                        driverData.isAnimating = false;
+                        const driver = drivers.find(d => d.id === driverData.data.id);
+                        if (driver) {
+                            driver.status = 'available';
+                            driver.speed = 0;
+                        }
+                    }
+                });
+                
+                if (simulationTimer) {
+                    clearInterval(simulationTimer);
+                    simulationTimer = null;
+                }
+                
+                activeRoutes = 0;
+                updateStatistics();
+                updateStatusOverlay();
+                
+                // Disable apply speed button
+                applySpeedBtn.disabled = true;
+                applySpeedBtn.classList.add('btn-disabled');
+                
+                showNotification('All Journeys Stopped', 'All drivers have been stopped.', 'warning');
+            });
+            
+            // Reset Function
+            document.getElementById('resetSelectionBtn').addEventListener('click', () => {
+                // Stop all animations
+                Object.values(driverMarkers).forEach(driverData => {
+                    if (driverData.animationInterval) {
+                        clearInterval(driverData.animationInterval);
+                        driverData.animationInterval = null;
+                    }
+                    
+                    driverData.isAnimating = false;
+                });
+                
+                if (simulationTimer) {
+                    clearInterval(simulationTimer);
+                    simulationTimer = null;
+                }
+                
+                if (selectedDriver) {
+                    const driverOptions = document.querySelectorAll(`.driver-option[data-driver-id="${selectedDriver}"]`);
+                    driverOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    if (driverMarkers[selectedDriver]) {
+                        driverMarkers[selectedDriver].marker.setZIndexOffset(1000 + selectedDriver);
+                        driverMarkers[selectedDriver].marker.closePopup();
+                        
+                        if (driverMarkers[selectedDriver].currentRoute) {
+                            map.removeLayer(driverMarkers[selectedDriver].currentRoute);
+                        }
+                    }
+                }
+                
+                if (selectedZone) {
+                    const zoneOptions = document.querySelectorAll(`.zone-option[data-zone-name="${selectedZone}"]`);
+                    zoneOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    if (zoneLayers[selectedZone]) {
+                        zoneLayers[selectedZone].setStyle({ fillOpacity: 0.15, weight: 2 });
+                    }
+                }
+                
+                selectedDriver = null;
+                selectedZone = null;
+                activeRoutes = 0;
+                totalDistance = 0;
+                
+                drivers.forEach(driver => {
+                    driver.status = 'available';
+                    driver.speed = 0;
+                });
+                
+                // Reset speed controls
+                currentSpeedSetting = 40;
+                speedSlider.value = 40;
+                speedSliderValue.textContent = '40';
+                updateSpeedDisplay();
+                updateSpeedButtons('normal');
+                
+                // Disable apply speed button
+                applySpeedBtn.disabled = true;
+                applySpeedBtn.classList.add('btn-disabled');
+                
+                // Reset map view
+                map.setView([30.0444, 31.2357], 13);
+                
+                updateSelectionInfo();
+                checkAssignButton();
+                updateStatusOverlay();
+                updateStatistics();
+                
+                showNotification('System Reset', 'All selections and routes have been reset.', 'info');
+            });
+            
+            // Initialize
+            updateStatistics();
+            updateStatusOverlay();
+            checkAssignButton();
+            updateSpeedDisplay();
+            updateSpeedButtons('normal');
+            
+            // Show detailed map tips
+            setTimeout(() => {
+                showNotification('System Ready', 'Cairo Advanced Tracking loaded with detailed maps. Try different map styles!', 'info');
+                
+                setTimeout(() => {
+                    showNotification('Map Styles', 'Use the map style buttons (top-right) to switch between different Cairo map views.', 'info');
+                }, 3000);
+            }, 1000);
+            
+            console.log("✅ Cairo Advanced Tracking System initialized successfully!");
+        });
+    </script>
+</body>
+</html>
