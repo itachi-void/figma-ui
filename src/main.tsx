@@ -1,9 +1,7 @@
 import './disable-devtools';
 import { createRoot } from 'react-dom/client';
 import App from './app/App';
-import './styles/theme.css';
-import './styles/fonts.css';
-
+import './styles/index.css';
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
