@@ -10,17 +10,22 @@ import SettingsModal from '@/app/components/SettingsModal';
 import { useRole } from '@/app/contexts/RoleContext';
 
 const sidebarItems = [
-  { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard, color: 'emerald' },
-  { name: 'Smart Alerts', path: '/dashboard/smart-alerts', icon: Bell, color: 'red' },
-  { name: 'Resources', path: '/dashboard/resources', icon: Package, color: 'blue' },
-  { name: 'Performance', path: '/dashboard/performance', icon: TrendingUp, color: 'purple' },
-  { name: 'Reports', path: '/dashboard/reports', icon: FileText, color: 'orange' },
-  { name: 'Drivers', path: '/dashboard/drivers', icon: Users, color: 'cyan' },
-  { name: 'Routes', path: '/dashboard/routes', icon: MapPin, color: 'pink' },
-  { name: 'Citizens', path: '/dashboard/citizens', icon: UsersRound, color: 'indigo' },
-  { name: 'Centers', path: '/dashboard/centers', icon: Building2, color: 'teal' },
-  { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart3, color: 'violet' },
+  { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard, color: 'emerald', roles: ['admin', 'manager'] },
+  { name: 'Smart Alerts', path: '/dashboard/smart-alerts', icon: Bell, color: 'red', roles: ['admin', 'manager'] },
+  { name: 'Resources', path: '/dashboard/resources', icon: Package, color: 'blue', roles: ['admin'] }, // Financial / Resources to Admin only
+  { name: 'Performance', path: '/dashboard/performance', icon: TrendingUp, color: 'purple', roles: ['admin', 'manager'] },
+  { name: 'Reports', path: '/dashboard/reports', icon: FileText, color: 'orange', roles: ['admin', 'manager'] },
+  { name: 'Drivers', path: '/dashboard/drivers', icon: Users, color: 'cyan', roles: ['admin', 'manager'] },
+  { name: 'Routes', path: '/dashboard/routes', icon: MapPin, color: 'pink', roles: ['admin', 'manager'] },
+  { name: 'Citizens', path: '/dashboard/citizens', icon: UsersRound, color: 'indigo', roles: ['admin', 'manager'] },
+  { name: 'Centers', path: '/dashboard/centers', icon: Building2, color: 'teal', roles: ['admin', 'manager', 'driver'] }, // Driver sees own center
+  { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart3, color: 'violet', roles: ['admin', 'manager'] },
+  { name: 'Fleet Map', path: '/dashboard/fleet-map', icon: MapPin, color: 'emerald', roles: ['admin', 'manager', 'driver'] }, // Driver sees own route
+  { name: 'Communities', path: '/dashboard/communities', icon: Users, color: 'blue', roles: ['admin', 'citizen'] }, // Citizen only sees communities
+  { name: 'Pickup Requests', path: '/dashboard/pickup-requests', icon: Package, color: 'purple', roles: ['admin', 'manager'] },
 ];
+
+import RoleSwitcher from '@/app/components/RoleSwitcher';
 
 export default function DashboardLayout() {
   const location = useLocation();
@@ -28,8 +33,7 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
-  const { role, setRole, userName } = useRole();
+  const { role } = useRole();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-teal-50/30 relative overflow-hidden">
@@ -236,7 +240,9 @@ export default function DashboardLayout() {
         className="fixed left-0 top-16 bottom-0 w-64 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 z-40 shadow-lg overflow-hidden"
       >
         <nav className="p-4 space-y-2 h-full overflow-y-auto">
-          {sidebarItems.map((item, index) => {
+          {sidebarItems
+            .filter(item => item.roles.includes(role))
+            .map((item, index) => {
             const Icon = item.icon;
             const isActive = pathname === item.path;
             
@@ -328,53 +334,6 @@ export default function DashboardLayout() {
 
           {/* Divider */}
           <div className="my-4 border-t border-gray-200" />
-
-          {/* Role Switcher */}
-          <div className="relative">
-            <motion.button
-              onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="relative flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600 text-white w-full transition-all group overflow-hidden"
-              whileHover={{ x: 5, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <motion.div
-                className="absolute inset-0 bg-white/20"
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-              />
-              
-              <Shield className="w-5 h-5 relative z-10" />
-              <span className="font-medium relative z-10 capitalize">{role}</span>
-            </motion.button>
-
-            {/* Role Dropdown */}
-            <AnimatePresence>
-              {roleMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50"
-                >
-                  {['admin', 'manager', 'user'].map((r) => (
-                    <motion.button
-                      key={r}
-                      onClick={() => {
-                        setRole(r as 'admin' | 'manager' | 'user');
-                        setRoleMenuOpen(false);
-                      }}
-                      className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors capitalize ${
-                        role === r ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-700'
-                      }`}
-                      whileHover={{ x: 5 }}
-                    >
-                      {r}
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
 
           {/* Admin Dashboard Link - Only for Admin */}
           {role === 'admin' && (
@@ -484,6 +443,9 @@ export default function DashboardLayout() {
 
       {/* Settings Modal */}
       <SettingsModal isOpen={settingsModalOpen} onClose={() => setSettingsModalOpen(false)} />
+      
+      {/* Floating Role Switcher */}
+      <RoleSwitcher />
     </div>
   );
 }

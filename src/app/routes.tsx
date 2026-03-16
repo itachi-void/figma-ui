@@ -19,6 +19,9 @@ const CentersPage = lazy(() => import('./dashboard/centers/page'));
 const AnalyticsPage = lazy(() => import('./dashboard/analytics/page'));
 const SettingsPage = lazy(() => import('./dashboard/settings/page'));
 const AdminPage = lazy(() => import('./dashboard/admin/page'));
+const FleetMapDemoPage = lazy(() => import('./pages/dashboard/FleetMapDemo'));
+const CommunitiesPage = lazy(() => import('./pages/dashboard/Communities'));
+const PickupRequestsPage = lazy(() => import('./pages/dashboard/PickupRequests'));
 
 export const router = createBrowserRouter(
   [
@@ -85,6 +88,18 @@ export const router = createBrowserRouter(
         {
           path: 'admin',
           Component: AdminPage,
+        },
+        {
+          path: 'fleet-map',
+          Component: FleetMapDemoPage,
+        },
+        {
+          path: 'communities',
+          Component: CommunitiesPage,
+        },
+        {
+          path: 'pickup-requests',
+          Component: PickupRequestsPage,
         },
       ],
     },

@@ -102,8 +102,12 @@
     });
     console.log('[DevTools Blocker] ✅ React DevTools successfully disabled!');
   } catch (error) {
-    console.warn('[DevTools Blocker] Failed to use defineProperty, using fallback...');
-    window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = devtoolsHook;
+    try {
+      console.warn('[DevTools Blocker] Failed to use defineProperty, using fallback...');
+      window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = devtoolsHook;
+    } catch (e) {
+      console.warn('[DevTools Blocker] Entirely failed to define hook (likely read-only environment like Figma). Skipping gracefully.');
+    }
   }
   
   // Mark as initialized
