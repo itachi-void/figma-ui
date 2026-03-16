@@ -388,9 +388,16 @@ function QuickActionCard({
   isLoading?: boolean;
   onClick?: () => void;
 }) {
+  // Prevent multiple clicks by disabling button completely during loading
+  const handleClick = () => {
+    if (!isLoading && onClick) {
+      onClick();
+    }
+  };
+
   return (
     <motion.button
-      onClick={onClick}
+      onClick={handleClick}
       disabled={isLoading}
       initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
       animate={{ opacity: 1, scale: 1, rotateY: 0 }}
@@ -401,7 +408,11 @@ function QuickActionCard({
         boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
       } : {}}
       whileTap={!isLoading ? { scale: 0.95 } : {}}
-      className={`bg-gradient-to-br ${color} rounded-2xl p-6 cursor-pointer relative overflow-hidden group w-full text-left disabled:opacity-75 transition-opacity`}
+      className={`bg-gradient-to-br ${color} rounded-2xl p-6 relative overflow-hidden group w-full text-left transition-all ${
+        isLoading 
+          ? 'opacity-50 cursor-not-allowed' 
+          : 'cursor-pointer hover:shadow-lg'
+      }`}
     >
       {/* Animated background pattern */}
       <motion.div

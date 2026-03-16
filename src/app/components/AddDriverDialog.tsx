@@ -91,6 +91,9 @@ export function AddDriverDialog({ isOpen, onClose, onAdd }: AddDriverDialogProps
 
           {/* Dialog */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-driver-dialog-title"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -99,7 +102,7 @@ export function AddDriverDialog({ isOpen, onClose, onAdd }: AddDriverDialogProps
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <h2 id="add-driver-dialog-title" className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <User className="w-6 h-6 text-indigo-600" />
                   Add New Driver
                 </h2>

@@ -42,6 +42,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
           {/* Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-modal-title"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -59,7 +62,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   <SettingsIcon className="w-6 h-6 text-white" />
                 </motion.div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Settings 2</h2>
+                  <h2 id="settings-modal-title" className="text-2xl font-bold text-white">Settings 2</h2>
                   <p className="text-white/80 text-sm">Manage your preferences</p>
                 </div>
               </div>

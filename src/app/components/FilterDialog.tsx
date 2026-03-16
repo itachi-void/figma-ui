@@ -52,6 +52,9 @@ export function FilterDialog({ isOpen, onClose, onApply }: FilterDialogProps) {
 
           {/* Dialog */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="filter-dialog-title"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -59,7 +62,7 @@ export function FilterDialog({ isOpen, onClose, onApply }: FilterDialogProps) {
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Filter Options</h2>
+              <h2 id="filter-dialog-title" className="text-2xl font-bold text-gray-900">Filter Options</h2>
               <button
                 onClick={onClose}
                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
