@@ -125,7 +125,7 @@ function AlertStats() {
           <div className="flex items-center justify-between mb-4">
             <motion.div
               className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg relative overflow-hidden`}
-              whileHover={{ rotate: 360, scale: 1.1 }}
+              whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.6 }}
             >
               <motion.div
@@ -216,7 +216,7 @@ function AlertCard({ alert, index }: { alert: Alert; index: number }) {
         {/* Icon */}
         <motion.div
           className={`w-14 h-14 rounded-xl bg-gradient-to-br ${config.gradient} flex items-center justify-center flex-shrink-0 shadow-lg relative overflow-hidden`}
-          whileHover={{ rotate: 360, scale: 1.1 }}
+          whileHover={{ scale: 1.1 }}
           transition={{ duration: 0.6 }}
         >
           <motion.div

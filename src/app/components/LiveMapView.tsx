@@ -12,6 +12,8 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "./LiveMapView.css";
+import { ThermometerSun, AlertTriangle, CarFront, CloudRain, Sun, CloudLightning, CloudFog } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 type Driver = {
   id: number;
@@ -20,7 +22,7 @@ type Driver = {
   iconColor: string;
   vehicle: string;
   license: string;
-  status: "available" | "moving" | "idle";
+  status: "available" | "moving" | "idle" | "paused";
   currentLocation: [number, number];
   speed: number;
   phone: string;
@@ -47,6 +49,8 @@ type DriverRuntime = {
   animationInterval: any;
   speedMultiplier: number;
   baseTotalTime: number;
+  elapsedSimulationTime: number; // NEW
+  isPaused: boolean; // NEW
   baseElapsedTime: number;
   data: Driver;
 };
@@ -198,6 +202,29 @@ const initialDrivers: Driver[] = [
   },
 ];
 
+const INCIDENTS = [
+  { id: 1, lat: 30.050, lng: 31.233, type: 'roadwork', title: 'Road Expansion' },
+  { id: 2, lat: 30.060, lng: 31.320, type: 'accident', title: 'Minor Collision' },
+  { id: 3, lat: 30.020, lng: 31.205, type: 'roadwork', title: 'Metro Construction' },
+  { id: 4, lat: 30.057, lng: 31.217, type: 'roadwork', title: 'Bridge Maintenance' },
+];
+
+const TRAFFIC_SEGMENTS = [
+  { path: [cairoLocations["Tahrir Square"], cairoLocations["Ramsis Square"]], color: '#EF4444', weight: 4 }, // Red (Heavy)
+  { path: [cairoLocations["Ramsis Square"], cairoLocations["Abbas El-Akkad Street"]], color: '#F59E0B', weight: 4 }, // Orange (Moderate)
+  { path: [cairoLocations["Dokki Square"], cairoLocations["Giza Square"]], color: '#10B981', weight: 4 }, // Green (Clear)
+  { path: [cairoLocations["Tahrir Square"], cairoLocations["Zamalek Club"]], color: '#F59E0B', weight: 4 }, // Orange
+  { path: [cairoLocations["Abbas El-Akkad Street"], cairoLocations["Merghany Street"]], color: '#10B981', weight: 4 }, // Green
+  { path: [cairoLocations["Zamalek Club"], cairoLocations["Dokki Square"]], color: '#EF4444', weight: 4 }, // Red
+];
+
+const WEATHER_DATA = [
+  { id: 1, lat: 30.0444, lng: 31.2357, temp: '25°C', condition: 'sunny' },
+  { id: 2, lat: 30.0620, lng: 31.3350, temp: '24°C', condition: 'cloudy' },
+  { id: 3, lat: 30.0131, lng: 31.2089, temp: '26°C', condition: 'sunny' },
+  { id: 4, lat: 30.0570, lng: 31.2175, temp: '23°C', condition: 'rain' },
+];
+
 function haversineKm(
   [lat1, lon1]: [number, number],
   [lat2, lon2]: [number, number],
@@ -220,18 +247,28 @@ const LiveMapView: React.FC = () => {
   const [selectedZoneName, setSelectedZoneName] = useState<string | null>(null);
   const [activeRoutes, setActiveRoutes] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0);
-  const [currentSpeedSetting, setCurrentSpeedSetting] = useState(40);
-  const [mapStyle, setMapStyle] = useState<
-    "satellite" | "standard" | "dark" | "terrain"
-  >("satellite");
+  const [globalSpeed, setGlobalSpeed] = useState(1);
+  const playbackSpeedRef = useRef(1);
+  const [mapStyle, setMapStyle] = useState<"satellite" | "standard" | "dark" | "terrain">("satellite");
   const [now, setNow] = useState<string>("Loading...");
-  const [simulationStart, setSimulationStart] = useState<number | null>(null);
+  const [showTraffic, setShowTraffic] = useState(true);
+  const [showIncidents, setShowIncidents] = useState(true);
+  const [showWeather, setShowWeather] = useState(true);
+
+  const handleSpeedChange = (speed: number) => {
+    setGlobalSpeed(speed);
+    playbackSpeedRef.current = speed;
+  };
 
   const mapRef = useRef<LeafletMap | null>(null);
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const driverLayersRef = useRef<Record<number, DriverRuntime>>({});
   const zoneLayersRef = useRef<Record<string, L.Circle>>({});
   const simulationTimerRef = useRef<any>(null);
+  
+  const trafficLayersRef = useRef<L.Polyline[]>([]);
+  const incidentLayersRef = useRef<L.Marker[]>([]);
+  const weatherLayersRef = useRef<L.Marker[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -254,7 +291,7 @@ const LiveMapView: React.FC = () => {
 
     const baseLayers = {
       satellite: L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
         { maxZoom: 19 },
       ),
       standard: L.tileLayer(
@@ -302,11 +339,13 @@ const LiveMapView: React.FC = () => {
       driverLayersRef.current[d.id] = {
         marker,
         isAnimating: false,
+        isPaused: false,
         currentRoute: null,
         progress: 0,
         totalDistance: 0,
         totalDuration: 0,
         animationStartTime: null,
+        elapsedSimulationTime: 0,
         remainingTime: 0,
         routePath: [],
         animationInterval: null,
@@ -338,7 +377,7 @@ const LiveMapView: React.FC = () => {
 
     const layerByStyle: Record<typeof mapStyle, L.TileLayer> = {
       satellite: L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
         { maxZoom: 19 },
       ),
       standard: L.tileLayer(
@@ -355,6 +394,77 @@ const LiveMapView: React.FC = () => {
     };
     layerByStyle[mapStyle].addTo(map);
   }, [mapStyle]);
+
+  // Handle Traffic & Incidents Overlays
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Clear old
+    trafficLayersRef.current.forEach(layer => layer.remove());
+    incidentLayersRef.current.forEach(layer => layer.remove());
+    weatherLayersRef.current.forEach(layer => layer.remove());
+    trafficLayersRef.current = [];
+    incidentLayersRef.current = [];
+    weatherLayersRef.current = [];
+
+    if (showTraffic) {
+      TRAFFIC_SEGMENTS.forEach(async (seg: any) => {
+        let coords = seg.path as [number, number][];
+        if (!seg.realPath) {
+           try {
+              const str = coords.map((c: any) => `${c[1]},${c[0]}`).join(';');
+              const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${str}?overview=full&geometries=geojson`);
+              const data = await res.json();
+              if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                 seg.realPath = data.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
+              }
+           } catch(e) { console.error(e); }
+        }
+        if (seg.realPath) coords = seg.realPath;
+
+        if (mapRef.current && showTraffic) { // Ensure map and toggle didn't vanish
+          const pl = L.polyline(coords, { 
+            color: seg.color, 
+            weight: seg.weight, 
+            opacity: 0.8 
+          }).addTo(mapRef.current);
+          trafficLayersRef.current.push(pl);
+        }
+      });
+    }
+
+    if (showIncidents) {
+      INCIDENTS.forEach(inc => {
+        const isRoadwork = inc.type === 'roadwork';
+        const iconHtml = isRoadwork ? '🚧' : '⚠️';
+        const marker = L.marker([inc.lat, inc.lng], {
+          icon: L.divIcon({
+            html: `<div class="incident-marker incident-${inc.type}" title="${inc.title}" style="background:white;border-radius:50%;padding:4px;box-shadow:0 2px 4px rgba(0,0,0,0.2);display:inline-block;font-size:16px;">${iconHtml}</div>`,
+            className: ''
+          }),
+          zIndexOffset: 500
+        }).addTo(map);
+        incidentLayersRef.current.push(marker);
+      });
+    }
+
+    if (showWeather) {
+      WEATHER_DATA.forEach(w => {
+        const iconHtml = w.condition === 'sunny' ? '☀️' : w.condition === 'rain' ? '🌧️' : '☁️';
+        const marker = L.marker([w.lat, w.lng], {
+          icon: L.divIcon({
+            html: `<div style="background:rgba(255,255,255,0.9);border-radius:12px;padding:4px 8px;box-shadow:0 2px 5px rgba(0,0,0,0.2);display:flex;align-items:center;gap:4px;font-weight:bold;font-size:12px;color:#333;width:max-content;backdrop-filter:blur(4px);">
+              <span style="font-size:16px">${iconHtml}</span> ${w.temp}
+            </div>`,
+            className: ''
+          }),
+          zIndexOffset: 400
+        }).addTo(map);
+        weatherLayersRef.current.push(marker);
+      });
+    }
+  }, [showTraffic, showIncidents, showWeather]);
 
   const selectDriver = useCallback((id: number) => {
     setSelectedDriverId(id);
@@ -390,6 +500,28 @@ const LiveMapView: React.FC = () => {
     start: [number, number],
     end: [number, number],
   ) {
+    try {
+      // OSRM expects longitude,latitude format
+      const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`);
+      const data = await response.json();
+
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        // OSRM returns coordinates as [lon, lat], Leaflet expects [lat, lon]
+        const path = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+        
+        return {
+          path,
+          distance: route.distance / 1000, // convert meters to km
+          duration: route.duration / 60, // convert seconds to minutes
+          source: "OSRM" as const,
+        };
+      }
+    } catch (error) {
+      console.error("OSRM Routing failed, falling back to direct calculation", error);
+    }
+    
+    // Fallback if API fails
     const dist = haversineKm(start, end);
     return {
       path: [start, end] as [number, number][],
@@ -417,6 +549,8 @@ const LiveMapView: React.FC = () => {
     dr.totalDistance = route.distance;
     dr.totalDuration = Math.round(route.duration);
     dr.progress = 0;
+    dr.elapsedSimulationTime = 0;
+    dr.isPaused = false;
     dr.remainingTime = route.duration * 60000;
     dr.routePath = route.path;
     dr.baseTotalTime = route.duration * 60000;
@@ -426,34 +560,55 @@ const LiveMapView: React.FC = () => {
     mapRef.current.fitBounds(dr.currentRoute.getBounds());
   };
 
+  const togglePause = () => {
+    if (!selectedDriverId) return;
+    const dr = driverLayersRef.current[selectedDriverId];
+    if (!dr || !dr.isAnimating) return;
+    
+    dr.isPaused = !dr.isPaused;
+    setDrivers((prev) =>
+      prev.map((d) =>
+        d.id === selectedDriverId ? { ...d, status: dr.isPaused ? "paused" : "moving" } : d,
+      ),
+    );
+  };
+
   const startJourney = () => {
     if (!selectedDriverId) return;
     const dr = driverLayersRef.current[selectedDriverId];
     if (!dr || !dr.currentRoute || dr.isAnimating) return;
 
     dr.isAnimating = true;
+    dr.isPaused = false;
     dr.animationStartTime = Date.now();
     setDrivers((prev) =>
       prev.map((d) =>
         d.id === selectedDriverId ? { ...d, status: "moving" } : d,
       ),
     );
-    setSimulationStart(Date.now());
 
     const tick = () => {
       if (!dr.isAnimating) return clearInterval(dr.animationInterval);
-      const elapsed = Date.now() - (dr.animationStartTime ?? Date.now());
-      const progress = Math.min(100, (elapsed / dr.baseTotalTime) * 100);
+      if (dr.isPaused) return;
+
+      dr.elapsedSimulationTime += 100 * playbackSpeedRef.current;
+      const progress = Math.min(100, (dr.elapsedSimulationTime / dr.baseTotalTime) * 100);
 
       dr.progress = progress;
-      dr.remainingTime = Math.max(0, dr.baseTotalTime - elapsed);
+      dr.remainingTime = Math.max(0, dr.baseTotalTime - dr.elapsedSimulationTime);
 
       if (dr.routePath.length >= 2) {
-        const [sLat, sLng] = dr.routePath[0];
-        const [eLat, eLng] = dr.routePath[dr.routePath.length - 1];
+        const totalSegments = dr.routePath.length - 1;
+        const currentPos = (progress / 100) * totalSegments;
+        const targetIndex = Math.min(Math.floor(currentPos), totalSegments - 1);
+        const remainder = currentPos - targetIndex;
+
+        const [sLat, sLng] = dr.routePath[targetIndex];
+        const [eLat, eLng] = dr.routePath[targetIndex + 1];
+
         dr.marker.setLatLng([
-          sLat + (eLat - sLat) * (progress / 100),
-          sLng + (eLng - sLng) * (progress / 100),
+          sLat + (eLat - sLat) * remainder,
+          sLng + (eLng - sLng) * remainder,
         ]);
       }
 
@@ -475,6 +630,8 @@ const LiveMapView: React.FC = () => {
     Object.values(driverLayersRef.current).forEach((dr) => {
       if (dr.animationInterval) clearInterval(dr.animationInterval);
       dr.isAnimating = false;
+      dr.isPaused = false;
+      if (dr.currentRoute) mapRef.current?.removeLayer(dr.currentRoute);
     });
     setDrivers((prev) =>
       prev.map((d) => ({ ...d, status: "available", speed: 0 })),
@@ -564,20 +721,52 @@ const LiveMapView: React.FC = () => {
             ))}
           </div>
 
+          <div className="selection-section">
+            <div className="section-title">Map Overlays</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 10px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#4b5563', fontWeight: 600 }}>
+                <input type="checkbox" checked={showTraffic} onChange={e => setShowTraffic(e.target.checked)} style={{ accentColor: '#10b981', width: '16px', height: '16px' }} />
+                Real-time Traffic
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#4b5563', fontWeight: 600 }}>
+                <input type="checkbox" checked={showIncidents} onChange={e => setShowIncidents(e.target.checked)} style={{ accentColor: '#ef4444', width: '16px', height: '16px' }} />
+                Road Incidents
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#4b5563', fontWeight: 600 }}>
+                <input type="checkbox" checked={showWeather} onChange={e => setShowWeather(e.target.checked)} style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }} />
+                Live Weather
+              </label>
+            </div>
+          </div>
+
           <div className="actions-section">
             <div className="action-buttons">
               <button
-                className={`btn btn-primary ${!(selectedDriverId && selectedZoneName) ? "btn-disabled" : ""}`}
+                className={`btn btn-primary ${(selectedDriver?.status === "moving" || selectedDriver?.status === "paused" || !selectedDriverId || !selectedZoneName) ? "btn-disabled" : ""}`}
                 onClick={planRoute}
+                disabled={selectedDriver?.status === "moving" || selectedDriver?.status === "paused"}
               >
                 Plan Route
               </button>
-              <button
-                className={`btn btn-success ${!(selectedDriverId && selectedZoneName) ? "btn-disabled" : ""}`}
-                onClick={startJourney}
-              >
-                Start Journey
-              </button>
+
+              {selectedDriver?.status === "moving" ? (
+                 <button className="btn btn-warning" onClick={togglePause}>
+                   Pause Journey
+                 </button>
+              ) : selectedDriver?.status === "paused" ? (
+                 <button className="btn btn-success" onClick={togglePause}>
+                   Resume Journey
+                 </button>
+              ) : (
+                 <button
+                   className={`btn btn-success ${!(selectedDriverId && selectedZoneName) ? "btn-disabled" : ""}`}
+                   onClick={startJourney}
+                   disabled={!(selectedDriverId && selectedZoneName)}
+                 >
+                   Start Journey
+                 </button>
+              )}
+
               <button className="btn btn-danger" onClick={stopAll}>
                 Stop All
               </button>
@@ -585,11 +774,83 @@ const LiveMapView: React.FC = () => {
                 Reset
               </button>
             </div>
+
+            <div className="speed-controls" style={{ marginTop: '16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', fontWeight: 'bold' }}>Simulation Speed:</span>
+              {[1, 2, 5, 10].map(s => (
+                <button
+                   key={s}
+                   onClick={() => handleSpeedChange(s)}
+                   style={{ 
+                     padding: '4px 10px', 
+                     borderRadius: '6px', 
+                     border: 'none', 
+                     cursor: 'pointer', 
+                     fontWeight: 'bold',
+                     background: globalSpeed === s ? '#3b82f6' : '#e5e7eb', 
+                     color: globalSpeed === s ? 'white' : '#4b5563',
+                     transition: 'all 0.2s'
+                   }}
+                >
+                   {s}x
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="map-container">
           <div id="map" ref={mapDivRef}></div>
+          
+          {/* Weather Widget */}
+          <div className="weather-widget">
+            <ThermometerSun className="w-8 h-8 text-amber-500" />
+            <div>
+              <div style={{ fontSize: '0.8rem', color: '#6B7280', lineHeight: 1 }}>Cairo, EG</div>
+              <div style={{ fontSize: '1.2rem', color: '#111827' }}>34°C <span style={{ fontSize: '0.9rem', fontWeight: 'normal', color: '#4B5563' }}>Sunny</span></div>
+            </div>
+          </div>
+
+          {/* Map Feature Toggles */}
+          <div className="map-toggles">
+            <button 
+              className={`toggle-btn ${showTraffic ? 'active' : ''}`}
+              onClick={() => setShowTraffic(!showTraffic)}
+              title="Toggle Live Traffic"
+            >
+              <CarFront className="w-5 h-5" />
+            </button>
+            <button 
+              className={`toggle-btn ${showIncidents ? 'active' : ''}`}
+              onClick={() => setShowIncidents(!showIncidents)}
+              title="Toggle Incident Reports"
+            >
+              <AlertTriangle className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Traffic Legend Overlay */}
+          <AnimatePresence>
+            {showTraffic && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="traffic-legend"
+              >
+                <div className="traffic-legend-item">
+                  <div className="traffic-dot" style={{ background: '#10B981', boxShadow: '0 0 5px #10B981' }}></div> Fast
+                </div>
+                <div className="traffic-legend-item">
+                  <div className="traffic-dot" style={{ background: '#F59E0B', boxShadow: '0 0 5px #F59E0B' }}></div> Moderate
+                </div>
+                <div className="traffic-legend-item">
+                  <div className="traffic-dot" style={{ background: '#EF4444', boxShadow: '0 0 5px #EF4444' }}></div> Heavy
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="map-style-selector">
             <button
               className={`map-style-btn ${mapStyle === "standard" ? "active" : ""}`}

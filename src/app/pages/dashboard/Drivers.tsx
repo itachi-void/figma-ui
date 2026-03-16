@@ -43,6 +43,8 @@ interface Driver {
   completedTrips: number;
   rating: number;
   earnings: number;
+  onTimePercentage: number;
+  fuelEfficiency: number;
   avatar: string;
   vehicleNumber: string;
   joinDate: string;
@@ -60,6 +62,8 @@ const driversData: Driver[] = [
     completedTrips: 248,
     rating: 4.8,
     earnings: 12450,
+    onTimePercentage: 96,
+    fuelEfficiency: 8.5,
     avatar: 'AH',
     vehicleNumber: 'VEH-101',
     joinDate: '2025-01-15',
@@ -75,6 +79,8 @@ const driversData: Driver[] = [
     completedTrips: 312,
     rating: 4.9,
     earnings: 15680,
+    onTimePercentage: 98,
+    fuelEfficiency: 9.2,
     avatar: 'MA',
     vehicleNumber: 'VEH-102',
     joinDate: '2024-11-20',
@@ -90,6 +96,8 @@ const driversData: Driver[] = [
     completedTrips: 189,
     rating: 4.6,
     earnings: 9850,
+    onTimePercentage: 92,
+    fuelEfficiency: 7.8,
     avatar: 'KI',
     vehicleNumber: 'VEH-103',
     joinDate: '2025-02-10',
@@ -105,6 +113,8 @@ const driversData: Driver[] = [
     completedTrips: 156,
     rating: 4.4,
     earnings: 7920,
+    onTimePercentage: 88,
+    fuelEfficiency: 7.2,
     avatar: 'FY',
     vehicleNumber: 'VEH-104',
     joinDate: '2025-03-01',
@@ -120,6 +130,8 @@ const driversData: Driver[] = [
     completedTrips: 203,
     rating: 4.7,
     earnings: 10540,
+    onTimePercentage: 94,
+    fuelEfficiency: 8.1,
     avatar: 'OA',
     vehicleNumber: 'VEH-105',
     joinDate: '2025-01-05',
@@ -379,22 +391,34 @@ export default function Drivers() {
               )}
             </div>
 
-            {/* Driver Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-4 pt-4 border-t border-gray-100">
-              <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Trips</p>
-                <p className="text-lg font-bold text-gray-900">{driver.completedTrips}</p>
+            {/* Driver Stats (Trips & Earnings) */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 bg-gray-50 rounded-xl">
+                <p className="text-xs text-gray-500 font-medium mb-1">Total Trips</p>
+                <p className="text-lg font-black text-gray-900">{driver.completedTrips}</p>
               </div>
-              <div className="text-center border-x border-gray-100">
-                <p className="text-xs text-gray-600 mb-1">Rating</p>
+              <div className="p-3 bg-gray-50 rounded-xl">
+                <p className="text-xs text-gray-500 font-medium mb-1">Total Earnings</p>
+                <p className="text-lg font-black text-gray-900">${(driver.earnings / 1000).toFixed(1)}k</p>
+              </div>
+            </div>
+
+            {/* KPIs */}
+            <div className="grid grid-cols-3 gap-3 mb-4 pt-4 border-t border-gray-100">
+              <div className="text-center group-hover:scale-105 transition-transform">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">On-Time</p>
+                <p className="text-sm font-black text-emerald-600">{driver.onTimePercentage}%</p>
+              </div>
+              <div className="text-center border-x border-gray-100 group-hover:scale-105 transition-transform">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Rating</p>
                 <div className="flex items-center justify-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <p className="text-lg font-bold text-gray-900">{driver.rating}</p>
+                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                  <p className="text-sm font-black text-gray-900">{driver.rating}</p>
                 </div>
               </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Earnings</p>
-                <p className="text-lg font-bold text-gray-900">${(driver.earnings / 1000).toFixed(1)}k</p>
+              <div className="text-center group-hover:scale-105 transition-transform">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Fuel Eff.</p>
+                <p className="text-sm font-black text-blue-600">{driver.fuelEfficiency} <span className="text-[10px] font-medium opacity-70">km/L</span></p>
               </div>
             </div>
 

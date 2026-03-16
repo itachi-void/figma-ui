@@ -19,9 +19,12 @@ const CentersPage = lazy(() => import('./dashboard/centers/page'));
 const AnalyticsPage = lazy(() => import('./dashboard/analytics/page'));
 const SettingsPage = lazy(() => import('./dashboard/settings/page'));
 const AdminPage = lazy(() => import('./dashboard/admin/page'));
+const ActivityLogPage = lazy(() => import('./dashboard/activity-log/page'));
 const FleetMapDemoPage = lazy(() => import('./pages/dashboard/FleetMapDemo'));
 const CommunitiesPage = lazy(() => import('./pages/dashboard/Communities'));
 const PickupRequestsPage = lazy(() => import('./pages/dashboard/PickupRequests'));
+const FleetMaintenancePage = lazy(() => import('./dashboard/fleet-maintenance/page'));
+
 
 export const router = createBrowserRouter(
   [
@@ -90,6 +93,10 @@ export const router = createBrowserRouter(
           Component: AdminPage,
         },
         {
+          path: 'activity-log',
+          Component: ActivityLogPage,
+        },
+        {
           path: 'fleet-map',
           Component: FleetMapDemoPage,
         },
@@ -100,6 +107,14 @@ export const router = createBrowserRouter(
         {
           path: 'pickup-requests',
           Component: PickupRequestsPage,
+        },
+        {
+          path: 'support-tickets',
+          Component: lazy(() => import('./dashboard/support-tickets/page')),
+        },
+        {
+          path: 'fleet-maintenance',
+          Component: FleetMaintenancePage,
         },
       ],
     },

@@ -3,40 +3,52 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   LayoutDashboard, Bell, Package, TrendingUp, FileText, 
   Users, MapPin, UsersRound, Building2, BarChart3, Menu, Home,
-  Settings, LogOut, Search, Sparkles, Zap, X, Shield
+  Settings, LogOut, Sparkles, Zap, Shield, Moon, Sun, ClipboardList,
+  Ticket
 } from 'lucide-react';
 import { useState } from 'react';
 import SettingsModal from '@/app/components/SettingsModal';
 import { useRole } from '@/app/contexts/RoleContext';
+import { useTheme } from '@/app/contexts/ThemeContext';
+import { GlobalSearch } from '@/app/components/GlobalSearch';
+import { NotificationBell } from '@/app/components/NotificationBell';
+import { ChatPanel } from '@/app/components/ChatPanel';
+import { OnboardingTour } from '@/app/components/OnboardingTour';
 
 const sidebarItems = [
-  { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard, color: 'emerald', roles: ['admin', 'manager'] },
+  { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard, color: 'emerald', roles: ['admin', 'manager', 'citizen'] },
   { name: 'Smart Alerts', path: '/dashboard/smart-alerts', icon: Bell, color: 'red', roles: ['admin', 'manager'] },
-  { name: 'Resources', path: '/dashboard/resources', icon: Package, color: 'blue', roles: ['admin'] }, // Financial / Resources to Admin only
+  { name: 'Resources', path: '/dashboard/resources', icon: Package, color: 'blue', roles: ['admin'] },
   { name: 'Performance', path: '/dashboard/performance', icon: TrendingUp, color: 'purple', roles: ['admin', 'manager'] },
   { name: 'Reports', path: '/dashboard/reports', icon: FileText, color: 'orange', roles: ['admin', 'manager'] },
   { name: 'Drivers', path: '/dashboard/drivers', icon: Users, color: 'cyan', roles: ['admin', 'manager'] },
   { name: 'Routes', path: '/dashboard/routes', icon: MapPin, color: 'pink', roles: ['admin', 'manager'] },
   { name: 'Citizens', path: '/dashboard/citizens', icon: UsersRound, color: 'indigo', roles: ['admin', 'manager'] },
-  { name: 'Centers', path: '/dashboard/centers', icon: Building2, color: 'teal', roles: ['admin', 'manager', 'driver'] }, // Driver sees own center
+  { name: 'Centers', path: '/dashboard/centers', icon: Building2, color: 'teal', roles: ['admin', 'manager', 'driver'] },
   { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart3, color: 'violet', roles: ['admin', 'manager'] },
-  { name: 'Fleet Map', path: '/dashboard/fleet-map', icon: MapPin, color: 'emerald', roles: ['admin', 'manager', 'driver'] }, // Driver sees own route
-  { name: 'Communities', path: '/dashboard/communities', icon: Users, color: 'blue', roles: ['admin', 'citizen'] }, // Citizen only sees communities
-  { name: 'Pickup Requests', path: '/dashboard/pickup-requests', icon: Package, color: 'purple', roles: ['admin', 'manager'] },
+  { name: 'Activity Log', path: '/dashboard/activity-log', icon: ClipboardList, color: 'emerald', roles: ['admin', 'manager'] },
+  { name: 'Fleet Map', path: '/dashboard/fleet-map', icon: MapPin, color: 'emerald', roles: ['admin', 'manager', 'driver', 'citizen'] },
+  { name: 'Communities', path: '/dashboard/communities', icon: Users, color: 'blue', roles: ['admin', 'citizen'] },
+  { name: 'Pickup Requests', path: '/dashboard/pickup-requests', icon: Package, color: 'purple', roles: ['admin', 'manager', 'citizen'] },
+  { name: 'Fleet Maintenance', path: '/dashboard/fleet-maintenance', icon: Settings, color: 'red', roles: ['admin', 'manager'] },
+  { name: 'Support Tickets', path: '/dashboard/support-tickets', icon: Ticket, color: 'orange', roles: ['admin', 'manager'] },
 ];
 
 import RoleSwitcher from '@/app/components/RoleSwitcher';
+import { RouteGuard } from '@/app/components/RouteGuard';
 
 export default function DashboardLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const { role } = useRole();
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-teal-50/30 relative overflow-hidden">
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
+      theme === 'dark' ? 'bg-gray-950 text-gray-100' : 'bg-gradient-to-br from-gray-50 via-emerald-50/30 to-teal-50/30 text-gray-900'
+    }`}>
       {/* Animated Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(3)].map((_, i) => (
@@ -69,7 +81,9 @@ export default function DashboardLayout() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, type: 'spring' }}
-        className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 z-50 shadow-sm"
+        className={`fixed top-0 left-0 right-0 h-16 backdrop-blur-xl border-b z-50 shadow-sm transition-colors ${
+          theme === 'dark' ? 'bg-gray-900/80 border-gray-800' : 'bg-white/80 border-gray-200/50'
+        }`}
       >
         <div className="h-full px-4 flex items-center justify-between">
           {/* Left Section */}
@@ -105,22 +119,9 @@ export default function DashboardLayout() {
               </h1>
             </motion.div>
 
-            {/* Search Bar */}
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 300, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="hidden lg:flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-2 hover:bg-gray-200 transition-colors"
-            >
-              <Search className="w-4 h-4 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="bg-transparent outline-none text-sm w-full text-gray-700 placeholder-gray-500"
-              />
-              <kbd className="px-2 py-0.5 text-xs bg-white rounded border border-gray-300 text-gray-600">
-                ⌘K
-              </kbd>
+            {/* Global Search */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="hidden lg:block">
+              <GlobalSearch />
             </motion.div>
           </div>
 
@@ -137,30 +138,23 @@ export default function DashboardLayout() {
               </Link>
             </motion.div>
 
-            {/* Notifications */}
+            {/* Dark Mode Toggle */}
             <motion.button
-              onClick={() => setNotificationOpen(!notificationOpen)}
-              className="relative p-2 hover:bg-emerald-50 rounded-xl transition-colors group"
-              whileHover={{ scale: 1.05 }}
+              onClick={toggleTheme}
+              className={`p-2 rounded-xl transition-colors ${
+                theme === 'dark' ? 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20' : 'hover:bg-gray-100 text-gray-700'
+              }`}
+              whileHover={{ scale: 1.05, rotate: 15 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Bell className="w-5 h-5 text-gray-700 group-hover:text-emerald-600" />
-              <motion.span
-                className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  boxShadow: [
-                    '0 0 0 0 rgba(239, 68, 68, 0.4)',
-                    '0 0 0 4px rgba(239, 68, 68, 0)',
-                    '0 0 0 0 rgba(239, 68, 68, 0)',
-                  ],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                }}
-              />
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </motion.button>
+
+            {/* Chat with Drivers */}
+            <ChatPanel />
+
+            {/* Notifications */}
+            <NotificationBell />
 
             {/* Profile Avatar */}
             <motion.div
@@ -185,59 +179,16 @@ export default function DashboardLayout() {
         </div>
       </motion.header>
 
-      {/* Notification Panel */}
-      <AnimatePresence>
-        {notificationOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setNotificationOpen(false)}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-            />
-            <motion.div
-              initial={{ x: 400, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 400, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="fixed right-0 top-16 bottom-0 w-96 bg-white shadow-2xl z-50 p-6 overflow-y-auto"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Notifications</h3>
-                <button
-                  onClick={() => setNotificationOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-colors cursor-pointer"
-                  >
-                    <p className="text-sm font-semibold text-gray-900">New bottle collected</p>
-                    <p className="text-xs text-gray-600 mt-1">500 bottles added to inventory</p>
-                    <p className="text-xs text-gray-500 mt-2">2 minutes ago</p>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+
 
       {/* Fixed Sidebar */}
       <motion.aside
         initial={{ x: -300 }}
         animate={{ x: sidebarOpen ? 0 : -300 }}
         transition={{ duration: 0.3, type: 'spring', damping: 25 }}
-        className="fixed left-0 top-16 bottom-0 w-64 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 z-40 shadow-lg overflow-hidden"
+        className={`fixed left-0 top-16 bottom-0 w-64 backdrop-blur-xl border-r z-40 shadow-lg overflow-hidden transition-colors ${
+          theme === 'dark' ? 'bg-gray-900/80 border-gray-800' : 'bg-white/80 border-gray-200/50'
+        }`}
       >
         <nav className="p-4 space-y-2 h-full overflow-y-auto">
           {sidebarItems
@@ -296,7 +247,7 @@ export default function DashboardLayout() {
                     )}
 
                     <motion.div
-                      animate={isActive ? { rotate: 360 } : {}}
+                      
                       transition={{ duration: 0.6 }}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0 relative z-10" />
@@ -436,7 +387,9 @@ export default function DashboardLayout() {
           <motion.div
             key={pathname}
           >
-            <Outlet />
+            <RouteGuard path={pathname}>
+              <Outlet />
+            </RouteGuard>
           </motion.div>
         </AnimatePresence>
       </motion.main>
@@ -446,6 +399,9 @@ export default function DashboardLayout() {
       
       {/* Floating Role Switcher */}
       <RoleSwitcher />
+
+      {/* Onboarding Tour - shows once for new users */}
+      <OnboardingTour />
     </div>
   );
 }

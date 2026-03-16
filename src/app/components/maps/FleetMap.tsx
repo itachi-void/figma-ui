@@ -81,9 +81,24 @@ export default function FleetMap({
     });
 
     // Add Routes
-    routes.forEach(route => {
-      if (route.coordinates && route.coordinates.length > 0) {
-        const polyline = L.polyline(route.coordinates as L.LatLngExpression[], { color: 'blue' }).addTo(map);
+    routes.forEach(async (route) => {
+      if (!route.coordinates || route.coordinates.length < 2) return;
+      
+      let pathCoords = route.coordinates as [number, number][];
+      
+      try {
+        const coordsStr = pathCoords.map(c => `${c[1]},${c[0]}`).join(';');
+        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`);
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+           pathCoords = data.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
+        }
+      } catch (e) {
+        console.error("OSRM route fetch failed", e);
+      }
+
+      if (mapRef.current) {
+        const polyline = L.polyline(pathCoords as L.LatLngExpression[], { color: '#3b82f6', weight: 4, opacity: 0.8 }).addTo(mapRef.current);
         polyline.on('click', () => onRouteClick(route));
         polyline.bindTooltip(route.name);
       }

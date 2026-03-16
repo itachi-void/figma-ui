@@ -5,9 +5,11 @@ import {
   BarChart3, TrendingUp, TrendingDown, DollarSign, Package,
   Users, MapPin, Activity, Calendar, Download, Filter,
   RefreshCw, Eye, Target, Award, Zap, ArrowUpRight, ArrowDownRight,
-  Clock, CheckCircle, AlertCircle, PieChart, LineChart
+  Clock, CheckCircle, AlertCircle, PieChart, LineChart,
+  FileSpreadsheet, Printer, Truck, Sparkles
 } from 'lucide-react';
 import { useState } from 'react';
+import { exportToCSV, exportToPDF } from '@/app/utils/exportUtils';
 import {
   LineChart as RechartsLineChart, Line, 
   AreaChart, Area, 
@@ -21,6 +23,7 @@ import type { FilterOptions } from '../../components/FilterDialog';
 import { FilterDialog } from '../../components/FilterDialog';
 import { ExportDialog } from '../../components/ExportDialog';
 import { DetailsDialog } from '../../components/DetailsDialog';
+import { useRole } from '@/app/contexts/RoleContext';
 
 // Sample Data
 const monthlyData = [
@@ -36,6 +39,13 @@ const monthlyData = [
   { month: 'Oct', collections: 8500, revenue: 17000, recycled: 8200, efficiency: 97 },
   { month: 'Nov', collections: 9200, revenue: 18400, recycled: 8900, efficiency: 97 },
   { month: 'Dec', collections: 9800, revenue: 19600, recycled: 9500, efficiency: 97 },
+];
+
+const predictiveData = [
+  ...monthlyData.slice(6), // Last 6 months of actual data
+  { month: 'Jan (F)', collections: 10200, revenue: 20400, recycled: 9800, efficiency: 97, isForecast: true },
+  { month: 'Feb (F)', collections: 10800, revenue: 21600, recycled: 10400, efficiency: 98, isForecast: true },
+  { month: 'Mar (F)', collections: 11500, revenue: 23000, recycled: 11100, efficiency: 98, isForecast: true },
 ];
 
 const categoryData = [
@@ -80,6 +90,7 @@ const recentActivities = [
 ];
 
 export default function Analytics() {
+  const { role: currentRole } = useRole();
   const [timeRange, setTimeRange] = useState('year');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -109,7 +120,7 @@ export default function Analytics() {
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
     },
-    {
+    ...(currentRole === 'admin' ? [{
       title: 'Total Revenue',
       value: '$170,480',
       change: '+18.2%',
@@ -118,7 +129,7 @@ export default function Analytics() {
       color: 'from-emerald-500 to-emerald-600',
       bgColor: 'bg-emerald-50',
       textColor: 'text-emerald-600',
-    },
+    }] : []),
     {
       title: 'Active Users',
       value: '12,456',
@@ -160,6 +171,21 @@ export default function Analytics() {
       textColor: 'text-cyan-600',
     },
   ];
+
+  if (currentRole === 'driver' || currentRole === 'citizen') {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
+        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          {currentRole === 'driver' ? <Truck className="w-10 h-10 text-gray-400" /> : <Users className="w-10 h-10 text-gray-400" />}
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900">Analytics Access Restricted</h2>
+        <p className="text-gray-500 max-w-md">
+          The analytics dashboard is available for Admin and Manager roles. 
+          Please check your personalized overview for your relevant statistics.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -219,11 +245,31 @@ export default function Analytics() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => exportToCSV(monthlyData, 'Analytics_Report')}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span className="hidden sm:inline">CSV</span>
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => exportToPDF('root', 'Analytics_Dashboard_Report')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+          >
+            <Printer className="w-4 h-4" />
+            <span className="hidden sm:inline">PDF</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsExportOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all"
           >
             <Download className="w-4 h-4" />
-            Export Report
+            Advanced Export
           </motion.button>
         </div>
       </motion.div>
@@ -322,7 +368,9 @@ export default function Analytics() {
                 strokeWidth={2}
                 name="Collections"
               />
-              <Bar dataKey="revenue" fill="#10B981" radius={[8, 8, 0, 0]} name="Revenue ($)" />
+              {currentRole === 'admin' && (
+                <Bar dataKey="revenue" fill="#10B981" radius={[8, 8, 0, 0]} name="Revenue ($)" />
+              )}
             </ComposedChart>
           </ResponsiveContainer>
         </motion.div>
@@ -383,6 +431,70 @@ export default function Analytics() {
           </div>
         </motion.div>
       </div>
+
+      {/* AI Predictive Insights (New Phase 4 Feature) */}
+      {(currentRole === 'admin' || currentRole === 'manager') && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="bg-white rounded-xl shadow-sm border border-emerald-100 p-6 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+            <Sparkles className="w-32 h-32 text-emerald-500" />
+          </div>
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 relative z-10">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Zap className="w-6 h-6 text-emerald-500" />
+                AI Predictive Insights
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">3-Month forecast based on historical trends and seasonal modifiers</p>
+            </div>
+            
+            <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl flex items-start gap-3 max-w-sm">
+              <Sparkles className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-emerald-800 font-medium leading-relaxed">
+                AI Analytics projects a <span className="font-bold">17.3% surge</span> in overall collections by Q1. Recommendation: Pre-allocate 2 additional trucks to the Central Hub to handle peak volume.
+              </p>
+            </div>
+          </div>
+
+          <ResponsiveContainer width="100%" height={300}>
+            <ComposedChart data={predictiveData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <XAxis dataKey="month" stroke="#9ca3af" axisLine={false} tickLine={false} />
+              <YAxis stroke="#9ca3af" axisLine={false} tickLine={false} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Legend wrapperStyle={{ paddingTop: '20px' }} />
+              <Bar 
+                dataKey="collections" 
+                name="Actual Collections" 
+                fill="#3B82F6" 
+                radius={[4, 4, 0, 0]} 
+                barSize={30}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="revenue" 
+                name="Projected Revenue ($)" 
+                stroke="#10B981" 
+                strokeWidth={3}
+                dot={{ r: 4, strokeWidth: 2 }}
+                strokeDasharray="5 5"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </motion.div>
+      )}
 
       {/* Performance Radar & Regional Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -680,27 +792,29 @@ export default function Analytics() {
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1 }}
-          whileHover={{ y: -5, scale: 1.02 }}
-          className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden"
-        >
+        {currentRole === 'admin' && (
           <motion.div
-            className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"
-            animate={{ rotate: -360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-          />
-          <TrendingUp className="w-10 h-10 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Revenue Growth</h3>
-          <p className="text-3xl font-bold mb-2">+18.2%</p>
-          <p className="text-emerald-100 text-sm">Compared to last period</p>
-          <div className="mt-4 flex items-center gap-2">
-            <ArrowUpRight className="w-5 h-5" />
-            <span className="text-sm font-medium">$28,400 increase</span>
-          </div>
-        </motion.div>
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1 }}
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden"
+          >
+            <motion.div
+              className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+            />
+            <TrendingUp className="w-10 h-10 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Revenue Growth</h3>
+            <p className="text-3xl font-bold mb-2">+18.2%</p>
+            <p className="text-emerald-100 text-sm">Compared to last period</p>
+            <div className="mt-4 flex items-center gap-2">
+              <ArrowUpRight className="w-5 h-5" />
+              <span className="text-sm font-medium">$28,400 increase</span>
+            </div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

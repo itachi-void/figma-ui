@@ -605,7 +605,7 @@ function StatCard({
       {/* مربع الأيقونة بلون حسب الكولور */}
       <motion.div
         className={`w-12 h-12 ${colorBg[stat.color]} rounded-lg flex items-center justify-center mb-4`}
-        whileHover={{ rotate: 360, scale: 1.1 }}
+        whileHover={{ scale: 1.1 }}
         transition={{ duration: 0.6 }}
       >
         <Icon className={`w-6 h-6 ${colorText[stat.color]}`} />
@@ -650,7 +650,7 @@ function FeatureCard({
     >
       <motion.div
         className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center mb-4"
-        whileHover={{ rotate: 360, scale: 1.15 }}
+        whileHover={{ scale: 1.15 }}
         transition={{ duration: 0.6 }}
       >
         <Icon className="w-7 h-7 text-emerald-600" />
@@ -776,7 +776,7 @@ function RoleCard({
       {/* مربع الأيقونة بلون الدور */}
       <motion.div
         className={`w-16 h-16 ${colorBg[role.color]} rounded-2xl flex items-center justify-center mb-6 mx-auto`}
-        whileHover={{ rotate: 360, scale: 1.2 }}
+        whileHover={{ scale: 1.2 }}
         transition={{ duration: 0.6 }}
       >
         <Icon className={`w-8 h-8 ${colorText[role.color]}`} />
@@ -1257,7 +1257,7 @@ export default function LandingPage() {
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <motion.div
-                          whileHover={{ rotate: 360 }}
+                          
                           transition={{ duration: 0.6 }}
                         >
                           <Icon

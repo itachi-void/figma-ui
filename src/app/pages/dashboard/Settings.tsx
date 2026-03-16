@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import { 
   Settings as SettingsIcon, User, Bell, Lock, Palette, Globe, 
-  Shield, Database, Zap, Mail, Phone, MapPin,
+  Shield, Database, Zap, Mail, Phone, MapPin, Award,
   Save, RefreshCw, Download, Upload, Trash2
 } from 'lucide-react';
 import { useState } from 'react';
@@ -20,6 +20,8 @@ export default function Settings() {
     { id: 'profile', name: 'Profile', icon: User, color: 'emerald' },
     { id: 'notifications', name: 'Notifications', icon: Bell, color: 'blue' },
     { id: 'security', name: 'Security', icon: Shield, color: 'red' },
+    { id: 'gamification', name: 'Points & Rewards', icon: Award, color: 'yellow' },
+    { id: 'system', name: 'System Config', icon: Globe, color: 'emerald' },
     { id: 'appearance', name: 'Appearance', icon: Palette, color: 'purple' },
     { id: 'data', name: 'Data & Privacy', icon: Database, color: 'orange' },
   ];
@@ -64,6 +66,7 @@ export default function Settings() {
                 emerald: 'from-emerald-500 via-teal-500 to-emerald-600',
                 blue: 'from-blue-500 via-cyan-500 to-blue-600',
                 red: 'from-red-500 via-rose-500 to-red-600',
+                yellow: 'from-yellow-400 via-orange-500 to-yellow-600',
                 purple: 'from-purple-500 via-violet-500 to-purple-600',
                 orange: 'from-orange-500 via-amber-500 to-orange-600',
               };
@@ -290,6 +293,142 @@ export default function Settings() {
                 </motion.button>
               </div>
             </motion.div>
+          )}
+
+          {/* Gamification Tab */}
+          {activeTab === 'gamification' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-6"
+            >
+              <h2 className="text-2xl font-bold text-gray-900">Points & Rewards Configuration</h2>
+              <p className="text-gray-600">Configure how citizens earn points from recycling activities.</p>
+
+              <div className="space-y-6">
+                <div className="p-6 bg-gray-50 border border-gray-200 rounded-2xl">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-yellow-500" />
+                    Conversion Rates
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Plastic Bottles</label>
+                        <p className="text-xs text-gray-500">Points awarded per 1 plastic bottle</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          defaultValue="10"
+                          className="w-24 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 outline-none text-right"
+                        />
+                        <span className="text-sm font-bold text-gray-500">pts/bottle</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Glass Bottles</label>
+                        <p className="text-xs text-gray-500">Points awarded per 1 glass bottle</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          defaultValue="15"
+                          className="w-24 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 outline-none text-right"
+                        />
+                        <span className="text-sm font-bold text-gray-500">pts/bottle</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gray-50 border border-gray-200 rounded-2xl">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Award className="w-5 h-5 text-purple-500" />
+                    Tier Thresholds
+                  </h3>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Silver Tier</label>
+                      <input
+                        type="number"
+                        defaultValue="1000"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Gold Tier</label>
+                      <input
+                        type="number"
+                        defaultValue="5000"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <motion.button
+                  className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-medium shadow-lg flex items-center gap-2"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Save className="w-5 h-5" />
+                  Save Configurations
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* System Config Tab */}
+          {activeTab === 'system' && (
+             <motion.div
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               className="space-y-6"
+             >
+               <h2 className="text-2xl font-bold text-gray-900">System Configurations</h2>
+               <p className="text-gray-600">Manage supported operational zones and system parameters.</p>
+
+               <div className="space-y-6">
+                 <div className="p-6 bg-gray-50 border border-gray-200 rounded-2xl">
+                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                     <Globe className="w-5 h-5 text-emerald-500" />
+                     Supported Zones
+                   </h3>
+                   
+                   <div className="space-y-4">
+                     <div className="space-y-2">
+                         <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl">
+                            <span className="font-medium text-gray-700">North District</span>
+                            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full font-bold">Active</span>
+                         </div>
+                         <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl">
+                            <span className="font-medium text-gray-700">South District</span>
+                            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full font-bold">Active</span>
+                         </div>
+                         <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl">
+                            <span className="font-medium text-gray-700">East District</span>
+                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full font-bold">Inactive</span>
+                         </div>
+                     </div>
+                     <button className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1">+ Add New Zone</button>
+                   </div>
+                 </div>
+
+                 <motion.button
+                   className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-medium shadow-lg flex items-center gap-2"
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                 >
+                   <Save className="w-5 h-5" />
+                   Save Changes
+                 </motion.button>
+               </div>
+             </motion.div>
           )}
 
           {/* Appearance Tab */}

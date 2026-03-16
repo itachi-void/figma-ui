@@ -23,8 +23,12 @@ import {
   CheckCircle,
   Clock,
   Sparkles,
+  QrCode,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
 import { useState } from 'react';
+import { useWallet } from '@/app/contexts/WalletContext';
 
 // Citizen Type
 interface Citizen {
@@ -40,6 +44,8 @@ interface Citizen {
   status: 'active' | 'inactive';
   avatar: string;
   lastActivity: string;
+  activeTickets: number;
+  recentRequests: number;
 }
 
 // Mock Data
@@ -57,6 +63,8 @@ const mockCitizens: Citizen[] = [
     status: 'active',
     avatar: 'AH',
     lastActivity: '2 hours ago',
+    activeTickets: 0,
+    recentRequests: 12,
   },
   {
     id: '2',
@@ -71,6 +79,8 @@ const mockCitizens: Citizen[] = [
     status: 'active',
     avatar: 'SM',
     lastActivity: '5 hours ago',
+    activeTickets: 1,
+    recentRequests: 8,
   },
   {
     id: '3',
@@ -85,6 +95,8 @@ const mockCitizens: Citizen[] = [
     status: 'active',
     avatar: 'OA',
     lastActivity: '1 day ago',
+    activeTickets: 0,
+    recentRequests: 5,
   },
   {
     id: '4',
@@ -99,6 +111,8 @@ const mockCitizens: Citizen[] = [
     status: 'active',
     avatar: 'FI',
     lastActivity: '3 days ago',
+    activeTickets: 2,
+    recentRequests: 3,
   },
   {
     id: '5',
@@ -113,6 +127,8 @@ const mockCitizens: Citizen[] = [
     status: 'inactive',
     avatar: 'KM',
     lastActivity: '2 weeks ago',
+    activeTickets: 0,
+    recentRequests: 2,
   },
 ];
 
@@ -170,7 +186,7 @@ function CitizenStats() {
           <div className="flex items-center justify-between mb-4">
             <motion.div
               className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg relative overflow-hidden`}
-              whileHover={{ rotate: 360, scale: 1.1 }}
+              whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.6 }}
             >
               <motion.div
@@ -260,7 +276,7 @@ function CitizenCard({ citizen, index }: { citizen: Citizen; index: number }) {
           {/* Avatar */}
           <motion.div
             className={`w-16 h-16 rounded-xl bg-gradient-to-br ${config.gradient} flex items-center justify-center text-white font-bold text-xl shadow-lg relative overflow-hidden flex-shrink-0`}
-            whileHover={{ rotate: 360, scale: 1.1 }}
+            whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.6 }}
           >
             <motion.div
@@ -386,6 +402,18 @@ function CitizenCard({ citizen, index }: { citizen: Citizen; index: number }) {
               </div>
             </div>
 
+            {/* History & Tickets */}
+            <div className="flex gap-2 mt-4">
+               <div className="flex-1 bg-gray-50 rounded-lg p-2 text-center">
+                  <span className="block text-xl font-bold text-gray-900">{citizen.recentRequests}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Requests</span>
+               </div>
+               <div className="flex-1 bg-gray-50 rounded-lg p-2 text-center">
+                  <span className={`block text-xl font-bold ${citizen.activeTickets > 0 ? 'text-red-500' : 'text-gray-900'}`}>{citizen.activeTickets}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Tickets</span>
+               </div>
+            </div>
+
             {/* Last Activity */}
             <div className="flex items-center gap-2 mt-4 text-xs text-gray-500">
               <Clock className="w-3 h-3" />
@@ -427,6 +455,15 @@ export default function Citizens() {
     
     return matchesSearch && matchesRank && matchesStatus;
   });
+
+  const { balance, tier, transactions, getProgressToNextTier, addPoints } = useWallet();
+  const progress = getProgressToNextTier();
+
+  // Handle simulating a QR scan
+  const handleSimulateScan = () => {
+    const points = Math.floor(Math.random() * 50) + 10;
+    addPoints(points, `Recycled ${Math.floor(points/10)} bottles via Smart Bin`);
+  };
 
   return (
     <div className="space-y-8 relative">
@@ -494,6 +531,100 @@ export default function Citizens() {
           <UserPlus className="w-5 h-5" />
           Add Citizen
         </motion.button>
+      </motion.div>
+
+      {/* Citizen Wallet Dashboard (Gamification) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
+        {/* Balance & Tier Card */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <p className="text-white/80 font-medium mb-1">My Digital Wallet</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-bold">{balance.toLocaleString()}</span>
+                <span className="text-lg text-white/80">pts</span>
+              </div>
+            </div>
+
+            <div className="text-center md:text-right">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/20 mb-3">
+                <Award className="w-5 h-5 text-yellow-300" />
+                <span className="font-bold">{tier} Tier</span>
+              </div>
+              {progress.nextTier && (
+                <div className="w-full md:w-64">
+                  <div className="flex justify-between text-sm mb-1 text-white/80">
+                    <span>Progress to {progress.nextTier}</span>
+                    <span>{progress.current} / {progress.required}</span>
+                  </div>
+                  <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-yellow-400"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress.percentage}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-white/20 flex gap-4">
+            <button 
+              onClick={handleSimulateScan}
+              className="flex-1 bg-white text-purple-600 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+            >
+              <QrCode className="w-5 h-5" />
+              Simulate QR Scan (Test)
+            </button>
+            <button className="flex-1 bg-black/20 text-white border border-white/30 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-black/30 transition-colors">
+              <Package className="w-5 h-5" />
+              Redeem Rewards
+            </button>
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-gray-900 border-b-2 border-transparent hover:border-blue-500 pb-1 cursor-pointer">Recent Activity</h3>
+            <button className="text-sm font-medium text-blue-600 hover:text-blue-700">View All</button>
+          </div>
+          
+          <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+            {transactions.slice(0, 4).map((tx) => (
+              <motion.div 
+                key={tx.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 transition-colors"
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  tx.type === 'earned' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'
+                }`}>
+                  {tx.type === 'earned' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{tx.description}</p>
+                  <p className="text-xs text-gray-500">{tx.date.toLocaleDateString()}</p>
+                </div>
+                <div className={`font-bold whitespace-nowrap ${
+                  tx.type === 'earned' ? 'text-emerald-600' : 'text-orange-600'
+                }`}>
+                  {tx.type === 'earned' ? '+' : '-'}{tx.amount}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </motion.div>
 
       {/* Stats */}

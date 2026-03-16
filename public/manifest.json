@@ -1,0 +1,22 @@
+{
+  "name": "RecycleHub - Smart Recycling System",
+  "short_name": "RecycleHub",
+  "description": "Smart bottle recycling management system for Cairo",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "ar",
+  "dir": "rtl",
+  "screenshots": []
+}
