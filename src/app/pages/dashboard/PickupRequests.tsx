@@ -6,8 +6,8 @@ import {
   Clock, 
   Package, 
   ArrowRight, 
-  CheckCircle2, 
-  XCircle, 
+  CircleCheck, 
+  CircleX, 
   Truck, 
   Navigation, 
   Filter, 
@@ -139,7 +139,7 @@ export default function PickupRequests() {
               >
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">Assignment</h3>
-                  <button onClick={() => setSelectedReq(null)} className="p-2 hover:bg-gray-50 rounded-lg transition-colors"><XCircle className="w-5 h-5 text-gray-400" /></button>
+                  <button onClick={() => setSelectedReq(null)} className="p-2 hover:bg-gray-50 rounded-lg transition-colors"><CircleX className="w-5 h-5 text-gray-400" /></button>
                 </div>
 
                 <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-3xl mb-8">

@@ -49,41 +49,39 @@ export default function RoleSwitcher() {
   const { role, setRole } = useRole();
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="fixed bottom-6 right-6 z-50 bg-white rounded-2xl shadow-2xl border-2 border-gray-200 p-4"
-      >
-        <div className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">
-          Demo: Switch Role
-        </div>
-        
-        <div className="flex gap-2">
-          {roleConfigs.map((r) => {
-            const Icon = r.icon;
-            const isActive = role === r.id;
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="fixed bottom-6 right-6 z-[9999] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 p-4"
+    >
+      <div className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">
+        Demo: Switch Role
+      </div>
+      
+      <div className="flex gap-2">
+        {roleConfigs.map((r) => {
+          const Icon = r.icon;
+          const isActive = role === r.id;
 
-            return (
-              <motion.button
-                key={r.id}
-                onClick={() => setRole(r.id as any)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl transition-all ${
-                  isActive
-                    ? `${r.activeBg} ${r.activeText} shadow-lg`
-                    : `${r.inactiveBg} ${r.inactiveText} ${r.hoverBg}`
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs font-bold">{r.label}</span>
-              </motion.button>
-            );
-          })}
-        </div>
-      </motion.div>
-    </AnimatePresence>
+          return (
+            <motion.button
+              key={r.id}
+              onClick={() => setRole(r.id as any)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl transition-all ${
+                isActive
+                  ? `${r.activeBg} ${r.activeText} shadow-lg`
+                  : `${r.inactiveBg} ${r.inactiveText} ${r.hoverBg}`
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-xs font-bold">{r.label}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </motion.div>
   );
 }

@@ -11,7 +11,7 @@ import {
   Truck,
   Clock,
   CheckCircle,
-  XCircle,
+  CircleX,
   Phone,
   Mail,
   Calendar,

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle, X, AlertCircle, Info, XCircle } from 'lucide-react';
+import { CheckCircle, X, AlertCircle, Info, CircleX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -32,7 +32,7 @@ export function Toast({ message, type, isOpen, onClose, duration = 3000 }: Toast
       text: 'text-emerald-900',
     },
     error: {
-      icon: XCircle,
+      icon: CircleX,
       color: 'from-red-500 to-red-600',
       bg: 'bg-red-50',
       border: 'border-red-200',

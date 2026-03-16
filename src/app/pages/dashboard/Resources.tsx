@@ -21,7 +21,7 @@ import {
   Wrench,
   CheckCircle,
   Clock,
-  XCircle,
+  CircleX,
   FileText,
   BarChart3,
   Briefcase,

@@ -19,7 +19,7 @@ import {
   FileBarChart,
   Clock,
   CheckCircle,
-  XCircle,
+  CircleX,
   AlertCircle,
   Printer,
   Share2,
@@ -154,7 +154,7 @@ export default function Reports() {
       case 'pending':
         return <Clock className="w-4 h-4" />;
       case 'failed':
-        return <XCircle className="w-4 h-4" />;
+        return <CircleX className="w-4 h-4" />;
     }
   };
 

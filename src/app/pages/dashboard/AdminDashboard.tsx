@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import { 
   Users, Server, Activity, AlertTriangle, 
-  Shield, Database, Clock, CheckCircle, XCircle,
+  Shield, Database, Clock, CheckCircle, CircleX,
   TrendingUp, Settings, FileText
 } from 'lucide-react';
 import { statusColors, typography, spacing } from '@/app/utils/colors';
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
                 const logStatus = log.type as 'success' | 'warning' | 'error' | 'info';
                 const colors = statusColors[logStatus];
                 const Icon = logStatus === 'success' ? CheckCircle : 
-                             logStatus === 'error' ? XCircle :
+                             logStatus === 'error' ? CircleX :
                              logStatus === 'warning' ? AlertTriangle : Activity;
 
                 return (
