@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="RecycleHub - Smart Bottle Recycling System" />
+    <title>RecycleHub - نظام إعادة تدوير الزجاجات الذكية</title>
+    
+    <!-- Complete React DevTools Blocker - LAYER 1 (Inline) -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // Create a complete no-op hook that satisfies all DevTools requirements
+        var noop = function() {};
+        var noopReturnsFalse = function() { return false; };
+        var noopReturnsNull = function() { return null; };
+        
+        // Complete DevTools hook implementation
+        var devtoolsHook = {
+          // Core properties
+          isDisabled: true,
+          supportsFiber: true,
+          renderers: new Map(),
+          
+          // Injection methods - CRITICAL for Figma Make
+          inject: noop,
+          injectIntoGlobalHook: noop,  // ← This is the missing function!
+          injectIntoDevTools: noop,
+          
+          // Fiber methods
+          onCommitFiberRoot: noop,
+          onPostCommitFiberRoot: noop,
+          onCommitFiberUnmount: noop,
+          onScheduleFiberRoot: noop,
+          
+          // Additional methods
+          checkDCE: noop,
+          getFiberRoots: function() { return new Map(); },
+          resolveRendererId: noopReturnsNull,
+          
+          // Settings
+          _renderers: new Map(),
+          _fiberRoots: new Map(),
+          
+          // Helper methods
+          sub: noop,
+          on: noop,
+          off: noop,
+          emit: noop,
+          
+          // Profiler methods
+          getTimelineData: noopReturnsNull,
+          toggleProfilingStatus: noop,
+          profilingHook: noop,
+          
+          // Compatibility
+          helpers: {},
+          backends: new Map(),
+          hasUnsupportedRendererAttached: false,
+          supportsProfiling: noopReturnsFalse,
+        };
+        
+        // Lock the hook to prevent overwriting
+        try {
+          Object.defineProperty(window, '__REACT_DEVTOOLS_GLOBAL_HOOK__', {
+            configurable: false,
+            enumerable: false,
+            writable: false,
+            value: devtoolsHook
+          });
+        } catch (e) {
+          // Fallback if defineProperty fails
+          window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = devtoolsHook;
+        }
+        
+        // Also prevent the hook from being overwritten
+        Object.freeze(devtoolsHook);
+        
+        console.log('[RecycleHub] React DevTools disabled for Figma Make environment ✅');
+      })();
+    </script>
+    
+    <!-- Complete React DevTools Blocker - LAYER 2 (External) -->
+    <script src="/devtools-blocker.js"></script>
+    
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script type="module" crossorigin src="/assets/index-D6c2Xew6.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/icons-Bdrx2c6D.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-aPwlZgPW.js">
+    <link rel="modulepreload" crossorigin href="/assets/charts-DXckNLn5.js">
+    <link rel="modulepreload" crossorigin href="/assets/motion-BQlnep5m.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CupCZASd.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

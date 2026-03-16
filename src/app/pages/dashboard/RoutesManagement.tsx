@@ -25,12 +25,7 @@ import {
   X,
 } from "lucide-react";
 
-// الخطوة دي سحرية عشان نشغل Leaflet في Next.js بدون أخطاء SSR
-import dynamic from "next/dynamic";
-const LiveMapView = dynamic(() => import("../../components/LiveMapView"), {
-  ssr: false,
-});
-
+import LiveMapView from "../../components/LiveMapView";
 type RouteStatus = "active" | "completed" | "pending" | "cancelled";
 type RoutePriority = "high" | "medium" | "low";
 
