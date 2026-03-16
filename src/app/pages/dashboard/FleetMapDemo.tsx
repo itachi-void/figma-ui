@@ -5,6 +5,7 @@ import FleetMap from '@/app/components/maps/FleetMap';
 import { useRole } from '@/app/contexts/RoleContext';
 import { getMapDataForRole } from '@/app/data/mockMapData';
 import { Driver, Route, Center, Community } from '@/app/components/maps/types';
+import { notify } from '@/app/utils/notifications';
 
 export default function FleetMapDemo() {
   const { user } = useRole();
@@ -17,6 +18,35 @@ export default function FleetMapDemo() {
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
+
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false);
+
+  const handleOptimizeRoutes = () => {
+    setIsOptimizing(true);
+    notify.info('Optimizing Routes', 'Calculating best paths based on current traffic...');
+    setTimeout(() => {
+      setIsOptimizing(false);
+      notify.success('Optimization Complete', 'All driver routes have been updated for maximum efficiency.');
+    }, 2000);
+  };
+
+  const handleAssignDriver = () => {
+    setIsAssigning(true);
+    setTimeout(() => {
+      setIsAssigning(false);
+      notify.success('Driver Assigned', 'A new driver has been assigned to the pending route.');
+    }, 1000);
+  };
+
+  const handleViewAnalytics = () => {
+    setIsAnalyticsLoading(true);
+    setTimeout(() => {
+      setIsAnalyticsLoading(false);
+      notify.info('Analytics Report Generated', 'Weekly performance and fleet analytics are ready for review.');
+    }, 1000);
+  };
 
   const handleDriverClick = (driver: Driver) => {
     setSelectedDriver(driver);
@@ -302,14 +332,29 @@ export default function FleetMapDemo() {
             <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
               <h3 className="font-bold text-sm mb-3">Quick Actions</h3>
               <div className="space-y-2">
-                <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Optimize All Routes
+                <button 
+                  onClick={handleOptimizeRoutes}
+                  disabled={isOptimizing}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {isOptimizing ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"/> : null}
+                  {isOptimizing ? 'Optimizing...' : 'Optimize All Routes'}
                 </button>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Assign New Driver
+                <button 
+                  onClick={handleAssignDriver}
+                  disabled={isAssigning}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {isAssigning ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"/> : null}
+                  {isAssigning ? 'Assigning...' : 'Assign New Driver'}
                 </button>
-                <button className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-                  View Analytics
+                <button 
+                  onClick={handleViewAnalytics}
+                  disabled={isAnalyticsLoading}
+                  className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {isAnalyticsLoading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"/> : null}
+                  {isAnalyticsLoading ? 'Loading Analytics...' : 'View Analytics'}
                 </button>
               </div>
             </div>
@@ -326,8 +371,8 @@ export default function FleetMapDemo() {
           <FleetMap
             role={role}
             currentUserId={user?.id}
-            center={[30.5000, 30.9500]}
-            zoom={10}
+            center={[30.0444, 31.2357]}
+            zoom={12}
             height="700px"
             drivers={drivers}
             routes={routes}

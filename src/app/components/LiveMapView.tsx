@@ -71,6 +71,7 @@ const cairoLocations: Record<string, [number, number]> = {
   "Merghany Street": [30.092, 31.328],
   "26th July Street": [30.057, 31.2175],
   "Pyramids Road (Harram)": [30.025, 31.195],
+  "Alhassan Location": [30.464388, 30.890404],
 };
 
 const STARTS: Record<number, [number, number]> = {
@@ -80,6 +81,7 @@ const STARTS: Record<number, [number, number]> = {
   4: cairoLocations["Giza Square"],
   5: cairoLocations["Zamalek Club"],
   6: cairoLocations["Abbas El-Akkad Street"],
+  7: cairoLocations["Alhassan Location"],
 };
 
 const zones: Record<string, Zone> = {
@@ -199,6 +201,18 @@ const initialDrivers: Driver[] = [
     currentLocation: STARTS[6],
     speed: 0,
     phone: "+20 100 678 9012",
+  },
+  {
+    id: 7,
+    name: "Alhassan Hisham",
+    color: "#FF6B6B",
+    iconColor: "#FFFFFF",
+    vehicle: "Plastic Scooter",
+    license: "CAI-55667",
+    status: "available",
+    currentLocation: STARTS[7],
+    speed: 0,
+    phone: "+20 100 789 0123",
   },
 ];
 
