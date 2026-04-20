@@ -1,5 +1,10 @@
-import Citizens from '@/app/pages/dashboard/Citizens';
+import Citizens from '../../pages/dashboard/Citizens';
+import { TablePageLoader } from '../../components/PageLoader';
 
 export default function CitizensPage() {
-  return <Citizens />;
+  return (
+    <TablePageLoader>
+      <Citizens />
+    </TablePageLoader>
+  );
 }
