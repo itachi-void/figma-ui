@@ -99,7 +99,7 @@ export function PageLoader({
 // Specific page loaders for common layouts
 export function OverviewPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="dashboard" loadingTime={2000} simulatedDelay={8000}>
+    <PageLoader type="dashboard" loadingTime={300} simulatedDelay={200}>
       {children}
     </PageLoader>
   );
@@ -107,7 +107,7 @@ export function OverviewPageLoader({ children }: { children: ReactNode }) {
 
 export function TablePageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="table" loadingTime={2000} simulatedDelay={8000}>
+    <PageLoader type="table" loadingTime={300} simulatedDelay={200}>
       {children}
     </PageLoader>
   );
@@ -115,7 +115,7 @@ export function TablePageLoader({ children }: { children: ReactNode }) {
 
 export function StatsPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="stats" loadingTime={2000} simulatedDelay={8000}>
+    <PageLoader type="stats" loadingTime={300} simulatedDelay={200}>
       {children}
     </PageLoader>
   );
@@ -123,7 +123,7 @@ export function StatsPageLoader({ children }: { children: ReactNode }) {
 
 export function ChartPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="chart" loadingTime={2000} simulatedDelay={8000}>
+    <PageLoader type="chart" loadingTime={300} simulatedDelay={200}>
       {children}
     </PageLoader>
   );
@@ -131,7 +131,7 @@ export function ChartPageLoader({ children }: { children: ReactNode }) {
 
 export function ListPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="list" loadingTime={2000} simulatedDelay={8000}>
+    <PageLoader type="list" loadingTime={300} simulatedDelay={200}>
       {children}
     </PageLoader>
   );
@@ -139,7 +139,7 @@ export function ListPageLoader({ children }: { children: ReactNode }) {
 
 export function FormPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="form" loadingTime={2000} simulatedDelay={8000}>
+    <PageLoader type="form" loadingTime={300} simulatedDelay={200}>
       {children}
     </PageLoader>
   );

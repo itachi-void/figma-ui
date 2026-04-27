@@ -197,7 +197,7 @@ export function AddDriverDialog({
     setIsSaving(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     setIsSaving(false);
     setSaveSuccess(true);

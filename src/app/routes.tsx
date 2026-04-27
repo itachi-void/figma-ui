@@ -1,7 +1,7 @@
 import { createBrowserRouter, redirect } from 'react-router';
 import { lazy } from 'react';
 
-// Helper function to add 2 second delay to lazy loading
+// Helper function to add 0.5 second delay to lazy loading
 const lazyWithDelay = (importFunc: () => Promise<any>) => {
   return lazy(() =>
     Promise.all([
@@ -11,7 +11,7 @@ const lazyWithDelay = (importFunc: () => Promise<any>) => {
   );
 };
 
-// Lazy load pages for better performance with 2 second delay
+// Lazy load pages for better performance with 0.5 second delay
 const LandingPage = lazyWithDelay(() => import('./pages/LandingPage'));
 const CitizenPortalPage = lazyWithDelay(() => import('./citizen-portal/CitizenPortalPage'));
 const NotFoundPage = lazyWithDelay(() => import('./pages/NotFound'));
@@ -19,13 +19,13 @@ const NotFoundPage = lazyWithDelay(() => import('./pages/NotFound'));
 // Dashboard layout
 const DashboardLayout = lazyWithDelay(() => import('./dashboard/layout'));
 
-// Dashboard Pages - Lazy loaded from dashboard folder structure with 2 second delay
+// Dashboard Pages - Lazy loaded from dashboard folder structure with 0.5 second delay
 const OverviewPage = lazyWithDelay(() => import('./dashboard/overview/page'));
 const SmartAlertsPage = lazyWithDelay(() => import('./dashboard/smart-alerts/page'));
 const ResourcesPage = lazyWithDelay(() => import('./dashboard/resources/page'));
 const PerformancePage = lazyWithDelay(() => import('./dashboard/performance/page'));
 const ReportsPage = lazyWithDelay(() => import('./dashboard/reports/page'));
-const DriversPage = lazy(() => import('./dashboard/drivers/page'));
+const DriversPage = lazyWithDelay(() => import('./dashboard/drivers/page'));
 const RoutesPage = lazyWithDelay(() => import('./dashboard/routes/page'));
 const CitizensPage = lazyWithDelay(() => import('./dashboard/citizens/page'));
 const CentersPage = lazyWithDelay(() => import('./dashboard/centers/page'));

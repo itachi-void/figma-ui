@@ -522,7 +522,7 @@ export default function Overview() {
     
     try {
       // Simulate API call with delay
-      await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Activity log messages
       const activityMessages: Record<string, { action: string; details: string; severity: string }> = {

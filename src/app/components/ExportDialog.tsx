@@ -17,7 +17,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
     setIsExporting(true);
     
     // Simulate export process
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     setIsExporting(false);
     onClose();
