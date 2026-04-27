@@ -1,30 +1,39 @@
-import { createBrowserRouter, Navigate } from 'react-router';
+import { createBrowserRouter, redirect } from 'react-router';
 import { lazy } from 'react';
 
-// Lazy load pages for better performance
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const CitizenPortalPage = lazy(() => import('./citizen-portal/CitizenPortalPage'));
-const DashboardLayout = lazy(() => import('./dashboard/layout'));
+// Helper function to add 2 second delay to lazy loading
+const lazyWithDelay = (importFunc: () => Promise<any>) => {
+  return lazy(() =>
+    Promise.all([
+      importFunc(),
+      new Promise(resolve => setTimeout(resolve, 500))
+    ]).then(([moduleExports]) => moduleExports)
+  );
+};
 
-// Dashboard Pages - Lazy loaded
-const OverviewPage = lazy(() => import('./dashboard/overview/page'));
-const SmartAlertsPage = lazy(() => import('./dashboard/smart-alerts/page'));
-const ResourcesPage = lazy(() => import('./dashboard/resources/page'));
-const PerformancePage = lazy(() => import('./dashboard/performance/page'));
-const ReportsPage = lazy(() => import('./dashboard/reports/page'));
+// Lazy load pages for better performance with 2 second delay
+const LandingPage = lazyWithDelay(() => import('./pages/LandingPage'));
+const CitizenPortalPage = lazyWithDelay(() => import('./citizen-portal/CitizenPortalPage'));
+const NotFoundPage = lazyWithDelay(() => import('./pages/NotFound'));
+
+// Dashboard layout
+const DashboardLayout = lazyWithDelay(() => import('./dashboard/layout'));
+
+// Dashboard Pages - Lazy loaded from dashboard folder structure with 2 second delay
+const OverviewPage = lazyWithDelay(() => import('./dashboard/overview/page'));
+const SmartAlertsPage = lazyWithDelay(() => import('./dashboard/smart-alerts/page'));
+const ResourcesPage = lazyWithDelay(() => import('./dashboard/resources/page'));
+const PerformancePage = lazyWithDelay(() => import('./dashboard/performance/page'));
+const ReportsPage = lazyWithDelay(() => import('./dashboard/reports/page'));
 const DriversPage = lazy(() => import('./dashboard/drivers/page'));
-const RoutesPage = lazy(() => import('./dashboard/routes/page'));
-const CitizensPage = lazy(() => import('./dashboard/citizens/page'));
-const CentersPage = lazy(() => import('./dashboard/centers/page'));
-const AnalyticsPage = lazy(() => import('./dashboard/analytics/page'));
-const SettingsPage = lazy(() => import('./dashboard/settings/page'));
-const AdminPage = lazy(() => import('./dashboard/admin/page'));
-const ActivityLogPage = lazy(() => import('./dashboard/activity-log/page'));
-const FleetMapDemoPage = lazy(() => import('./pages/dashboard/FleetMapDemo'));
-const CommunitiesPage = lazy(() => import('./pages/dashboard/Communities'));
-const PickupRequestsPage = lazy(() => import('./pages/dashboard/PickupRequests'));
-const FleetMaintenancePage = lazy(() => import('./dashboard/fleet-maintenance/page'));
-
+const RoutesPage = lazyWithDelay(() => import('./dashboard/routes/page'));
+const CitizensPage = lazyWithDelay(() => import('./dashboard/citizens/page'));
+const CentersPage = lazyWithDelay(() => import('./dashboard/centers/page'));
+const AnalyticsPage = lazyWithDelay(() => import('./dashboard/analytics/page'));
+const SettingsPage = lazyWithDelay(() => import('./dashboard/settings/page'));
+const AdminPage = lazyWithDelay(() => import('./dashboard/admin/page'));
+const FleetMapPage = lazyWithDelay(() => import('./dashboard/fleet-map/page'));
+const CommunitiesPage = lazyWithDelay(() => import('./dashboard/communities/page'));
 
 export const router = createBrowserRouter(
   [
@@ -42,7 +51,7 @@ export const router = createBrowserRouter(
       children: [
         {
           index: true,
-          element: <Navigate to="/dashboard/overview" replace />,
+          loader: () => redirect('/dashboard/overview'),
         },
         {
           path: 'overview',
@@ -93,34 +102,18 @@ export const router = createBrowserRouter(
           Component: AdminPage,
         },
         {
-          path: 'activity-log',
-          Component: ActivityLogPage,
-        },
-        {
           path: 'fleet-map',
-          Component: FleetMapDemoPage,
+          Component: FleetMapPage,
         },
         {
           path: 'communities',
           Component: CommunitiesPage,
         },
-        {
-          path: 'pickup-requests',
-          Component: PickupRequestsPage,
-        },
-        {
-          path: 'support-tickets',
-          Component: lazy(() => import('./dashboard/support-tickets/page')),
-        },
-        {
-          path: 'fleet-maintenance',
-          Component: FleetMaintenancePage,
-        },
       ],
     },
     {
       path: '*',
-      element: <Navigate to="/" replace />,
+      Component: NotFoundPage,
     },
   ],
   {

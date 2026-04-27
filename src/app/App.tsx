@@ -10,6 +10,7 @@ import { ActivityLogProvider } from '@/app/contexts/ActivityLogContext';
 import { ChatProvider } from '@/app/contexts/ChatContext';
 import { WalletProvider } from '@/app/contexts/WalletContext';
 import { TicketsProvider } from '@/app/contexts/TicketsContext';
+import { SidebarProvider } from '@/app/contexts/SidebarContext';
 
 export default function App() {
   return (
@@ -20,17 +21,19 @@ export default function App() {
             <NotificationsProvider>
               <ActivityLogProvider>
                 <ChatProvider>
-                  <Suspense fallback={
-                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-blue-50">
-                      <LoadingSpinner />
-                    </div>
-                  }>
-                <RouterProvider router={router} />
-              </Suspense>
-              <Toaster />
-            </ChatProvider>
-          </ActivityLogProvider>
-        </NotificationsProvider>
+                  <SidebarProvider>
+                    <Suspense fallback={
+                      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-blue-50">
+                        <LoadingSpinner />
+                      </div>
+                    }>
+                      <RouterProvider router={router} />
+                    </Suspense>
+                    <Toaster />
+                  </SidebarProvider>
+                </ChatProvider>
+              </ActivityLogProvider>
+            </NotificationsProvider>
           </TicketsProvider>
         </WalletProvider>
       </RoleProvider>

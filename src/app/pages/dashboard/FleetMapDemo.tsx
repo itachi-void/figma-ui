@@ -1,23 +1,29 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { MapPin, Truck, Building2, Users, Info } from 'lucide-react';
-import FleetMap from '@/app/components/maps/FleetMap';
-import { useRole } from '@/app/contexts/RoleContext';
-import { getMapDataForRole } from '@/app/data/mockMapData';
-import { Driver, Route, Center, Community } from '@/app/components/maps/types';
-import { notify } from '@/app/utils/notifications';
+import { useState } from "react";
+import { motion } from "motion/react";
+import { MapPin, Truck, Building2, Users, Info } from "lucide-react";
+import FleetMap from "@/app/components/maps/FleetMap";
+import { useRole } from "@/app/contexts/RoleContext";
+import { getMapDataForRole } from "@/app/data/mockMapData";
+import { Driver, Route, Center, Community } from "@/app/components/maps/types";
+import { notify } from "@/app/utils/notifications";
+import { Progress } from "../../components/ui/progress";
 
 export default function FleetMapDemo() {
   const { user } = useRole();
-  const role = user?.role || 'admin';
-  
+  const role = user?.role || "admin";
+
   // Get filtered data based on role
-  const { drivers, routes, centers, communities } = getMapDataForRole(role, user?.id);
-  
+  const { drivers, routes, centers, communities } = getMapDataForRole(
+    role,
+    user?.id,
+  );
+
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
-  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
+    null,
+  );
 
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -25,10 +31,16 @@ export default function FleetMapDemo() {
 
   const handleOptimizeRoutes = () => {
     setIsOptimizing(true);
-    notify.info('Optimizing Routes', 'Calculating best paths based on current traffic...');
+    notify.info(
+      "Optimizing Routes",
+      "Calculating best paths based on current traffic...",
+    );
     setTimeout(() => {
       setIsOptimizing(false);
-      notify.success('Optimization Complete', 'All driver routes have been updated for maximum efficiency.');
+      notify.success(
+        "Optimization Complete",
+        "All driver routes have been updated for maximum efficiency.",
+      );
     }, 2000);
   };
 
@@ -36,7 +48,10 @@ export default function FleetMapDemo() {
     setIsAssigning(true);
     setTimeout(() => {
       setIsAssigning(false);
-      notify.success('Driver Assigned', 'A new driver has been assigned to the pending route.');
+      notify.success(
+        "Driver Assigned",
+        "A new driver has been assigned to the pending route.",
+      );
     }, 1000);
   };
 
@@ -44,7 +59,10 @@ export default function FleetMapDemo() {
     setIsAnalyticsLoading(true);
     setTimeout(() => {
       setIsAnalyticsLoading(false);
-      notify.info('Analytics Report Generated', 'Weekly performance and fleet analytics are ready for review.');
+      notify.info(
+        "Analytics Report Generated",
+        "Weekly performance and fleet analytics are ready for review.",
+      );
     }, 1000);
   };
 
@@ -103,7 +121,7 @@ export default function FleetMapDemo() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {role !== 'citizen' && (
+        {role !== "citizen" && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -122,7 +140,7 @@ export default function FleetMapDemo() {
           </motion.div>
         )}
 
-        {role !== 'citizen' && (
+        {role !== "citizen" && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -141,7 +159,7 @@ export default function FleetMapDemo() {
           </motion.div>
         )}
 
-        {role !== 'citizen' && (
+        {role !== "citizen" && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -160,7 +178,7 @@ export default function FleetMapDemo() {
           </motion.div>
         )}
 
-        {role === 'citizen' || role === 'admin' || role === 'manager' ? (
+        {role === "citizen" || role === "admin" || role === "manager" ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -195,9 +213,12 @@ export default function FleetMapDemo() {
             <li>Use layer controls to toggle different data views</li>
             <li>Routes are calculated using real road networks via OSRM</li>
             <li>
-              {role === 'driver' && 'You can only see your assigned route and vehicle'}
-              {role === 'citizen' && 'Discover communities near you and join them'}
-              {(role === 'admin' || role === 'manager') && 'You have access to all operational data'}
+              {role === "driver" &&
+                "You can only see your assigned route and vehicle"}
+              {role === "citizen" &&
+                "Discover communities near you and join them"}
+              {(role === "admin" || role === "manager") &&
+                "You have access to all operational data"}
             </li>
           </ul>
         </div>
@@ -213,10 +234,13 @@ export default function FleetMapDemo() {
           className="lg:col-span-1 space-y-4"
         >
           {/* Selected Item Details */}
-          {(selectedDriver || selectedRoute || selectedCenter || selectedCommunity) ? (
+          {selectedDriver ||
+          selectedRoute ||
+          selectedCenter ||
+          selectedCommunity ? (
             <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
               <h3 className="font-bold text-lg mb-3">Details</h3>
-              
+
               {selectedDriver && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-emerald-600 mb-2">
@@ -224,21 +248,35 @@ export default function FleetMapDemo() {
                     <span className="font-semibold">Driver Information</span>
                   </div>
                   <div className="space-y-1 text-sm">
-                    <p><span className="font-medium">Name:</span> {selectedDriver.name}</p>
-                    <p><span className="font-medium">Status:</span> <span className="capitalize">{selectedDriver.status}</span></p>
-                    <p><span className="font-medium">Load:</span> {selectedDriver.load}%</p>
+                    <p>
+                      <span className="font-medium">Name:</span>{" "}
+                      {selectedDriver.name}
+                    </p>
+                    <p>
+                      <span className="font-medium">Status:</span>{" "}
+                      <span className="capitalize">
+                        {selectedDriver.status}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium">Load:</span>{" "}
+                      {selectedDriver.load}%
+                    </p>
                     {selectedDriver.vehicleType && (
-                      <p><span className="font-medium">Vehicle:</span> {selectedDriver.vehicleType}</p>
+                      <p>
+                        <span className="font-medium">Vehicle:</span>{" "}
+                        {selectedDriver.vehicleType}
+                      </p>
                     )}
                     <div className="mt-3 pt-3 border-t">
                       <div className="bg-gray-100 rounded-lg p-2">
-                        <div className="text-xs text-gray-600 mb-1">Load Progress</div>
-                        <div className="w-full bg-gray-300 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all"
-                            style={{ width: `${selectedDriver.load}%` }}
-                          />
+                        <div className="text-xs text-gray-600 mb-1">
+                          Load Progress
                         </div>
+                        <Progress
+                          value={selectedDriver.load}
+                          className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-teal-500"
+                        />
                       </div>
                     </div>
                   </div>
@@ -252,14 +290,29 @@ export default function FleetMapDemo() {
                     <span className="font-semibold">Route Information</span>
                   </div>
                   <div className="space-y-1 text-sm">
-                    <p><span className="font-medium">Name:</span> {selectedRoute.name}</p>
-                    <p><span className="font-medium">Status:</span> <span className="capitalize">{selectedRoute.status}</span></p>
-                    <p><span className="font-medium">Stops:</span> {selectedRoute.stops.length}</p>
+                    <p>
+                      <span className="font-medium">Name:</span>{" "}
+                      {selectedRoute.name}
+                    </p>
+                    <p>
+                      <span className="font-medium">Status:</span>{" "}
+                      <span className="capitalize">{selectedRoute.status}</span>
+                    </p>
+                    <p>
+                      <span className="font-medium">Stops:</span>{" "}
+                      {selectedRoute.stops.length}
+                    </p>
                     {selectedRoute.distance && (
-                      <p><span className="font-medium">Distance:</span> {selectedRoute.distance} km</p>
+                      <p>
+                        <span className="font-medium">Distance:</span>{" "}
+                        {selectedRoute.distance} km
+                      </p>
                     )}
                     {selectedRoute.duration && (
-                      <p><span className="font-medium">Duration:</span> {selectedRoute.duration} min</p>
+                      <p>
+                        <span className="font-medium">Duration:</span>{" "}
+                        {selectedRoute.duration} min
+                      </p>
                     )}
                   </div>
                 </div>
@@ -272,21 +325,37 @@ export default function FleetMapDemo() {
                     <span className="font-semibold">Center Information</span>
                   </div>
                   <div className="space-y-1 text-sm">
-                    <p><span className="font-medium">Name:</span> {selectedCenter.name}</p>
-                    <p><span className="font-medium">Type:</span> <span className="capitalize">{selectedCenter.type}</span></p>
-                    <p><span className="font-medium">Capacity:</span> {selectedCenter.currentLoad} / {selectedCenter.capacity}</p>
+                    <p>
+                      <span className="font-medium">Name:</span>{" "}
+                      {selectedCenter.name}
+                    </p>
+                    <p>
+                      <span className="font-medium">Type:</span>{" "}
+                      <span className="capitalize">{selectedCenter.type}</span>
+                    </p>
+                    <p>
+                      <span className="font-medium">Capacity:</span>{" "}
+                      {selectedCenter.currentLoad} / {selectedCenter.capacity}
+                    </p>
                     {selectedCenter.operatingHours && (
-                      <p><span className="font-medium">Hours:</span> {selectedCenter.operatingHours}</p>
+                      <p>
+                        <span className="font-medium">Hours:</span>{" "}
+                        {selectedCenter.operatingHours}
+                      </p>
                     )}
                     <div className="mt-3 pt-3 border-t">
                       <div className="bg-gray-100 rounded-lg p-2">
-                        <div className="text-xs text-gray-600 mb-1">Capacity Usage</div>
-                        <div className="w-full bg-gray-300 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all"
-                            style={{ width: `${(selectedCenter.currentLoad / selectedCenter.capacity) * 100}%` }}
-                          />
+                        <div className="text-xs text-gray-600 mb-1">
+                          Capacity Usage
                         </div>
+                        <Progress
+                          value={
+                            (selectedCenter.currentLoad /
+                              selectedCenter.capacity) *
+                            100
+                          }
+                          className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-cyan-500 [&>div]:to-blue-500"
+                        />
                       </div>
                     </div>
                   </div>
@@ -300,16 +369,28 @@ export default function FleetMapDemo() {
                     <span className="font-semibold">Community Information</span>
                   </div>
                   <div className="space-y-1 text-sm">
-                    <p><span className="font-medium">Name:</span> {selectedCommunity.name}</p>
-                    <p><span className="font-medium">Members:</span> {selectedCommunity.members}</p>
-                    <p><span className="font-medium">Bottles:</span> {selectedCommunity.totalBottles.toLocaleString()}</p>
-                    <p><span className="font-medium">Level:</span> {selectedCommunity.level}</p>
+                    <p>
+                      <span className="font-medium">Name:</span>{" "}
+                      {selectedCommunity.name}
+                    </p>
+                    <p>
+                      <span className="font-medium">Members:</span>{" "}
+                      {selectedCommunity.members}
+                    </p>
+                    <p>
+                      <span className="font-medium">Bottles:</span>{" "}
+                      {selectedCommunity.totalBottles.toLocaleString()}
+                    </p>
+                    <p>
+                      <span className="font-medium">Level:</span>{" "}
+                      {selectedCommunity.level}
+                    </p>
                     {selectedCommunity.isJoined && (
                       <div className="mt-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-semibold">
                         ✓ You are a member
                       </div>
                     )}
-                    {!selectedCommunity.isJoined && role === 'citizen' && (
+                    {!selectedCommunity.isJoined && role === "citizen" && (
                       <button className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
                         Join Community
                       </button>
@@ -328,33 +409,62 @@ export default function FleetMapDemo() {
           )}
 
           {/* Quick Actions */}
-          {role === 'admin' && (
+          {role === "admin" && (
             <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
               <h3 className="font-bold text-sm mb-3">Quick Actions</h3>
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={handleOptimizeRoutes}
                   disabled={isOptimizing}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
-                  {isOptimizing ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"/> : null}
-                  {isOptimizing ? 'Optimizing...' : 'Optimize All Routes'}
+                  {isOptimizing ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1,
+                      }}
+                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                    />
+                  ) : null}
+                  {isOptimizing ? "Optimizing..." : "Optimize All Routes"}
                 </button>
-                <button 
+                <button
                   onClick={handleAssignDriver}
                   disabled={isAssigning}
                   className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
-                  {isAssigning ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"/> : null}
-                  {isAssigning ? 'Assigning...' : 'Assign New Driver'}
+                  {isAssigning ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1,
+                      }}
+                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                    />
+                  ) : null}
+                  {isAssigning ? "Assigning..." : "Assign New Driver"}
                 </button>
-                <button 
+                <button
                   onClick={handleViewAnalytics}
                   disabled={isAnalyticsLoading}
                   className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
-                  {isAnalyticsLoading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"/> : null}
-                  {isAnalyticsLoading ? 'Loading Analytics...' : 'View Analytics'}
+                  {isAnalyticsLoading ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1,
+                      }}
+                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                    />
+                  ) : null}
+                  {isAnalyticsLoading
+                    ? "Loading Analytics..."
+                    : "View Analytics"}
                 </button>
               </div>
             </div>

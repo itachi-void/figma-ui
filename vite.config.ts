@@ -23,10 +23,6 @@ export default defineConfig({
     include: ["react", "react-dom", "react/jsx-runtime", "react-dom/client"],
     esbuildOptions: {
       target: "es2020",
-      define: {
-        // ✅ تم تصحيح هذا السطر ليقبله esbuild
-        __REACT_DEVTOOLS_GLOBAL_HOOK__: '{"isDisabled":true}',
-      },
     },
   },
   esbuild: {
@@ -67,6 +63,7 @@ export default defineConfig({
     },
   },
   define: {
-    __REACT_DEVTOOLS_GLOBAL_HOOK__: "undefined",
+    // We removed this to avoid TypeError in read-only environments (Figma)
+    // where Vite tries to assign to window.__REACT_DEVTOOLS_GLOBAL_HOOK__ in env.mjs
   },
 });
