@@ -11,14 +11,7 @@ import {
 
 interface PageLoaderProps {
   children: ReactNode;
-  type?:
-    | "dashboard"
-    | "table"
-    | "stats"
-    | "chart"
-    | "list"
-    | "form"
-    | "custom";
+  type?: "dashboard" | "table" | "stats" | "chart" | "list" | "form" | "custom";
   customSkeleton?: ReactNode;
   loadingTime?: number; // Minimum time to show skeleton (ms)
   simulatedDelay?: number; // Simulated data fetch delay (ms)

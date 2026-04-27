@@ -1,6 +1,6 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { X, FileText, Download, Calendar } from 'lucide-react';
-import { useState } from 'react';
+import { motion, AnimatePresence } from "motion/react";
+import { X, FileText, Download, Calendar } from "lucide-react";
+import { useState } from "react";
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -8,20 +8,20 @@ interface ExportDialogProps {
 }
 
 export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
-  const [format, setFormat] = useState('pdf');
-  const [dateRange, setDateRange] = useState('month');
+  const [format, setFormat] = useState("pdf");
+  const [dateRange, setDateRange] = useState("month");
   const [includeCharts, setIncludeCharts] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
     setIsExporting(true);
-    
+
     // Simulate export process
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     setIsExporting(false);
     onClose();
-    
+
     // Show success message
     alert(`Report exported successfully as ${format.toUpperCase()}!`);
   };
@@ -51,7 +51,10 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 id="export-dialog-title" className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <h2
+                id="export-dialog-title"
+                className="text-2xl font-bold text-gray-900 flex items-center gap-2"
+              >
                 <FileText className="w-6 h-6 text-indigo-600" />
                 Export Report
               </h2>
@@ -71,7 +74,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                   Export Format
                 </label>
                 <div className="grid grid-cols-3 gap-3">
-                  {['pdf', 'excel', 'csv'].map((fmt) => (
+                  {["pdf", "excel", "csv"].map((fmt) => (
                     <motion.button
                       key={fmt}
                       whileHover={{ scale: 1.05 }}
@@ -79,8 +82,8 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                       onClick={() => setFormat(fmt)}
                       className={`px-4 py-3 rounded-lg border-2 font-medium transition-all ${
                         format === fmt
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                          : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
                       {fmt.toUpperCase()}
@@ -113,7 +116,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                 <label className="text-sm font-medium text-gray-700 block">
                   Include in Report
                 </label>
-                
+
                 <label className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer">
                   <input
                     type="checkbox"
@@ -121,7 +124,9 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                     onChange={(e) => setIncludeCharts(e.target.checked)}
                     className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-400"
                   />
-                  <span className="text-sm text-gray-700">Include charts and visualizations</span>
+                  <span className="text-sm text-gray-700">
+                    Include charts and visualizations
+                  </span>
                 </label>
               </div>
             </div>
@@ -148,7 +153,11 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                   <>
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                       className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                     />
                     Exporting...

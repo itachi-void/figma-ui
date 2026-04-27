@@ -1,118 +1,126 @@
-import { createBrowserRouter, redirect } from 'react-router';
-import { lazy } from 'react';
+import { createBrowserRouter, redirect } from "react-router";
+import { lazy } from "react";
 
 // Helper function to add 0.5 second delay to lazy loading
 const lazyWithDelay = (importFunc: () => Promise<any>) => {
   return lazy(() =>
     Promise.all([
       importFunc(),
-      new Promise(resolve => setTimeout(resolve, 500))
-    ]).then(([moduleExports]) => moduleExports)
+      new Promise((resolve) => setTimeout(resolve, 500)),
+    ]).then(([moduleExports]) => moduleExports),
   );
 };
 
 // Lazy load pages for better performance with 0.5 second delay
-const LandingPage = lazyWithDelay(() => import('./pages/LandingPage'));
-const CitizenPortalPage = lazyWithDelay(() => import('./citizen-portal/CitizenPortalPage'));
-const NotFoundPage = lazyWithDelay(() => import('./pages/NotFound'));
+const LandingPage = lazyWithDelay(() => import("./pages/LandingPage"));
+const CitizenPortalPage = lazyWithDelay(
+  () => import("./citizen-portal/CitizenPortalPage"),
+);
+const NotFoundPage = lazyWithDelay(() => import("./pages/NotFound"));
 
 // Dashboard layout
-const DashboardLayout = lazyWithDelay(() => import('./dashboard/layout'));
+const DashboardLayout = lazyWithDelay(() => import("./dashboard/layout"));
 
 // Dashboard Pages - Lazy loaded from dashboard folder structure with 0.5 second delay
-const OverviewPage = lazyWithDelay(() => import('./dashboard/overview/page'));
-const SmartAlertsPage = lazyWithDelay(() => import('./dashboard/smart-alerts/page'));
-const ResourcesPage = lazyWithDelay(() => import('./dashboard/resources/page'));
-const PerformancePage = lazyWithDelay(() => import('./dashboard/performance/page'));
-const ReportsPage = lazyWithDelay(() => import('./dashboard/reports/page'));
-const DriversPage = lazyWithDelay(() => import('./dashboard/drivers/page'));
-const RoutesPage = lazyWithDelay(() => import('./dashboard/routes/page'));
-const CitizensPage = lazyWithDelay(() => import('./dashboard/citizens/page'));
-const CentersPage = lazyWithDelay(() => import('./dashboard/centers/page'));
-const AnalyticsPage = lazyWithDelay(() => import('./dashboard/analytics/page'));
-const SettingsPage = lazyWithDelay(() => import('./dashboard/settings/page'));
-const AdminPage = lazyWithDelay(() => import('./dashboard/admin/page'));
-const FleetMapPage = lazyWithDelay(() => import('./dashboard/fleet-map/page'));
-const CommunitiesPage = lazyWithDelay(() => import('./dashboard/communities/page'));
+const OverviewPage = lazyWithDelay(() => import("./dashboard/overview/page"));
+const SmartAlertsPage = lazyWithDelay(
+  () => import("./dashboard/smart-alerts/page"),
+);
+const ResourcesPage = lazyWithDelay(() => import("./dashboard/resources/page"));
+const PerformancePage = lazyWithDelay(
+  () => import("./dashboard/performance/page"),
+);
+const ReportsPage = lazyWithDelay(() => import("./dashboard/reports/page"));
+const DriversPage = lazyWithDelay(() => import("./dashboard/drivers/page"));
+const RoutesPage = lazyWithDelay(() => import("./dashboard/routes/page"));
+const CitizensPage = lazyWithDelay(() => import("./dashboard/citizens/page"));
+const CentersPage = lazyWithDelay(() => import("./dashboard/centers/page"));
+const AnalyticsPage = lazyWithDelay(() => import("./dashboard/analytics/page"));
+const SettingsPage = lazyWithDelay(() => import("./dashboard/settings/page"));
+const AdminPage = lazyWithDelay(() => import("./dashboard/admin/page"));
+const FleetMapPage = lazyWithDelay(() => import("./dashboard/fleet-map/page"));
+const CommunitiesPage = lazyWithDelay(
+  () => import("./dashboard/communities/page"),
+);
 
 export const router = createBrowserRouter(
   [
     {
-      path: '/',
+      path: "/",
       Component: LandingPage,
     },
     {
-      path: '/citizen-portal',
+      path: "/citizen-portal",
       Component: CitizenPortalPage,
     },
     {
-      path: '/dashboard',
+      path: "/dashboard",
       Component: DashboardLayout,
       children: [
         {
           index: true,
-          loader: () => redirect('/dashboard/overview'),
+          loader: () => redirect("/dashboard/overview"),
         },
         {
-          path: 'overview',
+          path: "overview",
           Component: OverviewPage,
         },
         {
-          path: 'smart-alerts',
+          path: "smart-alerts",
           Component: SmartAlertsPage,
         },
         {
-          path: 'resources',
+          path: "resources",
           Component: ResourcesPage,
         },
         {
-          path: 'performance',
+          path: "performance",
           Component: PerformancePage,
         },
         {
-          path: 'reports',
+          path: "reports",
           Component: ReportsPage,
         },
         {
-          path: 'drivers',
+          path: "drivers",
           Component: DriversPage,
         },
         {
-          path: 'routes',
+          path: "routes",
           Component: RoutesPage,
         },
         {
-          path: 'citizens',
+          path: "citizens",
           Component: CitizensPage,
         },
         {
-          path: 'centers',
+          path: "centers",
           Component: CentersPage,
         },
         {
-          path: 'analytics',
+          path: "analytics",
           Component: AnalyticsPage,
         },
         {
-          path: 'settings',
+          path: "settings",
           Component: SettingsPage,
         },
         {
-          path: 'admin',
+          path: "admin",
           Component: AdminPage,
         },
         {
-          path: 'fleet-map',
+          path: "fleet-map",
           Component: FleetMapPage,
         },
         {
-          path: 'communities',
+          path: "communities",
           Component: CommunitiesPage,
         },
       ],
     },
     {
-      path: '*',
+      path: "*",
       Component: NotFoundPage,
     },
   ],
@@ -121,5 +129,5 @@ export const router = createBrowserRouter(
       v7_startTransition: true,
       v7_relativeSplatPath: true,
     },
-  }
+  },
 );
