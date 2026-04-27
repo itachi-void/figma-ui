@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { ExportPerformanceDialog } from "../../components/ExportPerformanceDialog";
 import {
   TrendingUp,
   TrendingDown,
@@ -22,20 +23,20 @@ import {
   Download,
   Filter,
   RefreshCw,
-} from 'lucide-react';
-import { 
-  LineChart as RechartsLine, 
-  BarChart, 
+} from "lucide-react";
+import {
+  LineChart as RechartsLine,
+  BarChart,
   PieChart as RechartsPie,
-  Line, 
-  Bar, 
+  Line,
+  Bar,
   Pie,
   Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   Area,
   AreaChart,
@@ -44,10 +45,20 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
-} from 'recharts';
+} from "recharts";
 
 // Animated Counter
-function AnimatedCounter({ end, duration = 2, prefix = '', suffix = '' }: { end: number; duration?: number; prefix?: string; suffix?: string }) {
+function AnimatedCounter({
+  end,
+  duration = 2,
+  prefix = "",
+  suffix = "",
+}: {
+  end: number;
+  duration?: number;
+  prefix?: string;
+  suffix?: string;
+}) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -63,7 +74,7 @@ function AnimatedCounter({ end, duration = 2, prefix = '', suffix = '' }: { end:
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / (duration * 1000), 1);
       const easedProgress = easeOutExpo(progress);
-      
+
       setCount(Math.floor(easedProgress * end));
 
       if (progress < 1) {
@@ -75,64 +86,162 @@ function AnimatedCounter({ end, duration = 2, prefix = '', suffix = '' }: { end:
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration]);
 
-  return <>{prefix}{count.toLocaleString()}{suffix}</>;
+  return (
+    <>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </>
+  );
 }
 
 // Performance data
 const weeklyData = [
-  { id: 'mon', day: 'Mon', collected: 245, processed: 230, revenue: 1850 },
-  { id: 'tue', day: 'Tue', collected: 312, processed: 298, revenue: 2340 },
-  { id: 'wed', day: 'Wed', collected: 278, processed: 265, revenue: 2100 },
-  { id: 'thu', day: 'Thu', collected: 398, processed: 375, revenue: 2980 },
-  { id: 'fri', day: 'Fri', collected: 445, processed: 420, revenue: 3350 },
-  { id: 'sat', day: 'Sat', collected: 520, processed: 495, revenue: 3920 },
-  { id: 'sun', day: 'Sun', collected: 380, processed: 360, revenue: 2850 },
+  {
+    id: "mon",
+    day: "Mon",
+    collected: 245,
+    processed: 230,
+    revenue: 1850,
+  },
+  {
+    id: "tue",
+    day: "Tue",
+    collected: 312,
+    processed: 298,
+    revenue: 2340,
+  },
+  {
+    id: "wed",
+    day: "Wed",
+    collected: 278,
+    processed: 265,
+    revenue: 2100,
+  },
+  {
+    id: "thu",
+    day: "Thu",
+    collected: 398,
+    processed: 375,
+    revenue: 2980,
+  },
+  {
+    id: "fri",
+    day: "Fri",
+    collected: 445,
+    processed: 420,
+    revenue: 3350,
+  },
+  {
+    id: "sat",
+    day: "Sat",
+    collected: 520,
+    processed: 495,
+    revenue: 3920,
+  },
+  {
+    id: "sun",
+    day: "Sun",
+    collected: 380,
+    processed: 360,
+    revenue: 2850,
+  },
 ];
 
 const monthlyData = [
-  { id: 'jan', month: 'Jan', efficiency: 85, satisfaction: 92, revenue: 45000 },
-  { id: 'feb', month: 'Feb', efficiency: 88, satisfaction: 90, revenue: 48000 },
-  { id: 'mar', month: 'Mar', efficiency: 92, satisfaction: 94, revenue: 52000 },
-  { id: 'apr', month: 'Apr', efficiency: 89, satisfaction: 91, revenue: 49500 },
-  { id: 'may', month: 'May', efficiency: 94, satisfaction: 95, revenue: 55000 },
-  { id: 'jun', month: 'Jun', efficiency: 96, satisfaction: 96, revenue: 58000 },
+  {
+    id: "jan",
+    month: "Jan",
+    efficiency: 85,
+    satisfaction: 92,
+    revenue: 45000,
+  },
+  {
+    id: "feb",
+    month: "Feb",
+    efficiency: 88,
+    satisfaction: 90,
+    revenue: 48000,
+  },
+  {
+    id: "mar",
+    month: "Mar",
+    efficiency: 92,
+    satisfaction: 94,
+    revenue: 52000,
+  },
+  {
+    id: "apr",
+    month: "Apr",
+    efficiency: 89,
+    satisfaction: 91,
+    revenue: 49500,
+  },
+  {
+    id: "may",
+    month: "May",
+    efficiency: 94,
+    satisfaction: 95,
+    revenue: 55000,
+  },
+  {
+    id: "jun",
+    month: "Jun",
+    efficiency: 96,
+    satisfaction: 96,
+    revenue: 58000,
+  },
 ];
 
 const categoryData = [
-  { id: 'glass', name: 'Glass', value: 35, color: '#10B981' },
-  { id: 'plastic', name: 'Plastic', value: 28, color: '#3B82F6' },
-  { id: 'metal', name: 'Metal', value: 22, color: '#8B5CF6' },
-  { id: 'paper', name: 'Paper', value: 15, color: '#F59E0B' },
+  { id: "glass", name: "Glass", value: 35, color: "#10B981" },
+  {
+    id: "plastic",
+    name: "Plastic",
+    value: 28,
+    color: "#3B82F6",
+  },
+  { id: "metal", name: "Metal", value: 22, color: "#8B5CF6" },
+  { id: "paper", name: "Paper", value: 15, color: "#F59E0B" },
 ];
 
 const radarData = [
-  { id: 'efficiency', metric: 'Efficiency', value: 94 },
-  { id: 'quality', metric: 'Quality', value: 88 },
-  { id: 'speed', metric: 'Speed', value: 92 },
-  { id: 'satisfaction', metric: 'Satisfaction', value: 96 },
-  { id: 'safety', metric: 'Safety', value: 90 },
-  { id: 'innovation', metric: 'Innovation', value: 85 },
+  { id: "efficiency", metric: "Efficiency", value: 94 },
+  { id: "quality", metric: "Quality", value: 88 },
+  { id: "speed", metric: "Speed", value: 92 },
+  { id: "satisfaction", metric: "Satisfaction", value: 96 },
+  { id: "safety", metric: "Safety", value: 90 },
+  { id: "innovation", metric: "Innovation", value: 85 },
 ];
 
 export default function Performance() {
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('week');
-  const [selectedMetric, setSelectedMetric] = useState<'all' | 'collection' | 'processing' | 'revenue'>('all');
+  const [timeRange, setTimeRange] = useState<"week" | "month" | "quarter">(
+    "week",
+  );
+  const [selectedMetric, setSelectedMetric] = useState<
+    "all" | "collection" | "processing" | "revenue"
+  >("all");
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { type: 'spring', stiffness: 100, damping: 15 }
-    }
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+      },
+    },
   };
 
   return (
@@ -144,8 +253,12 @@ export default function Performance() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Performance Metrics</h1>
-          <p className="text-gray-600 mt-1">Track system performance and KPIs</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Performance Metrics
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Track system performance and KPIs
+          </p>
         </div>
         <div className="flex gap-3">
           <select
@@ -166,6 +279,7 @@ export default function Performance() {
             Refresh
           </motion.button>
           <motion.button
+            onClick={() => setIsExportDialogOpen(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -177,7 +291,7 @@ export default function Performance() {
       </motion.div>
 
       {/* KPI Cards */}
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -185,67 +299,97 @@ export default function Performance() {
       >
         {[
           {
-            label: 'Collection Rate',
+            label: "Collection Rate",
             value: 94,
-            suffix: '%',
+            suffix: "%",
             icon: Package,
-            trend: '+8%',
+            trend: "+8%",
             trendUp: true,
-            color: 'green',
+            color: "green",
             target: 95,
           },
           {
-            label: 'Processing Efficiency',
+            label: "Processing Efficiency",
             value: 89,
-            suffix: '%',
+            suffix: "%",
             icon: Activity,
-            trend: '+5%',
+            trend: "+5%",
             trendUp: true,
-            color: 'blue',
+            color: "blue",
             target: 90,
           },
           {
-            label: 'Driver Performance',
+            label: "Driver Performance",
             value: 92,
-            suffix: '%',
+            suffix: "%",
             icon: Truck,
-            trend: '+3%',
+            trend: "+3%",
             trendUp: true,
-            color: 'purple',
+            color: "purple",
             target: 95,
           },
           {
-            label: 'Customer Satisfaction',
+            label: "Customer Satisfaction",
             value: 96,
-            suffix: '%',
+            suffix: "%",
             icon: Award,
-            trend: '+2%',
+            trend: "+2%",
             trendUp: true,
-            color: 'orange',
+            color: "orange",
             target: 98,
           },
         ].map((kpi, index) => {
           const Icon = kpi.icon;
-          const colorMap: Record<string, { bg: string; text: string; progress: string }> = {
-            green: { bg: 'bg-green-100', text: 'text-green-600', progress: 'bg-green-600' },
-            blue: { bg: 'bg-blue-100', text: 'text-blue-600', progress: 'bg-blue-600' },
-            purple: { bg: 'bg-purple-100', text: 'text-purple-600', progress: 'bg-purple-600' },
-            orange: { bg: 'bg-orange-100', text: 'text-orange-600', progress: 'bg-orange-600' },
+          const colorMap: Record<
+            string,
+            { bg: string; text: string; progress: string }
+          > = {
+            green: {
+              bg: "bg-green-100",
+              text: "text-green-600",
+              progress: "bg-green-600",
+            },
+            blue: {
+              bg: "bg-blue-100",
+              text: "text-blue-600",
+              progress: "bg-blue-600",
+            },
+            purple: {
+              bg: "bg-purple-100",
+              text: "text-purple-600",
+              progress: "bg-purple-600",
+            },
+            orange: {
+              bg: "bg-orange-100",
+              text: "text-orange-600",
+              progress: "bg-orange-600",
+            },
           };
 
           return (
             <motion.div
               key={kpi.label}
               variants={itemVariants}
-              whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+              whileHover={{
+                y: -5,
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+              }}
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${colorMap[kpi.color].bg} ${colorMap[kpi.color].text}`}>
+                <div
+                  className={`p-3 rounded-lg ${colorMap[kpi.color].bg} ${colorMap[kpi.color].text}`}
+                >
                   <Icon className="w-6 h-6" />
                 </div>
-                <span className={`flex items-center text-sm font-medium ${kpi.trendUp ? 'text-green-600' : 'text-red-600'}`}>
-                  {kpi.trendUp ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
+                <span
+                  className={`flex items-center text-sm font-medium ${kpi.trendUp ? "text-green-600" : "text-red-600"}`}
+                >
+                  {kpi.trendUp ? (
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                  ) : (
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                  )}
                   {kpi.trend}
                 </span>
               </div>
@@ -261,8 +405,13 @@ export default function Performance() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(kpi.value / kpi.target) * 100}%` }}
-                    transition={{ duration: 1, delay: index * 0.1 }}
+                    animate={{
+                      width: `${(kpi.value / kpi.target) * 100}%`,
+                    }}
+                    transition={{
+                      duration: 1,
+                      delay: index * 0.1,
+                    }}
                     className={`h-2 rounded-full ${colorMap[kpi.color].progress}`}
                   />
                 </div>
@@ -273,21 +422,25 @@ export default function Performance() {
       </motion.div>
 
       {/* Charts Grid */}
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
         {/* Weekly Performance Chart */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Weekly Performance</h3>
-              <p className="text-sm text-gray-600 mt-1">Collection vs Processing</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Weekly Performance
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Collection vs Processing
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-gray-400" />
@@ -296,41 +449,53 @@ export default function Performance() {
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={weeklyData}>
               <defs>
-                <linearGradient id="colorCollected" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                <linearGradient
+                  id="perfColorCollected"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                 </linearGradient>
-                <linearGradient id="colorProcessed" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                <linearGradient
+                  id="perfColorProcessed"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
               <XAxis dataKey="day" stroke="#6B7280" />
               <YAxis stroke="#6B7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #E5E7EB",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
               />
               <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="collected" 
-                stroke="#10B981" 
-                fillOpacity={1} 
-                fill="url(#colorCollected)" 
+              <Area
+                type="monotone"
+                dataKey="collected"
+                stroke="#10B981"
+                fillOpacity={1}
+                fill="url(#perfColorCollected)"
                 strokeWidth={2}
               />
-              <Area 
-                type="monotone" 
-                dataKey="processed" 
-                stroke="#3B82F6" 
-                fillOpacity={1} 
-                fill="url(#colorProcessed)" 
+              <Area
+                type="monotone"
+                dataKey="processed"
+                stroke="#3B82F6"
+                fillOpacity={1}
+                fill="url(#perfColorProcessed)"
                 strokeWidth={2}
               />
             </AreaChart>
@@ -338,14 +503,18 @@ export default function Performance() {
         </motion.div>
 
         {/* Revenue Trend */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Revenue Trend</h3>
-              <p className="text-sm text-gray-600 mt-1">Weekly revenue analysis</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Revenue Trend
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Weekly revenue analysis
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <LineChart className="w-5 h-5 text-gray-400" />
@@ -356,21 +525,21 @@ export default function Performance() {
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
               <XAxis dataKey="day" stroke="#6B7280" />
               <YAxis stroke="#6B7280" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #E5E7EB",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
               />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#8B5CF6" 
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="#8B5CF6"
                 strokeWidth={3}
-                dot={{ fill: '#8B5CF6', r: 5 }}
+                dot={{ fill: "#8B5CF6", r: 5 }}
                 activeDot={{ r: 7 }}
               />
             </RechartsLine>
@@ -378,13 +547,15 @@ export default function Performance() {
         </motion.div>
 
         {/* Material Distribution */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Material Distribution</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Material Distribution
+              </h3>
               <p className="text-sm text-gray-600 mt-1">By category</p>
             </div>
             <div className="flex items-center gap-2">
@@ -398,13 +569,15 @@ export default function Performance() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
               >
-                {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {categoryData.map((entry) => (
+                  <Cell key={`cell-${entry.id}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip />
@@ -413,22 +586,31 @@ export default function Performance() {
           <div className="grid grid-cols-2 gap-3 mt-6">
             {categoryData.map((cat) => (
               <div key={cat.name} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                <span className="text-sm text-gray-700">{cat.name}: {cat.value}%</span>
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: cat.color }}
+                />
+                <span className="text-sm text-gray-700">
+                  {cat.name}: {cat.value}%
+                </span>
               </div>
             ))}
           </div>
         </motion.div>
 
         {/* Performance Radar */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Performance Overview</h3>
-              <p className="text-sm text-gray-600 mt-1">Multi-dimensional analysis</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Performance Overview
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Multi-dimensional analysis
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Target className="w-5 h-5 text-gray-400" />
@@ -439,11 +621,11 @@ export default function Performance() {
               <PolarGrid stroke="#E5E7EB" />
               <PolarAngleAxis dataKey="metric" stroke="#6B7280" />
               <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#6B7280" />
-              <Radar 
-                name="Performance" 
-                dataKey="value" 
-                stroke="#10B981" 
-                fill="#10B981" 
+              <Radar
+                name="Performance"
+                dataKey="value"
+                stroke="#10B981"
+                fill="#10B981"
                 fillOpacity={0.6}
                 strokeWidth={2}
               />
@@ -454,7 +636,7 @@ export default function Performance() {
       </motion.div>
 
       {/* Monthly Trends */}
-      <motion.div 
+      <motion.div
         variants={itemVariants}
         initial="hidden"
         animate="visible"
@@ -462,8 +644,12 @@ export default function Performance() {
       >
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Monthly Trends</h3>
-            <p className="text-sm text-gray-600 mt-1">Efficiency, satisfaction & revenue</p>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Monthly Trends
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Efficiency, satisfaction & revenue
+            </p>
           </div>
           <div className="flex gap-2">
             <motion.button
@@ -487,12 +673,12 @@ export default function Performance() {
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
             <XAxis dataKey="month" stroke="#6B7280" />
             <YAxis stroke="#6B7280" />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#fff', 
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#fff",
+                border: "1px solid #E5E7EB",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
             />
             <Legend />
@@ -511,32 +697,47 @@ export default function Performance() {
       >
         {[
           {
-            title: 'Top Performer',
-            value: 'Route #12',
-            description: '98% efficiency this week',
+            title: "Top Performer",
+            value: "Route #12",
+            description: "98% efficiency this week",
             icon: Award,
-            color: 'green',
+            color: "green",
           },
           {
-            title: 'Most Improved',
-            value: 'Center East',
-            description: '+15% from last month',
+            title: "Most Improved",
+            value: "Center East",
+            description: "+15% from last month",
             icon: TrendingUp,
-            color: 'blue',
+            color: "blue",
           },
           {
-            title: 'Needs Attention',
-            value: 'Route #5',
-            description: 'Below target efficiency',
+            title: "Needs Attention",
+            value: "Route #5",
+            description: "Below target efficiency",
             icon: AlertCircle,
-            color: 'orange',
+            color: "orange",
           },
         ].map((insight, index) => {
           const Icon = insight.icon;
-          const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-            green: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
-            blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-            orange: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+          const colorMap: Record<
+            string,
+            { bg: string; text: string; border: string }
+          > = {
+            green: {
+              bg: "bg-green-50",
+              text: "text-green-700",
+              border: "border-green-200",
+            },
+            blue: {
+              bg: "bg-blue-50",
+              text: "text-blue-700",
+              border: "border-blue-200",
+            },
+            orange: {
+              bg: "bg-orange-50",
+              text: "text-orange-700",
+              border: "border-orange-200",
+            },
           };
 
           return (
@@ -546,16 +747,58 @@ export default function Performance() {
               whileHover={{ scale: 1.02 }}
               className={`p-6 rounded-xl border-2 ${colorMap[insight.color].bg} ${colorMap[insight.color].border}`}
             >
-              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorMap[insight.color].text} bg-white mb-4`}>
+              <div
+                className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${colorMap[insight.color].text} bg-white mb-4`}
+              >
                 <Icon className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-medium text-gray-600 mb-1">{insight.title}</h3>
-              <p className="text-xl font-bold text-gray-900 mb-2">{insight.value}</p>
+              <h3 className="text-sm font-medium text-gray-600 mb-1">
+                {insight.title}
+              </h3>
+              <p className="text-xl font-bold text-gray-900 mb-2">
+                {insight.value}
+              </p>
               <p className="text-sm text-gray-600">{insight.description}</p>
             </motion.div>
           );
         })}
       </motion.div>
+
+      {/* Export Dialog */}
+      <ExportPerformanceDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        data={[
+          // Mock performance data for export
+          {
+            id: "DRV-001",
+            name: "Ahmed Hassan",
+            status: "active",
+            completedTrips: 248,
+            earnings: 12450,
+            rating: 4.8,
+            onTimePercentage: 96,
+            fuelEfficiency: 8.5,
+            currentRoute: "Route #12",
+            vehicleNumber: "VEH-101",
+            joinDate: "2025-01-15",
+          },
+          {
+            id: "DRV-002",
+            name: "Mohammed Ali",
+            status: "active",
+            completedTrips: 312,
+            earnings: 15680,
+            rating: 4.9,
+            onTimePercentage: 98,
+            fuelEfficiency: 9.2,
+            currentRoute: "Route #8",
+            vehicleNumber: "VEH-102",
+            joinDate: "2024-11-20",
+          },
+          // Add more mock data as needed
+        ]}
+      />
     </div>
   );
 }
