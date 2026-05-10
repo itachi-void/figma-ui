@@ -1,6 +1,9 @@
-import FleetMap from '../../pages/dashboard/FleetMap';
-import { PageLoader } from '../../components/PageLoader';
-import { SkeletonPageHeader, SkeletonChart } from '../../components/ui/skeleton';
+import FleetMapDemo from "../../pages/dashboard/FleetMapDemo";
+import { PageLoader } from "../../components/PageLoader";
+import {
+  SkeletonPageHeader,
+  SkeletonChart,
+} from "../../components/ui/skeleton";
 
 export default function FleetMapPage() {
   return (
@@ -15,7 +18,7 @@ export default function FleetMapPage() {
       loadingTime={2000}
       simulatedDelay={8000}
     >
-      <FleetMap />
+      <FleetMapDemo />
     </PageLoader>
   );
 }
