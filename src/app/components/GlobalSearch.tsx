@@ -1,7 +1,4 @@
-'use client';
-
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { Search, X, Navigation, Users, MapPin, Route, BarChart3, Settings, Bell, Truck, Home } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
@@ -34,6 +31,7 @@ const ALL_ITEMS: SearchResult[] = [
 export function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [isVisible, setIsVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -49,6 +47,14 @@ export function GlobalSearch() {
   const close = useCallback(() => { setIsOpen(false); setQuery(''); }, []);
 
   useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+    } else {
+      setTimeout(() => setIsVisible(false), 75);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
@@ -61,11 +67,11 @@ export function GlobalSearch() {
   }, [isOpen, open, close]);
 
   useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 50);
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 13);
   }, [isOpen]);
 
   const handleSelect = (item: SearchResult) => {
-    navigate(item.path);
+    startTransition(() => navigate(item.path));
     close();
   };
 
@@ -79,11 +85,9 @@ export function GlobalSearch() {
   return (
     <>
       {/* Trigger button */}
-      <motion.button
+      <button
         onClick={open}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-500 text-sm transition-colors border border-gray-200"
+        className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-500 text-sm transition-all border border-gray-200 hover:scale-105 active:scale-95"
         title="Global Search (Ctrl+K)"
       >
         <Search className="w-4 h-4" />
@@ -91,91 +95,79 @@ export function GlobalSearch() {
         <kbd className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 bg-white border border-gray-300 rounded text-xs text-gray-400 font-mono">
           ⌘K
         </kbd>
-      </motion.button>
+      </button>
 
       {/* Modal */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[9999] flex items-start justify-center pt-20 px-4"
-            onClick={close}
+      {isOpen && (
+        <div
+          className={`fixed inset-0 bg-black/50 z-[9999] flex items-start justify-center pt-20 px-4 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          onClick={close}
+        >
+          <div
+            className={`w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4'}`}
+            onClick={e => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden"
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Search Input */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-                <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search pages, drivers, routes..."
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  className="flex-1 text-gray-900 placeholder-gray-400 text-sm outline-none bg-transparent"
-                />
-                {query && (
-                  <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} onClick={() => setQuery('')} className="p-1 hover:bg-gray-100 rounded-md">
-                    <X className="w-4 h-4 text-gray-400" />
-                  </motion.button>
-                )}
-                <kbd className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-400 font-mono">ESC</kbd>
-              </div>
+            {/* Search Input */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+              <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search pages, drivers, routes..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                className="flex-1 text-gray-900 placeholder-gray-400 text-sm outline-none bg-transparent"
+              />
+              {query && (
+                <button onClick={() => setQuery('')} className="p-1 hover:bg-gray-100 rounded-md transition-all">
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+              <kbd className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-400 font-mono">ESC</kbd>
+            </div>
 
-              {/* Results */}
-              <div className="max-h-96 overflow-y-auto p-2">
-                {Object.entries(grouped).map(([category, items]) => (
-                  <div key={category} className="mb-2">
-                    <p className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">{category}</p>
-                    {items.map((item, i) => {
-                      const Icon = item.icon;
-                      return (
-                        <motion.button
-                          key={item.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.03 }}
-                          onClick={() => handleSelect(item)}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-gray-50 transition-colors group"
-                        >
-                          <div className="w-9 h-9 rounded-lg bg-green-50 group-hover:bg-green-100 flex items-center justify-center flex-shrink-0 transition-colors">
-                            <Icon className="w-4 h-4 text-green-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
-                            <p className="text-xs text-gray-500 truncate">{item.subtitle}</p>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                ))}
-                {results.length === 0 && (
-                  <div className="py-12 text-center">
-                    <Search className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">No results for "{query}"</p>
-                  </div>
-                )}
-              </div>
+            {/* Results */}
+            <div className="max-h-96 overflow-y-auto p-2">
+              {Object.entries(grouped).map(([category, items]) => (
+                <div key={category} className="mb-2">
+                  <p className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">{category}</p>
+                  {items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleSelect(item)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-gray-50 transition-colors group"
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-green-50 group-hover:bg-green-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                          <Icon className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                          <p className="text-xs text-gray-500 truncate">{item.subtitle}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+              {results.length === 0 && (
+                <div className="py-12 text-center">
+                  <Search className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No results for "{query}"</p>
+                </div>
+              )}
+            </div>
 
-              {/* Footer */}
-              <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
-                <span>↑↓ navigate</span>
-                <span>↵ open</span>
-                <span>ESC close</span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {/* Footer */}
+            <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
+              <span>↑↓ navigate</span>
+              <span>↵ open</span>
+              <span>ESC close</span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

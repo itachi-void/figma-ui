@@ -1,5 +1,10 @@
-import Centers from '@/app/pages/dashboard/Centers';
+import Centers from '../../pages/dashboard/Centers';
+import { TablePageLoader } from '../../components/PageLoader';
 
 export default function CentersPage() {
-  return <Centers />;
+  return (
+    <TablePageLoader>
+      <Centers />
+    </TablePageLoader>
+  );
 }

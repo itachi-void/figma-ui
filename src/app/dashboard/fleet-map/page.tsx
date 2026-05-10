@@ -1,10 +1,21 @@
+import FleetMap from '../../pages/dashboard/FleetMap';
+import { PageLoader } from '../../components/PageLoader';
+import { SkeletonPageHeader, SkeletonChart } from '../../components/ui/skeleton';
 
-import FleetMapDemo from '@/app/pages/dashboard/FleetMapDemo'
-import React from 'react'
-
-function page() {
+export default function FleetMapPage() {
   return (
-    <div>  <FleetMapDemo />;
-</div>
-  )
+    <PageLoader
+      type="custom"
+      customSkeleton={
+        <div className="space-y-6">
+          <SkeletonPageHeader />
+          <SkeletonChart height="h-96" />
+        </div>
+      }
+      loadingTime={2000}
+      simulatedDelay={8000}
+    >
+      <FleetMap />
+    </PageLoader>
+  );
 }

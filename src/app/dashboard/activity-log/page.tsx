@@ -1,5 +1,10 @@
-import ActivityLog from '@/app/pages/dashboard/ActivityLog';
+import ActivityLog from '../../pages/dashboard/ActivityLog';
+import { ListPageLoader } from '../../components/PageLoader';
 
 export default function ActivityLogPage() {
-  return <ActivityLog />;
+  return (
+    <ListPageLoader>
+      <ActivityLog />
+    </ListPageLoader>
+  );
 }

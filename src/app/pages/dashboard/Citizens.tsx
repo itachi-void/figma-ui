@@ -371,17 +371,38 @@ function CitizenCard({
                     className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-20"
                   >
                     {[
-                      { icon: Eye, label: "View Profile" },
-                      { icon: Edit, label: "Edit Details" },
-                      { icon: Award, label: "Give Reward" },
+                      {
+                        icon: Eye,
+                        label: "View Profile",
+                        action: () => alert(`View profile: ${citizen.name}`),
+                      },
+                      {
+                        icon: Edit,
+                        label: "Edit Details",
+                        action: () => alert(`Edit details for ${citizen.name}`),
+                      },
+                      {
+                        icon: Award,
+                        label: "Give Reward",
+                        action: () => alert(`Reward sent to ${citizen.name}`),
+                      },
                       {
                         icon: Trash2,
                         label: "Remove",
                         danger: true,
+                        action: () => {
+                          if (window.confirm(`Remove ${citizen.name}?`)) {
+                            alert("Removed (demo).");
+                          }
+                        },
                       },
                     ].map((item, i) => (
                       <button
                         key={i}
+                        onClick={() => {
+                          item.action();
+                          setShowMenu(false);
+                        }}
                         className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 ${
                           item.danger
                             ? "text-red-600"
@@ -930,6 +951,7 @@ export default function Citizens() {
           transition={{ delay: 0.5, type: "spring" }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => alert("Add Citizen — feature ready, dialog wiring pending.")}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
         >
           <UserPlus className="w-5 h-5" />
@@ -968,13 +990,14 @@ export default function Citizens() {
             color: "from-orange-500 to-amber-500",
           },
         ].map((item, index) => (
-          <motion.div
+          <motion.button
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 + index * 0.1 }}
             whileHover={{ y: -5, scale: 1.02 }}
-            className="bg-white rounded-2xl p-6 shadow-lg cursor-pointer group relative overflow-hidden"
+            onClick={() => alert(`${item.title} — coming soon.`)}
+            className="bg-white rounded-2xl p-6 shadow-lg cursor-pointer group relative overflow-hidden text-left"
           >
             <div
               className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-5 transition-opacity`}
@@ -993,7 +1016,7 @@ export default function Citizens() {
                 {item.description}
               </p>
             </div>
-          </motion.div>
+          </motion.button>
         ))}
       </div>
 
@@ -1056,7 +1079,15 @@ export default function Citizens() {
                   }
                   className={`px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${
                     filterRank === item.value
-                      ? `bg-${item.color}-500 text-white shadow-lg`
+                      ? `${
+                          item.color === "purple"
+                            ? "bg-purple-500"
+                            : item.color === "yellow"
+                            ? "bg-yellow-500"
+                            : item.color === "orange"
+                            ? "bg-orange-500"
+                            : "bg-gray-500"
+                        } text-white shadow-lg`
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                   whileHover={{ scale: 1.05 }}

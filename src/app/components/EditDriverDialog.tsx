@@ -111,7 +111,7 @@ export function EditDriverDialog({
     if (isOpen && firstInputRef.current) {
       setTimeout(() => {
         firstInputRef.current?.focus();
-      }, 100);
+      }, 25);
     }
   }, [isOpen]);
 
@@ -146,12 +146,14 @@ export function EditDriverDialog({
 
       case "completedTrips":
         const trips = parseInt(value);
-        if (isNaN(trips) || trips < 0) return "Must be a positive number";
+        if (isNaN(trips) || trips < 0)
+          return "Must be a positive number";
         return "";
 
       case "earnings":
         const earnings = parseFloat(value);
-        if (isNaN(earnings) || earnings < 0) return "Must be a positive number";
+        if (isNaN(earnings) || earnings < 0)
+          return "Must be a positive number";
         return "";
 
       case "onTimePercentage":
@@ -168,7 +170,8 @@ export function EditDriverDialog({
 
       case "fuelEfficiency":
         const fuel = parseFloat(value);
-        if (isNaN(fuel) || fuel < 0) return "Must be a positive number";
+        if (isNaN(fuel) || fuel < 0)
+          return "Must be a positive number";
         return "";
 
       default:
@@ -208,7 +211,7 @@ export function EditDriverDialog({
   const isFormValid = () => {
     return Object.keys(formData).every(
       (key) =>
-        validateField(key, formData[key as keyof typeof formData]) === "",
+        validateField(key, formData[key as keyof typeof formData]) === ""
     );
   };
 
@@ -216,7 +219,7 @@ export function EditDriverDialog({
   const handleSave = async () => {
     const allTouched = Object.keys(formData).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
-      {},
+      {}
     );
     setTouched(allTouched);
 
@@ -232,7 +235,7 @@ export function EditDriverDialog({
     setIsSaving(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 375));
 
     setIsSaving(false);
     setSaveSuccess(true);
@@ -246,22 +249,22 @@ export function EditDriverDialog({
       if (driver) {
         onSuccess?.({ id: driver.id, ...formData });
       }
-    }, 1500);
+    }, 375);
   };
 
   // Handle close
   const handleClose = () => {
-    const hasChanges =
-      driver &&
-      (formData.name !== driver.name ||
-        formData.phone !== driver.phone ||
-        formData.email !== driver.email ||
-        formData.vehicle !== driver.vehicleNumber ||
-        formData.completedTrips !== String(driver.completedTrips) ||
-        formData.earnings !== String(driver.earnings) ||
-        formData.onTimePercentage !== String(driver.onTimePercentage) ||
-        formData.rating !== String(driver.rating) ||
-        formData.fuelEfficiency !== String(driver.fuelEfficiency));
+    const hasChanges = driver && (
+      formData.name !== driver.name ||
+      formData.phone !== driver.phone ||
+      formData.email !== driver.email ||
+      formData.vehicle !== driver.vehicleNumber ||
+      formData.completedTrips !== String(driver.completedTrips) ||
+      formData.earnings !== String(driver.earnings) ||
+      formData.onTimePercentage !== String(driver.onTimePercentage) ||
+      formData.rating !== String(driver.rating) ||
+      formData.fuelEfficiency !== String(driver.fuelEfficiency)
+    );
 
     if (hasChanges && !saveSuccess) {
       setShowCancelConfirm(true);
@@ -307,7 +310,7 @@ export function EditDriverDialog({
 
   // Filter routes based on search
   const filteredRoutes = routeOptions.filter((route) =>
-    route.name.toLowerCase().includes(routeSearch.toLowerCase()),
+    route.name.toLowerCase().includes(routeSearch.toLowerCase())
   );
 
   if (!driver) return null;
@@ -326,7 +329,7 @@ export function EditDriverDialog({
             style={{
               top: 0,
               bottom: 0,
-              left: sidebarOpen ? "256px" : "0",
+              left: sidebarOpen ? '256px' : '0',
               right: 0,
               zIndex: 99,
             }}
@@ -337,7 +340,7 @@ export function EditDriverDialog({
             className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none transition-all duration-300"
             style={{
               zIndex: 100,
-              left: sidebarOpen ? "256px" : "0",
+              left: sidebarOpen ? '256px' : '0',
             }}
           >
             <motion.div
@@ -347,8 +350,8 @@ export function EditDriverDialog({
               transition={{ type: "spring", duration: 0.5 }}
               className="w-full max-w-2xl bg-white/95 backdrop-blur-xl md:rounded-3xl rounded-t-3xl shadow-2xl border border-white/20 overflow-hidden pointer-events-auto max-h-[90vh] flex flex-col"
               style={{
-                marginLeft: sidebarOpen ? "0" : "0",
-                marginRight: sidebarOpen ? "128px" : "0",
+                marginLeft: sidebarOpen ? '0' : '0',
+                marginRight: sidebarOpen ? '128px' : '0',
               }}
             >
               {/* Header */}
@@ -390,9 +393,7 @@ export function EditDriverDialog({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span>
-                            {getInitials(formData.name) || driver.avatar}
-                          </span>
+                          <span>{getInitials(formData.name) || driver.avatar}</span>
                         )}
                       </div>
                       <button
@@ -439,14 +440,12 @@ export function EditDriverDialog({
                           errors.name && touched.name
                             ? "border-red-400 bg-red-50"
                             : formData.name && !errors.name
-                              ? "border-emerald-400 bg-emerald-50"
-                              : "border-gray-200"
+                            ? "border-emerald-400 bg-emerald-50"
+                            : "border-gray-200"
                         }`}
                       />
                       {errors.name && touched.name && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.name}
-                        </p>
+                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
                       )}
                     </div>
 
@@ -460,22 +459,18 @@ export function EditDriverDialog({
                         <input
                           type="tel"
                           value={formData.phone}
-                          onChange={(e) =>
-                            handleChange("phone", e.target.value)
-                          }
+                          onChange={(e) => handleChange("phone", e.target.value)}
                           onBlur={() => handleBlur("phone")}
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.phone && touched.phone
                               ? "border-red-400 bg-red-50"
                               : formData.phone && !errors.phone
-                                ? "border-emerald-400 bg-emerald-50"
-                                : "border-gray-200"
+                              ? "border-emerald-400 bg-emerald-50"
+                              : "border-gray-200"
                           }`}
                         />
                         {errors.phone && touched.phone && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {errors.phone}
-                          </p>
+                          <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
                         )}
                       </div>
 
@@ -487,22 +482,18 @@ export function EditDriverDialog({
                         <input
                           type="email"
                           value={formData.email}
-                          onChange={(e) =>
-                            handleChange("email", e.target.value)
-                          }
+                          onChange={(e) => handleChange("email", e.target.value)}
                           onBlur={() => handleBlur("email")}
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.email && touched.email
                               ? "border-red-400 bg-red-50"
                               : formData.email && !errors.email
-                                ? "border-emerald-400 bg-emerald-50"
-                                : "border-gray-200"
+                              ? "border-emerald-400 bg-emerald-50"
+                              : "border-gray-200"
                           }`}
                         />
                         {errors.email && touched.email && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {errors.email}
-                          </p>
+                          <p className="text-red-500 text-sm mt-1">{errors.email}</p>
                         )}
                       </div>
                     </div>
@@ -525,9 +516,7 @@ export function EditDriverDialog({
                           type="number"
                           min="0"
                           value={formData.completedTrips}
-                          onChange={(e) =>
-                            handleChange("completedTrips", e.target.value)
-                          }
+                          onChange={(e) => handleChange("completedTrips", e.target.value)}
                           onBlur={() => handleBlur("completedTrips")}
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.completedTrips && touched.completedTrips
@@ -536,9 +525,7 @@ export function EditDriverDialog({
                           }`}
                         />
                         {errors.completedTrips && touched.completedTrips && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {errors.completedTrips}
-                          </p>
+                          <p className="text-red-500 text-sm mt-1">{errors.completedTrips}</p>
                         )}
                       </div>
 
@@ -552,9 +539,7 @@ export function EditDriverDialog({
                           min="0"
                           step="0.01"
                           value={formData.earnings}
-                          onChange={(e) =>
-                            handleChange("earnings", e.target.value)
-                          }
+                          onChange={(e) => handleChange("earnings", e.target.value)}
                           onBlur={() => handleBlur("earnings")}
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.earnings && touched.earnings
@@ -563,9 +548,7 @@ export function EditDriverDialog({
                           }`}
                         />
                         {errors.earnings && touched.earnings && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {errors.earnings}
-                          </p>
+                          <p className="text-red-500 text-sm mt-1">{errors.earnings}</p>
                         )}
                       </div>
 
@@ -579,9 +562,7 @@ export function EditDriverDialog({
                           min="0"
                           max="100"
                           value={formData.onTimePercentage}
-                          onChange={(e) =>
-                            handleChange("onTimePercentage", e.target.value)
-                          }
+                          onChange={(e) => handleChange("onTimePercentage", e.target.value)}
                           onBlur={() => handleBlur("onTimePercentage")}
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.onTimePercentage && touched.onTimePercentage
@@ -602,9 +583,7 @@ export function EditDriverDialog({
                           max="5"
                           step="0.1"
                           value={formData.rating}
-                          onChange={(e) =>
-                            handleChange("rating", e.target.value)
-                          }
+                          onChange={(e) => handleChange("rating", e.target.value)}
                           onBlur={() => handleBlur("rating")}
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.rating && touched.rating
@@ -624,9 +603,7 @@ export function EditDriverDialog({
                           min="0"
                           step="0.1"
                           value={formData.fuelEfficiency}
-                          onChange={(e) =>
-                            handleChange("fuelEfficiency", e.target.value)
-                          }
+                          onChange={(e) => handleChange("fuelEfficiency", e.target.value)}
                           onBlur={() => handleBlur("fuelEfficiency")}
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.fuelEfficiency && touched.fuelEfficiency
@@ -686,7 +663,7 @@ export function EditDriverDialog({
                   style={{
                     top: 0,
                     bottom: 0,
-                    left: sidebarOpen ? "256px" : "0",
+                    left: sidebarOpen ? '256px' : '0',
                     right: 0,
                     zIndex: 110,
                   }}
@@ -697,7 +674,7 @@ export function EditDriverDialog({
                   style={{
                     top: 0,
                     bottom: 0,
-                    left: sidebarOpen ? "256px" : "0",
+                    left: sidebarOpen ? '256px' : '0',
                     right: 0,
                     zIndex: 120,
                   }}

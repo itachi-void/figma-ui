@@ -1,5 +1,10 @@
-import Performance from '@/app/pages/dashboard/Performance';
+import Performance from '../../pages/dashboard/Performance';
+import { StatsPageLoader } from '../../components/PageLoader';
 
 export default function PerformancePage() {
-  return <Performance />;
+  return (
+    <StatsPageLoader>
+      <Performance />
+    </StatsPageLoader>
+  );
 }

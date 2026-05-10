@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, X, AlertCircle, Info, CircleX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -12,14 +11,22 @@ interface ToastProps {
   duration?: number;
 }
 
-export function Toast({ message, type, isOpen, onClose, duration = 3000 }: ToastProps) {
+export function Toast({ message, type, isOpen, onClose, duration = 750 }: ToastProps) {
+  const [isVisible, setIsVisible] = useState(false);
+
   useEffect(() => {
-    if (isOpen && duration > 0) {
-      const timer = setTimeout(() => {
-        onClose();
-      }, duration);
-      
-      return () => clearTimeout(timer);
+    if (isOpen) {
+      setIsVisible(true);
+      if (duration > 0) {
+        const timer = setTimeout(() => {
+          setIsVisible(false);
+          setTimeout(onClose, 75);
+        }, duration);
+        
+        return () => clearTimeout(timer);
+      }
+    } else {
+      setIsVisible(false);
     }
   }, [isOpen, duration, onClose]);
 
@@ -56,35 +63,30 @@ export function Toast({ message, type, isOpen, onClose, duration = 3000 }: Toast
 
   const { icon: Icon, color, bg, border, text } = config[type];
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -50, x: '50%' }}
-          animate={{ opacity: 1, y: 0, x: 0 }}
-          exit={{ opacity: 0, y: -50, x: '50%' }}
-          className="fixed top-4 right-4 z-[100]"
+    <div className={`fixed top-4 right-4 z-[100] transition-all duration-300 ${
+      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+    }`}>
+      <div className={`flex items-center gap-3 ${bg} ${border} border rounded-xl shadow-lg px-4 py-3 min-w-[300px] max-w-md transition-transform hover:scale-105`}>
+        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        
+        <p className={`flex-1 ${text} font-medium text-sm`}>{message}</p>
+        
+        <button
+          onClick={() => {
+            setIsVisible(false);
+            setTimeout(onClose, 75);
+          }}
+          className="w-6 h-6 flex items-center justify-center rounded hover:bg-black/5 transition-colors flex-shrink-0"
         >
-          <motion.div
-            className={`flex items-center gap-3 ${bg} ${border} border rounded-xl shadow-lg px-4 py-3 min-w-[300px] max-w-md`}
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
-              <Icon className="w-5 h-5 text-white" />
-            </div>
-            
-            <p className={`flex-1 ${text} font-medium text-sm`}>{message}</p>
-            
-            <button
-              onClick={onClose}
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-black/5 transition-colors flex-shrink-0"
-            >
-              <X className="w-4 h-4 text-gray-600" />
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          <X className="w-4 h-4 text-gray-600" />
+        </button>
+      </div>
+    </div>
   );
 }
 

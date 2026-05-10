@@ -1,32 +1,32 @@
 "use client";
 
+import { useState, useEffect, startTransition } from "react";
+import { useNavigate } from "react-router";
 import { motion, AnimatePresence, Reorder } from "motion/react";
 import {
   Package,
   Users,
   MapPin,
-  TrendingUp,
-  TrendingDown,
+  Target,
   Activity,
-  Zap,
   Award,
-  CheckCircle,
+  Leaf,
+  Zap,
   Clock,
-  AlertCircle,
   ArrowUpRight,
   ArrowDownRight,
-  Sparkles,
-  Target,
-  DollarSign,
-  Leaf,
-  Truck,
   Settings,
+  TrendingUp,
+  DollarSign,
+  Sparkles,
+  Truck,
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
 import { useActivityLog } from "@/app/contexts/ActivityLogContext";
 import { useRole } from "@/app/contexts/RoleContext";
 import WidgetCustomizerModal from "../../components/WidgetCustomizerModal";
+import { WasteStreamChart } from "../../components/WasteStreamChart";
+import { ZoneHeatmap } from "../../components/ZoneHeatmap";
+import { PremiumExportModal } from "../../components/PremiumExportModal";
 
 // Animated Counter
 function AnimatedCounter({
@@ -134,7 +134,12 @@ function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, duration: 0.5, type: "spring", stiffness: 100 }}
+      transition={{
+        delay,
+        duration: 0.5,
+        type: "spring",
+        stiffness: 100,
+      }}
       whileHover={{
         y: -10,
         scale: 1.02,
@@ -204,7 +209,9 @@ function StatCard({
               ease: "linear",
             }}
           >
-            <Sparkles className={`w-5 h-5 text-${color.split("-")[0]}-400`} />
+            <Sparkles
+              className={`w-5 h-5 text-${color.split("-")[0]}-400`}
+            />
           </motion.div>
         </motion.div>
 
@@ -243,7 +250,9 @@ function StatCard({
             <ArrowDownRight className="w-4 h-4" />
           )}
           <span>{trendValue}</span>
-          <span className="text-gray-500 font-normal">from last month</span>
+          <span className="text-gray-500 font-normal">
+            from last month
+          </span>
         </motion.div>
 
         {/* Progress bar */}
@@ -257,7 +266,11 @@ function StatCard({
             className={`h-full bg-gradient-to-r ${gradient} relative`}
             initial={{ width: 0 }}
             animate={{ width: "75%" }}
-            transition={{ delay: delay + 0.7, duration: 1, ease: "easeOut" }}
+            transition={{
+              delay: delay + 0.7,
+              duration: 1,
+              ease: "easeOut",
+            }}
           >
             <motion.div
               className="absolute inset-0 bg-white/30"
@@ -463,7 +476,11 @@ function QuickActionCard({
         {isLoading ? (
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            transition={{
+              duration: 1,
+              repeat: Infinity,
+              ease: "linear",
+            }}
             className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full mb-4"
           />
         ) : (
@@ -474,7 +491,9 @@ function QuickActionCard({
       <h3 className="text-lg font-bold text-white mb-2 relative z-10">
         {isLoading ? "Processing..." : title}
       </h3>
-      <p className="text-sm text-white/80 relative z-10">{description}</p>
+      <p className="text-sm text-white/80 relative z-10">
+        {description}
+      </p>
 
       {/* Corner glow */}
       <motion.div
@@ -494,25 +513,35 @@ function QuickActionCard({
 
 export default function Overview() {
   const navigate = useNavigate();
-  const [timeFilter, setTimeFilter] = useState<"today" | "week" | "month">(
-    "month",
+  const [timeFilter, setTimeFilter] = useState<
+    "today" | "week" | "month"
+  >("month");
+  const [isCustomizerOpen, setIsCustomizerOpen] =
+    useState(false);
+  const [hiddenWidgets, setHiddenWidgets] = useState<string[]>(
+    [],
   );
-  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
-  const [hiddenWidgets, setHiddenWidgets] = useState<string[]>([]);
   const { role: currentRole } = useRole();
   const { activities, logActivity } = useActivityLog();
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Loading states for quick actions
-  const [loadingActions, setLoadingActions] = useState<Record<string, boolean>>(
-    {},
-  );
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loadingActions, setLoadingActions] = useState<
+    Record<string, boolean>
+  >({});
+  const [successMessage, setSuccessMessage] = useState<
+    string | null
+  >(null);
 
   // Role-specific greetings
-  const greetings: Record<string, { title: string; subtitle: string }> = {
+  const greetings: Record<
+    string,
+    { title: string; subtitle: string }
+  > = {
     admin: {
       title: "System Overview",
-      subtitle: "Complete system metrics and management controls",
+      subtitle:
+        "Complete system metrics and management controls",
     },
     manager: {
       title: "Team Performance",
@@ -688,11 +717,16 @@ export default function Overview() {
 
   // Quick Action Handlers with Real Functionality
   const handleQuickAction = async (actionName: string) => {
-    setLoadingActions((prev) => ({ ...prev, [actionName]: true }));
+    setLoadingActions((prev) => ({
+      ...prev,
+      [actionName]: true,
+    }));
 
     try {
       // Simulate API call with delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) =>
+        setTimeout(resolve, 375 + Math.random() * 250),
+      );
 
       // Activity log messages
       const activityMessages: Record<
@@ -707,7 +741,8 @@ export default function Overview() {
         },
         "Assign New Driver": {
           action: "Driver Assigned",
-          details: "Mohamed Ali assigned to Route 5, status: Active",
+          details:
+            "Mohamed Ali assigned to Route 5, status: Active",
           severity: "low",
         },
         "View Analytics": {
@@ -722,42 +757,50 @@ export default function Overview() {
         },
         "New Route": {
           action: "New Route Created",
-          details: "Route 24 created: Downtown District, 18 stops, 32.5 km",
+          details:
+            "Route 24 created: Downtown District, 18 stops, 32.5 km",
           severity: "low",
         },
         "Add Citizen": {
           action: "Citizen Registered",
-          details: "Sarah Mohamed successfully registered - Bronze tier",
+          details:
+            "Sarah Mohamed successfully registered - Bronze tier",
           severity: "low",
         },
         "Request Pickup": {
           action: "Pickup Scheduled",
-          details: "Pickup confirmed for tomorrow 10:00 AM at your location",
+          details:
+            "Pickup confirmed for tomorrow 10:00 AM at your location",
           severity: "low",
         },
         "My Rewards": {
           action: "Rewards Review",
-          details: "You have 1,730 points available, redeemable for eco-gifts",
+          details:
+            "You have 1,730 points available, redeemable for eco-gifts",
           severity: "low",
         },
         Communities: {
           action: "Communities View",
-          details: "Joined 3 communities, Ranked 2nd in recycling challenge",
+          details:
+            "Joined 3 communities, Ranked 2nd in recycling challenge",
           severity: "low",
         },
         "Find Center": {
           action: "Nearest Center Found",
-          details: "Green Hub Cairo - 2.3 km away, Open 9 AM - 6 PM",
+          details:
+            "Green Hub Cairo - 2.3 km away, Open 9 AM - 6 PM",
           severity: "low",
         },
         "My Route": {
           action: "Route Loaded",
-          details: "12 stops remaining today, 35 km to cover, 3h 45m ETA",
+          details:
+            "12 stops remaining today, 35 km to cover, 3h 45m ETA",
           severity: "low",
         },
         "Scan Bottles": {
           action: "Scan Session Started",
-          details: "QR scanner ready - 450 bottles collected so far today",
+          details:
+            "QR scanner ready - 450 bottles collected so far today",
           severity: "low",
         },
         "My Stats": {
@@ -768,7 +811,8 @@ export default function Overview() {
         },
         "Report Issue": {
           action: "Issue Reported",
-          details: "Ticket #1246: Route obstacle reported, Support notified",
+          details:
+            "Ticket #1246: Route obstacle reported, Support notified",
           severity: "medium",
         },
       };
@@ -787,40 +831,46 @@ export default function Overview() {
             : actionName.includes("Driver")
               ? "driver"
               : "system",
-          severity: message.severity as "low" | "medium" | "high",
+          severity: message.severity as
+            | "low"
+            | "medium"
+            | "high",
         });
       }
 
       // Navigate to relevant pages based on action (only for admin/manager)
-      if (currentRole === "admin" || currentRole === "manager") {
+      if (
+        currentRole === "admin" ||
+        currentRole === "manager"
+      ) {
         if (actionName === "Optimize All Routes") {
-          navigate("/dashboard/routes");
+          startTransition(() => navigate("/dashboard/routes"));
         } else if (actionName === "Assign New Driver") {
-          navigate("/dashboard/drivers");
+          startTransition(() => navigate("/dashboard/drivers"));
         } else if (actionName === "View Analytics") {
-          navigate("/dashboard/analytics");
+          startTransition(() => navigate("/dashboard/analytics"));
         } else if (actionName === "Quick Scan") {
-          navigate("/dashboard/resources");
+          startTransition(() => navigate("/dashboard/resources"));
         } else if (actionName === "New Route") {
-          navigate("/dashboard/routes");
+          startTransition(() => navigate("/dashboard/routes"));
         } else if (actionName === "Add Citizen") {
-          navigate("/dashboard/citizens");
+          startTransition(() => navigate("/dashboard/citizens"));
         }
       } else if (currentRole === "driver") {
         if (actionName === "My Route") {
-          navigate("/dashboard/routes");
+          startTransition(() => navigate("/dashboard/routes"));
         } else if (actionName === "My Stats") {
-          navigate("/dashboard/performance");
+          startTransition(() => navigate("/dashboard/performance"));
         }
       } else if (currentRole === "citizen") {
         if (actionName === "Request Pickup") {
-          navigate("/dashboard/pickup-requests");
+          startTransition(() => navigate("/dashboard/pickup-requests"));
         } else if (actionName === "My Rewards") {
-          navigate("/dashboard/resources");
+          startTransition(() => navigate("/dashboard/resources"));
         } else if (actionName === "Communities") {
-          navigate("/dashboard/communities");
+          startTransition(() => navigate("/dashboard/communities"));
         } else if (actionName === "Find Center") {
-          navigate("/dashboard/centers");
+          startTransition(() => navigate("/dashboard/centers"));
         }
       }
 
@@ -828,14 +878,22 @@ export default function Overview() {
       setSuccessMessage(`✓ ${actionName} completed!`);
 
       // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 750);
     } finally {
-      setLoadingActions((prev) => ({ ...prev, [actionName]: false }));
+      setLoadingActions((prev) => ({
+        ...prev,
+        [actionName]: false,
+      }));
     }
   };
 
-  const getFilteredStats = (stats: any[], filter: string, hidden: string[]) => {
-    const multiplier = filter === "today" ? 0.05 : filter === "week" ? 0.25 : 1;
+  const getFilteredStats = (
+    stats: any[],
+    filter: string,
+    hidden: string[],
+  ) => {
+    const multiplier =
+      filter === "today" ? 0.05 : filter === "week" ? 0.25 : 1;
     return stats
       .filter((stat) => !hidden.includes(stat.label))
       .map((stat) => {
@@ -846,21 +904,33 @@ export default function Overview() {
           !stat.label.includes("Rate") &&
           !stat.label.includes("%")
         ) {
-          return { ...stat, value: Math.ceil(stat.value * multiplier) };
+          return {
+            ...stat,
+            value: Math.ceil(stat.value * multiplier),
+          };
         }
         return stat;
       });
   };
 
-  const currentRoleStats = roleStats[currentRole] || roleStats.admin;
+  const currentRoleStats =
+    roleStats[currentRole] || roleStats.admin;
   const [orderedStats, setOrderedStats] = useState(
-    getFilteredStats(currentRoleStats, timeFilter, hiddenWidgets),
+    getFilteredStats(
+      currentRoleStats,
+      timeFilter,
+      hiddenWidgets,
+    ),
   );
 
   // Sync when role, time filter, or hidden widgets changes
   useEffect(() => {
     setOrderedStats(
-      getFilteredStats(currentRoleStats, timeFilter, hiddenWidgets),
+      getFilteredStats(
+        currentRoleStats,
+        timeFilter,
+        hiddenWidgets,
+      ),
     );
   }, [currentRole, timeFilter, hiddenWidgets]);
 
@@ -995,7 +1065,9 @@ export default function Overview() {
             {/* Time Filter Dropdown */}
             <motion.select
               value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value as any)}
+              onChange={(e) =>
+                setTimeFilter(e.target.value as any)
+              }
               className="bg-white border flex items-center border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block p-2.5 shadow-sm font-medium outline-none cursor-pointer"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1007,7 +1079,8 @@ export default function Overview() {
             </motion.select>
 
             {/* Additional Header Settings Button (Manager/Admin Only) */}
-            {(currentRole === "admin" || currentRole === "manager") && (
+            {(currentRole === "admin" ||
+              currentRole === "manager") && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -1042,7 +1115,9 @@ export default function Overview() {
                   repeat: Infinity,
                 }}
               />
-              <span className="text-sm font-bold text-gray-700">LIVE</span>
+              <span className="text-sm font-bold text-gray-700">
+                LIVE
+              </span>
             </motion.div>
           </div>
         </div>
@@ -1126,6 +1201,7 @@ export default function Overview() {
                 Recent Activity
               </h2>
               <motion.button
+                onClick={() => startTransition(() => navigate("/dashboard/activity-log"))}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
@@ -1151,7 +1227,9 @@ export default function Overview() {
                     title={activity.action}
                     description={activity.details}
                     time={activity.timestamp.toLocaleDateString()}
-                    status={statusMap[activity.severity] || "info"}
+                    status={
+                      statusMap[activity.severity] || "info"
+                    }
                     index={index}
                   />
                 );
@@ -1240,8 +1318,12 @@ export default function Overview() {
                           <item.icon className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-sm opacity-80">{item.label}</p>
-                          <p className="text-xl font-bold">{item.value}</p>
+                          <p className="text-sm opacity-80">
+                            {item.label}
+                          </p>
+                          <p className="text-xl font-bold">
+                            {item.value}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-1 text-sm font-medium bg-white/20 px-2 py-1 rounded-lg">
@@ -1294,8 +1376,12 @@ export default function Overview() {
                           <item.icon className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-sm opacity-80">{item.label}</p>
-                          <p className="text-xl font-bold">{item.value}</p>
+                          <p className="text-sm opacity-80">
+                            {item.label}
+                          </p>
+                          <p className="text-xl font-bold">
+                            {item.value}
+                          </p>
                         </div>
                       </div>
                       <div className="text-sm font-medium opacity-90">
@@ -1316,10 +1402,14 @@ export default function Overview() {
                   No assigned routes for today.
                 </h2>
                 <p className="text-white/80 mb-8 max-w-[250px]">
-                  You currently have no active deliveries or pickups. Take a
-                  rest or check with your manager!
+                  You currently have no active deliveries or
+                  pickups. Take a rest or check with your
+                  manager!
                 </p>
-                <button className="px-6 py-3 bg-white text-indigo-600 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <button
+                  onClick={() => startTransition(() => navigate("/dashboard/routes"))}
+                  className="px-6 py-3 bg-white text-indigo-600 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+                >
                   View Schedule
                 </button>
               </div>
@@ -1334,10 +1424,14 @@ export default function Overview() {
                   Ready to make an impact?
                 </h2>
                 <p className="text-white/80 mb-8 max-w-[280px]">
-                  You haven't requested any pickups recently. Start recycling to
-                  earn points and climb the community leaderboard!
+                  You haven't requested any pickups recently.
+                  Start recycling to earn points and climb the
+                  community leaderboard!
                 </p>
-                <button className="px-6 py-3 bg-white text-orange-600 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 hover:-translate-y-1">
+                <button
+                  onClick={() => startTransition(() => navigate("/dashboard/pickup-requests"))}
+                  className="px-6 py-3 bg-white text-orange-600 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 hover:-translate-y-1"
+                >
                   <Zap className="w-5 h-5" />
                   Request your first pickup!
                 </button>
@@ -1346,6 +1440,33 @@ export default function Overview() {
           </div>
         </motion.div>
       </div>
+
+      {/* ── Intelligence Section: Admin / Manager only ── */}
+      {(currentRole === "admin" || currentRole === "manager") && (
+        <div className="space-y-6 relative z-10">
+          {/* Section Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <TrendingUp className="w-6 h-6 text-emerald-500" />
+                Business Intelligence
+              </h2>
+              <p className="text-gray-500 text-sm mt-0.5">Real-time waste stream analytics & zone performance</p>
+            </div>
+            {currentRole === "admin" && (
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-medium hover:shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <DollarSign className="w-4 h-4" />
+                Export Report
+              </button>
+            )}
+          </div>
+          <WasteStreamChart />
+          <ZoneHeatmap />
+        </div>
+      )}
 
       <AnimatePresence>
         {isCustomizerOpen && (
@@ -1358,6 +1479,12 @@ export default function Overview() {
           />
         )}
       </AnimatePresence>
+
+      {/* Premium Export Modal */}
+      <PremiumExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
     </div>
   );
 }

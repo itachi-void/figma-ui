@@ -1,5 +1,10 @@
-import Overview from '@/app/pages/dashboard/Overview';
+import Overview from '../../pages/dashboard/Overview';
+import { OverviewPageLoader } from '../../components/PageLoader';
 
 export default function OverviewPage() {
-  return <Overview />;
+  return (
+    <OverviewPageLoader>
+      <Overview />
+    </OverviewPageLoader>
+  );
 }

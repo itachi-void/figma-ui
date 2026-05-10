@@ -1,5 +1,10 @@
-import RoutesManagement from '@/app/pages/dashboard/RoutesManagement';
+import Routes from '../../pages/dashboard/Routes';
+import { TablePageLoader } from '../../components/PageLoader';
 
 export default function RoutesPage() {
-  return <RoutesManagement />;
+  return (
+    <TablePageLoader>
+      <Routes />
+    </TablePageLoader>
+  );
 }

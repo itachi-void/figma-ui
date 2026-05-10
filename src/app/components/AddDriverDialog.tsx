@@ -73,7 +73,7 @@ export function AddDriverDialog({
     if (isOpen && firstInputRef.current) {
       setTimeout(() => {
         firstInputRef.current?.focus();
-      }, 100);
+      }, 25);
     }
   }, [isOpen]);
 
@@ -109,12 +109,14 @@ export function AddDriverDialog({
 
       case "completedTrips":
         const trips = parseInt(value);
-        if (isNaN(trips) || trips < 0) return "Must be a positive number";
+        if (isNaN(trips) || trips < 0)
+          return "Must be a positive number";
         return "";
 
       case "earnings":
         const earnings = parseFloat(value);
-        if (isNaN(earnings) || earnings < 0) return "Must be a positive number";
+        if (isNaN(earnings) || earnings < 0)
+          return "Must be a positive number";
         return "";
 
       case "onTimePercentage":
@@ -131,7 +133,8 @@ export function AddDriverDialog({
 
       case "fuelEfficiency":
         const fuel = parseFloat(value);
-        if (isNaN(fuel) || fuel < 0) return "Must be a positive number";
+        if (isNaN(fuel) || fuel < 0)
+          return "Must be a positive number";
         return "";
 
       default:
@@ -171,7 +174,7 @@ export function AddDriverDialog({
   const isFormValid = () => {
     return Object.keys(formData).every(
       (key) =>
-        validateField(key, formData[key as keyof typeof formData]) === "",
+        validateField(key, formData[key as keyof typeof formData]) === ""
     );
   };
 
@@ -180,7 +183,7 @@ export function AddDriverDialog({
     // Mark all fields as touched
     const allTouched = Object.keys(formData).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
-      {},
+      {}
     );
     setTouched(allTouched);
 
@@ -197,7 +200,7 @@ export function AddDriverDialog({
     setIsSaving(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 375));
 
     setIsSaving(false);
     setSaveSuccess(true);
@@ -217,7 +220,7 @@ export function AddDriverDialog({
     setTimeout(() => {
       handleClose();
       onSuccess?.(formData);
-    }, 1500);
+    }, 375);
   };
 
   // Handle close
@@ -267,7 +270,7 @@ export function AddDriverDialog({
 
   // Filter routes based on search
   const filteredRoutes = routeOptions.filter((route) =>
-    route.name.toLowerCase().includes(routeSearch.toLowerCase()),
+    route.name.toLowerCase().includes(routeSearch.toLowerCase())
   );
 
   return (
@@ -284,7 +287,7 @@ export function AddDriverDialog({
             style={{
               top: 0,
               bottom: 0,
-              left: sidebarOpen ? "256px" : "0",
+              left: sidebarOpen ? '256px' : '0',
               right: 0,
               zIndex: 99,
             }}
@@ -295,18 +298,18 @@ export function AddDriverDialog({
             className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none transition-all duration-300"
             style={{
               zIndex: 100,
-              left: sidebarOpen ? "256px" : "0",
+              left: sidebarOpen ? '256px' : '0',
             }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 100 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 100 }}
-              transition={{ type: "spring", duration: 0.5 }}
+              transition={{ type: "spring", duration: 0.125 }}
               className="w-full max-w-2xl bg-white/95 backdrop-blur-xl md:rounded-3xl rounded-t-3xl shadow-2xl border border-white/20 overflow-hidden pointer-events-auto max-h-[90vh] flex flex-col"
               style={{
-                marginLeft: sidebarOpen ? "0" : "0",
-                marginRight: sidebarOpen ? "128px" : "0",
+                marginLeft: sidebarOpen ? '0' : '0',
+                marginRight: sidebarOpen ? '128px' : '0',
               }}
             >
               {/* Header */}
@@ -383,7 +386,7 @@ export function AddDriverDialog({
                     <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.15 }}
+                      transition={{ delay: 0.025 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <User className="w-4 h-4 inline mr-2" />
@@ -399,8 +402,8 @@ export function AddDriverDialog({
                           errors.name && touched.name
                             ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                             : formData.name && !errors.name
-                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                         }`}
                         placeholder="Enter full name"
                       />
@@ -420,7 +423,7 @@ export function AddDriverDialog({
                     <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
+                      transition={{ delay: 0.0375 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <Phone className="w-4 h-4 inline mr-2" />
@@ -435,8 +438,8 @@ export function AddDriverDialog({
                           errors.phone && touched.phone
                             ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                             : formData.phone && !errors.phone
-                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                         }`}
                         placeholder="+201xxxxxxxxx"
                       />
@@ -456,7 +459,7 @@ export function AddDriverDialog({
                     <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.25 }}
+                      transition={{ delay: 0.05 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <Mail className="w-4 h-4 inline mr-2" />
@@ -471,8 +474,8 @@ export function AddDriverDialog({
                           errors.email && touched.email
                             ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                             : formData.email && !errors.email
-                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                         }`}
                         placeholder="name@recyclehub.com"
                       />
@@ -492,7 +495,7 @@ export function AddDriverDialog({
                     <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 }}
+                      transition={{ delay: 0.0625 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <Truck className="w-4 h-4 inline mr-2" />
@@ -508,8 +511,8 @@ export function AddDriverDialog({
                           errors.vehicle && touched.vehicle
                             ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                             : formData.vehicle && !errors.vehicle
-                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                            : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                         }`}
                       >
                         <option value="">Select vehicle</option>
@@ -535,7 +538,7 @@ export function AddDriverDialog({
                     <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.35 }}
+                      transition={{ delay: 0.0875 }}
                     >
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <MapPin className="w-4 h-4 inline mr-2" />
@@ -547,7 +550,7 @@ export function AddDriverDialog({
                           value={
                             formData.route
                               ? routeOptions.find(
-                                  (r) => r.id === formData.route,
+                                  (r) => r.id === formData.route
                                 )?.name || routeSearch
                               : routeSearch
                           }
@@ -565,8 +568,8 @@ export function AddDriverDialog({
                             errors.route && touched.route
                               ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                               : formData.route && !errors.route
-                                ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                                : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                           }`}
                           placeholder="Search for route..."
                         />
@@ -626,7 +629,7 @@ export function AddDriverDialog({
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 }}
+                        transition={{ delay: 0.1 }}
                       >
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Completed Trips
@@ -642,10 +645,9 @@ export function AddDriverDialog({
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.completedTrips && touched.completedTrips
                               ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
-                              : formData.completedTrips &&
-                                  !errors.completedTrips
-                                ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                                : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : formData.completedTrips && !errors.completedTrips
+                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                           }`}
                           placeholder="0"
                         />
@@ -665,7 +667,7 @@ export function AddDriverDialog({
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.45 }}
+                        transition={{ delay: 0.1125 }}
                       >
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Total Earnings ($)
@@ -683,8 +685,8 @@ export function AddDriverDialog({
                             errors.earnings && touched.earnings
                               ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                               : formData.earnings && !errors.earnings
-                                ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                                : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                           }`}
                           placeholder="0.00"
                         />
@@ -704,7 +706,7 @@ export function AddDriverDialog({
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 }}
+                        transition={{ delay: 0.1375 }}
                       >
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           On-Time Percentage (%)
@@ -722,30 +724,29 @@ export function AddDriverDialog({
                             errors.onTimePercentage && touched.onTimePercentage
                               ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                               : formData.onTimePercentage &&
-                                  !errors.onTimePercentage
-                                ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                                : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                                !errors.onTimePercentage
+                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                           }`}
                           placeholder="100"
                         />
-                        {errors.onTimePercentage &&
-                          touched.onTimePercentage && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-red-500 text-sm mt-1 flex items-center gap-1"
-                            >
-                              <AlertCircle className="w-4 h-4" />
-                              {errors.onTimePercentage}
-                            </motion.p>
-                          )}
+                        {errors.onTimePercentage && touched.onTimePercentage && (
+                          <motion.p
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-red-500 text-sm mt-1 flex items-center gap-1"
+                          >
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.onTimePercentage}
+                          </motion.p>
+                        )}
                       </motion.div>
 
                       {/* Rating */}
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.55 }}
+                        transition={{ delay: 0.15 }}
                       >
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Rating (0-5)
@@ -764,8 +765,8 @@ export function AddDriverDialog({
                             errors.rating && touched.rating
                               ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
                               : formData.rating && !errors.rating
-                                ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                                : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                           }`}
                           placeholder="5.0"
                         />
@@ -785,7 +786,7 @@ export function AddDriverDialog({
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.6 }}
+                        transition={{ delay: 0.1625 }}
                         className="md:col-span-2"
                       >
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -803,10 +804,9 @@ export function AddDriverDialog({
                           className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none ${
                             errors.fuelEfficiency && touched.fuelEfficiency
                               ? "border-red-400 bg-red-50 focus:border-red-500 focus:shadow-lg focus:shadow-red-500/20"
-                              : formData.fuelEfficiency &&
-                                  !errors.fuelEfficiency
-                                ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
-                                : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : formData.fuelEfficiency && !errors.fuelEfficiency
+                              ? "border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
+                              : "border-gray-200 focus:border-emerald-500 focus:shadow-lg focus:shadow-emerald-500/20"
                           }`}
                           placeholder="8.0"
                         />
@@ -872,7 +872,7 @@ export function AddDriverDialog({
                   style={{
                     top: 0,
                     bottom: 0,
-                    left: sidebarOpen ? "256px" : "0",
+                    left: sidebarOpen ? '256px' : '0',
                     right: 0,
                     zIndex: 110,
                   }}
@@ -883,7 +883,7 @@ export function AddDriverDialog({
                   style={{
                     top: 0,
                     bottom: 0,
-                    left: sidebarOpen ? "256px" : "0",
+                    left: sidebarOpen ? '256px' : '0',
                     right: 0,
                     zIndex: 120,
                   }}

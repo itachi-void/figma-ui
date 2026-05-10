@@ -1,9 +1,10 @@
-import { Link } from "react-router";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Link } from 'react-router';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
 const NotFoundPage = () => {
   return (
     <div className="min-h-screen bg-[#FDF2E9] flex flex-col items-center justify-center p-4 text-center font-sans">
+
       {/* الجزء العلوي: النصوص */}
       <div className="mb-8">
         <h2 className="text-[#E67E22] text-2xl md:text-4xl font-bold mb-2">
@@ -49,52 +50,30 @@ const NotFoundPage = () => {
 
       {/* منطقة الأنميشن - عناصر إعادة التدوير */}
       <div className="relative w-full max-w-2xl h-64 flex items-end justify-center">
+
         {/* زجاجات متحركة - عالشمال */}
         <div className="absolute left-0 bottom-0 flex gap-2">
-          <div
-            className="w-4 h-16 bg-emerald-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0s", animationDuration: "2s" }}
-          ></div>
-          <div
-            className="w-4 h-16 bg-blue-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0.2s", animationDuration: "2s" }}
-          ></div>
-          <div
-            className="w-4 h-16 bg-amber-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0.4s", animationDuration: "2s" }}
-          ></div>
+          <div className="w-4 h-16 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }}></div>
+          <div className="w-4 h-16 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s', animationDuration: '2s' }}></div>
+          <div className="w-4 h-16 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s', animationDuration: '2s' }}></div>
         </div>
 
         {/* صندوق إعادة التدوير - في النص */}
         <div className="bg-black w-24 h-32 md:w-32 md:h-40 rounded-t-full relative overflow-hidden border-b-4 border-gray-300">
           {/* العيون اللي جوه الصندوق */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-3">
-            <div
-              className="w-4 h-4 bg-white rounded-full animate-bounce"
-              style={{ animationDelay: "0s" }}
-            ></div>
-            <div
-              className="w-4 h-4 bg-white rounded-full animate-bounce"
-              style={{ animationDelay: "0.2s" }}
-            ></div>
+            <div className="w-4 h-4 bg-white rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+            <div className="w-4 h-4 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
           </div>
         </div>
 
         {/* زجاجات متحركة - عاليمين */}
         <div className="absolute right-0 bottom-0 flex gap-2">
-          <div
-            className="w-4 h-16 bg-purple-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0.6s", animationDuration: "2s" }}
-          ></div>
-          <div
-            className="w-4 h-16 bg-pink-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0.8s", animationDuration: "2s" }}
-          ></div>
-          <div
-            className="w-4 h-16 bg-orange-500 rounded-full animate-bounce"
-            style={{ animationDelay: "1s", animationDuration: "2s" }}
-          ></div>
+          <div className="w-4 h-16 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.6s', animationDuration: '2s' }}></div>
+          <div className="w-4 h-16 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.8s', animationDuration: '2s' }}></div>
+          <div className="w-4 h-16 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '1s', animationDuration: '2s' }}></div>
         </div>
+
       </div>
 
       {/* زرار الرجوع */}
@@ -104,6 +83,7 @@ const NotFoundPage = () => {
       >
         Go Back Home
       </Link>
+
     </div>
   );
 };

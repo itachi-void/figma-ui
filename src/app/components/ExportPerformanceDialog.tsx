@@ -194,7 +194,7 @@ export function ExportPerformanceDialog({
     setIsExporting(true);
 
     // Simulate processing
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
     try {
       if (selectedFormat === "excel") {
@@ -218,7 +218,7 @@ export function ExportPerformanceDialog({
       setTimeout(() => {
         onClose();
         setExportSuccess(false);
-      }, 1500);
+      }, 375);
     } catch (error) {
       setIsExporting(false);
       toast.error("Export failed. Please try again.");

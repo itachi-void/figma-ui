@@ -1,10 +1,6 @@
 import { Link } from "react-router";
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-} from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Recycle,
   Leaf,
@@ -24,51 +20,9 @@ import {
   CheckCircle,
   ArrowRight,
 } from "lucide-react";
-import { FloatingParticles } from "@/app/components/FloatingParticles";
-
-/* -------------------------------------------------------------------------- */
-/*                                Motion Helpers                              */
-/* -------------------------------------------------------------------------- */
-// دول شوية إعدادات/دوال جاهزة بنستخدمها في كل حتة عشان منكررش نفس الأكواد
-// springSoft: حركة سبرينج ناعمة
-const springSoft = {
-  type: "spring",
-  stiffness: 100,
-  damping: 20,
-};
-// inViewDefault: إعدادات ظهور العناصر لما تيجي في الشاشة
-const inViewDefault = { once: true, margin: "-50px" }; // Changed to once: true for better performance
-
-// fadeInUp: انيميشن شائع "يطلع لفوق مع فادينج"
-const fadeInUp = (delay = 0, y = 30) => ({
-  initial: { opacity: 0, y },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: inViewDefault,
-  transition: { duration: 0.6, delay, ...springSoft },
-});
-
-// scaleIn: دخول بعنصر مكبّر تدريجي
-const scaleIn = (delay = 0, scaleFrom = 0.9) => ({
-  initial: { opacity: 0, scale: scaleFrom },
-  whileInView: { opacity: 1, scale: 1 },
-  viewport: inViewDefault,
-  transition: { duration: 0.6, delay },
-});
-
-// hoverLiftShadow: تأثير hover يرفع الكارت سنة ويعمل شادو لطيف
-const hoverLiftShadow = (
-  shadow = "0 20px 40px rgba(0,0,0,0.12)",
-  y = -10,
-) => ({
-  whileHover: { y, boxShadow: shadow },
-  transition: { duration: 0.3 },
-});
-
-// spinForever: دوران لا نهائي (مثلاً للأيقونة)
-const spinForever = (duration = 20) => ({
-  animate: { rotate: 360 },
-  transition: { duration, repeat: Infinity, ease: "linear" },
-});
+import FloatingParticles from "../components/FloatingParticles";
+import "./landing-animations.css";
+import LoginModal from "../components/LoginModal";
 
 /* -------------------------------------------------------------------------- */
 /*                               Tailwind Helpers                             */
@@ -111,9 +65,7 @@ const colorBtnTo: Record<string, string> = {
 /*                                   Types                                    */
 /* -------------------------------------------------------------------------- */
 // شوية Types خفيفة عشان الكود يبقى قوي وواضح في TS
-type IconType = React.ComponentType<
-  React.SVGProps<SVGSVGElement>
->;
+type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 type Stat = {
   icon: IconType;
   label: string;
@@ -151,12 +103,7 @@ type ImpactStatT = {
 /*                                  Data                                      */
 /* -------------------------------------------------------------------------- */
 // هنا بنحط الداتا اللي UI هيرندر على أساسها — مفصولة عشان التنظيم والأداء
-const NAV_ITEMS = [
-  "Features",
-  "How It Works",
-  "Pricing",
-  "Impact",
-];
+const NAV_ITEMS = ["Features", "How It Works", "Pricing", "Impact"];
 
 const STATS: Stat[] = [
   {
@@ -191,8 +138,7 @@ const FEATURES: FeatureT[] = [
     icon: Brain,
     name: "AI Bottle Matching",
     accuracy: 99,
-    description:
-      "Identify bottle types instantly with 99.9% accuracy",
+    description: "Identify bottle types instantly with 99.9% accuracy",
   },
   {
     icon: QrCode,
@@ -204,29 +150,25 @@ const FEATURES: FeatureT[] = [
     icon: MapPin,
     name: "Smart Routing",
     accuracy: 87,
-    description:
-      "AI-optimized collection routes save 40% fuel costs",
+    description: "AI-optimized collection routes save 40% fuel costs",
   },
   {
     icon: BarChart3,
     name: "Live Dashboard",
     accuracy: 92,
-    description:
-      "Real-time analytics and performance monitoring",
+    description: "Real-time analytics and performance monitoring",
   },
   {
     icon: Wallet,
     name: "Digital Wallet",
     accuracy: 88,
-    description:
-      "Instant rewards and seamless point redemption",
+    description: "Instant rewards and seamless point redemption",
   },
   {
     icon: Shield,
     name: "Secure Management",
     accuracy: 96,
-    description:
-      "Enterprise-grade security with blockchain verification",
+    description: "Enterprise-grade security with blockchain verification",
   },
 ];
 
@@ -263,33 +205,21 @@ const ROLES: RoleT[] = [
     icon: Users,
     title: "Citizen",
     description: "Scan and recycle",
-    features: [
-      "Scan & Recycle",
-      "Earn Rewards",
-      "Redeem Prizes",
-    ],
+    features: ["Scan & Recycle", "Earn Rewards", "Redeem Prizes"],
     color: "emerald",
   },
   {
     icon: MapPin,
     title: "Driver",
     description: "Optimized routes",
-    features: [
-      "Optimized Routes",
-      "Live Tracking",
-      "Earn Income",
-    ],
+    features: ["Optimized Routes", "Live Tracking", "Earn Income"],
     color: "blue",
   },
   {
     icon: BarChart3,
     title: "Admin",
     description: "Full control",
-    features: [
-      "Full Dashboard",
-      "Deep Analytics",
-      "Manage All Operations",
-    ],
+    features: ["Full Dashboard", "Deep Analytics", "Manage All Operations"],
     color: "purple",
   },
 ];
@@ -323,84 +253,114 @@ const IMPACT_STATS: ImpactStatT[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
+/*                           Animation Helper Functions                       */
+/* -------------------------------------------------------------------------- */
+// Helper functions for motion props to avoid repetition
+
+// Fade in from bottom with customizable delay and distance
+const fadeInUp = (delay: number = 0, distance: number = 20) => ({
+  initial: { opacity: 0, y: distance },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay },
+});
+
+// Scale in animation
+const scaleIn = (delay: number = 0, initialScale: number = 0.8) => ({
+  initial: { opacity: 0, scale: initialScale },
+  animate: { opacity: 1, scale: 1 },
+  transition: { duration: 0.6, delay },
+});
+
+// Hover lift with shadow
+const hoverLiftShadow = () => ({
+  whileHover: {
+    y: -10,
+    boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
+  },
+  transition: { duration: 0.3 },
+});
+
+// Continuous spin animation
+const spinForever = (duration: number = 20) => ({
+  animate: { rotate: 360 },
+  transition: {
+    duration,
+    repeat: Infinity,
+    ease: "linear",
+  },
+});
+
+// Default viewport settings for whileInView
+const inViewDefault = {
+  once: true,
+  margin: "-50px",
+};
+
+/* -------------------------------------------------------------------------- */
 /*                             Reusable Components                            */
 /* -------------------------------------------------------------------------- */
 
 // TypewriterText: بتكتب كلمات واحدة واحدة وبعدين تمسحها — مع مؤشر بيلمع
-const TypewriterText: React.FC = React.memo(
-  function TypewriterText() {
-    // الكلمات اللي هتتعرض بالتتابع
-    const words = useMemo(
-      () => [
-        "Recycle Smart",
-        "Earn Rewards",
-        "Save Planet",
-        "Join Movement",
-      ],
-      [],
-    );
-    // حالات التحكم في الكتابة والمسح
-    const [currentWordIndex, setCurrentWordIndex] = useState(0);
-    const [displayText, setDisplayText] = useState("");
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [showCursor, setShowCursor] = useState(true);
+const TypewriterText: React.FC = React.memo(function TypewriterText() {
+  // الكلمات اللي هتتعرض بالتتابع
+  const words = useMemo(
+    () => ["Recycle Smart", "Earn Rewards", "Save Planet", "Join Movement"],
+    [],
+  );
+  // حالات التحكم في الكتابة والمسح
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showCursor, setShowCursor] = useState(true);
 
-    // اللوجيك الأساسي: يكتب حرف حرف وبعدين يمسح حرف حرف
-    useEffect(() => {
-      const word = words[currentWordIndex];
-      const timeout = setTimeout(
-        () => {
-          if (!isDeleting) {
-            // لسه بيكتب
-            if (displayText.length < word.length) {
-              setDisplayText(
-                word.slice(0, displayText.length + 1),
-              );
-            } else {
-              // خلص الكلمة — يستنى شوية وبعدين يبدأ يمسح
-              setTimeout(() => setIsDeleting(true), 2000);
-            }
+  // اللوجيك الأساسي: يكتب حرف حرف وبعدين يمسح حرف حرف
+  useEffect(() => {
+    const word = words[currentWordIndex];
+    const timeout = setTimeout(
+      () => {
+        if (!isDeleting) {
+          // لسه بيكتب
+          if (displayText.length < word.length) {
+            setDisplayText(word.slice(0, displayText.length + 1));
           } else {
-            // طور المسح
-            if (displayText.length > 0) {
-              setDisplayText(displayText.slice(0, -1));
-            } else {
-              // خلص مسح — روح للكلمة اللي بعدها
-              setIsDeleting(false);
-              setCurrentWordIndex(
-                (currentWordIndex + 1) % words.length,
-              );
-            }
+            // خلص الكلمة — يستنى شوية وبعدين يبدأ يمسح
+            setTimeout(() => setIsDeleting(true), 500);
           }
-        },
-        isDeleting ? 75 : 150,
-      );
-
-      return () => clearTimeout(timeout);
-    }, [displayText, isDeleting, currentWordIndex, words]);
-
-    // كيرсор بيلمع كل نص ثانية
-    useEffect(() => {
-      const interval = setInterval(
-        () => setShowCursor((prev) => !prev),
-        500,
-      );
-      return () => clearInterval(interval);
-    }, []);
-
-    return (
-      <span className="text-emerald-600">
-        {displayText}
-        {/* ده شكل الكيرсор */}
-        <span
-          className={`inline-block w-1 h-12 bg-emerald-600 ml-1 ${showCursor ? "opacity-100" : "opacity-0"} transition-opacity`}
-        >
-          |
-        </span>
-      </span>
+        } else {
+          // ور المسح
+          if (displayText.length > 0) {
+            setDisplayText(displayText.slice(0, -1));
+          } else {
+            // خلص مسح — روح للكلمة اللي بعدها
+            setIsDeleting(false);
+            setCurrentWordIndex((currentWordIndex + 1) % words.length);
+          }
+        }
+      },
+      isDeleting ? 75 : 150,
     );
-  },
-);
+
+    return () => clearTimeout(timeout);
+  }, [displayText, isDeleting, currentWordIndex, words]);
+
+  // كيرсор بيلمع كل نص ثانية
+  useEffect(() => {
+    const interval = setInterval(() => setShowCursor((prev) => !prev), 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span className="text-emerald-600">
+      {displayText}
+      {/* ده شكل الكيرсор */}
+      <span
+        className={`inline-block w-1 h-12 bg-emerald-600 ml-1 ${showCursor ? "opacity-100" : "opacity-0"} transition-opacity`}
+      >
+        |
+      </span>
+    </span>
+  );
+});
 
 // AnimatedCounter: عدّاد بيتزايد لحد رقم معين بحركة smooth (easeOutExpo)
 function AnimatedCounter({
@@ -421,16 +381,14 @@ function AnimatedCounter({
     let animationFrame = 0;
 
     // دالة easing نعومة للطلوع
-    const easeOutExpo = (x: number) =>
-      x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+    const easeOutExpo = (x: number) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x));
     const animate = (t: number) => {
       if (!startTime) startTime = t;
       const elapsed = t - startTime;
       const progress = Math.min(elapsed / (duration * 1000), 1);
       const eased = easeOutExpo(progress);
       setCount(Math.floor(eased * end));
-      if (progress < 1)
-        animationFrame = requestAnimationFrame(animate);
+      if (progress < 1) animationFrame = requestAnimationFrame(animate);
     };
 
     animationFrame = requestAnimationFrame(animate);
@@ -564,30 +522,19 @@ function SectionHeading({
   subtitle?: string;
 }) {
   return (
-    <motion.div
-      {...fadeInUp(0.0)}
-      className="text-center mb-16"
-    >
+    <motion.div {...fadeInUp(0.0)} className="text-center mb-16">
       <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
         {title}
       </h2>
       {subtitle && (
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          {subtitle}
-        </p>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
       )}
     </motion.div>
   );
 }
 
 // StatCard: كارت إحصائية فيه أيقونة + رقم متحرك + عنوان
-function StatCard({
-  stat,
-  index,
-}: {
-  stat: Stat;
-  index: number;
-}) {
+function StatCard({ stat, index }: { stat: Stat; index: number }) {
   const Icon = stat.icon;
   return (
     <motion.div
@@ -612,13 +559,8 @@ function StatCard({
       </motion.div>
 
       {/* الرقم المتحرك */}
-      <div
-        className={`text-3xl font-bold ${colorText[stat.color]} mb-1`}
-      >
-        <AnimatedCounter
-          end={stat.value}
-          suffix={stat.suffix}
-        />
+      <div className={`text-3xl font-bold ${colorText[stat.color]} mb-1`}>
+        <AnimatedCounter end={stat.value} suffix={stat.suffix} />
       </div>
 
       <div className="text-sm text-gray-600">{stat.label}</div>
@@ -627,13 +569,7 @@ function StatCard({
 }
 
 // FeatureCard: كارت ميزة — أيقونة، اسم، وصف، وبروجرس دقيقته
-function FeatureCard({
-  feature,
-  index,
-}: {
-  feature: FeatureT;
-  index: number;
-}) {
+function FeatureCard({ feature, index }: { feature: FeatureT; index: number }) {
   const Icon = feature.icon;
   return (
     <motion.div
@@ -646,7 +582,7 @@ function FeatureCard({
         boxShadow: "0 25px 50px rgba(16,185,129,0.2)",
         borderColor: "rgb(16,185,129)",
       }}
-      className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-emerald-500"
+      className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg cursor-pointer border-2 border-transparent"
     >
       <motion.div
         className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center mb-4"
@@ -659,9 +595,7 @@ function FeatureCard({
       <h3 className="text-xl font-semibold text-gray-900 mb-2">
         {feature.name}
       </h3>
-      <p className="text-gray-600 mb-4 text-sm">
-        {feature.description}
-      </p>
+      <p className="text-gray-600 mb-4 text-sm">{feature.description}</p>
 
       {/* جزء الدقة + البار امتحرك */}
       <div className="space-y-2">
@@ -710,13 +644,7 @@ function FeatureCard({
 }
 
 // StepItem: عنصر خطوة من خطوات "إزاي شغال"
-function StepItem({
-  step,
-  index,
-}: {
-  step: StepT;
-  index: number;
-}) {
+function StepItem({ step, index }: { step: StepT; index: number }) {
   const Icon = step.icon;
   return (
     <motion.div
@@ -741,24 +669,14 @@ function StepItem({
       >
         <Icon className="w-10 h-10 text-emerald-600" />
       </motion.div>
-      <h3 className="font-semibold text-gray-900 mb-2">
-        {step.title}
-      </h3>
-      <p className="text-sm text-gray-600">
-        {step.description}
-      </p>
+      <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
+      <p className="text-sm text-gray-600">{step.description}</p>
     </motion.div>
   );
 }
 
 // RoleCard: كارت دور (مواطن/سواق/أدمن) فيه Features وزرار CTA
-function RoleCard({
-  role,
-  index,
-}: {
-  role: RoleT;
-  index: number;
-}) {
+function RoleCard({ role, index }: { role: RoleT; index: number }) {
   const Icon = role.icon;
   return (
     <motion.div
@@ -770,8 +688,9 @@ function RoleCard({
         y: -15,
         scale: 1.03,
         boxShadow: "0 30px 60px rgba(0,0,0,0.15)",
+        borderColor: "rgb(16,185,129)",
       }}
-      className="bg-white rounded-2xl p-8 shadow-lg transition-all border-2 border-transparent hover:border-emerald-500 cursor-pointer"
+      className="bg-white rounded-2xl p-8 shadow-lg border-2 border-transparent cursor-pointer"
     >
       {/* مربع الأيقونة بلون الدور */}
       <motion.div
@@ -785,9 +704,7 @@ function RoleCard({
       <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">
         {role.title}
       </h3>
-      <p className="text-gray-600 text-center mb-6">
-        {role.description}
-      </p>
+      <p className="text-gray-600 text-center mb-6">{role.description}</p>
 
       {/* مميزات الدور */}
       <ul className="space-y-3 mb-6">
@@ -809,16 +726,9 @@ function RoleCard({
       </ul>
 
       {/* زرار الانتقال حسب الدور */}
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
         <Link
-          to={
-            role.title === "Admin"
-              ? "/dashboard"
-              : "/citizen-portal"
-          }
+          to={role.title === "Admin" ? "/dashboard" : "/citizen-portal"}
           className={`block w-full px-6 py-3 bg-gradient-to-r ${colorBtnFrom[role.color]} ${colorBtnTo[role.color]} text-white rounded-lg hover:shadow-lg transition-all text-center`}
         >
           Get Started
@@ -829,13 +739,7 @@ function RoleCard({
 }
 
 // ImpactStatCard: كارت إحصائية في سكشن التأثير البيئي
-function ImpactStatCard({
-  stat,
-  index,
-}: {
-  stat: ImpactStatT;
-  index: number;
-}) {
+function ImpactStatCard({ stat, index }: { stat: ImpactStatT; index: number }) {
   const Icon = stat.icon;
   return (
     <motion.div
@@ -860,25 +764,15 @@ function ImpactStatCard({
       >
         <Icon className="w-12 h-12 mx-auto mb-4" />
       </motion.div>
-      <div className="text-3xl font-bold mb-1">
-        {stat.value}
-      </div>
-      <div className="text-sm text-green-100 mb-1">
-        {stat.label}
-      </div>
-      <div className="text-xs text-green-200">
-        {stat.subtitle}
-      </div>
+      <div className="text-3xl font-bold mb-1">{stat.value}</div>
+      <div className="text-sm text-green-100 mb-1">{stat.label}</div>
+      <div className="text-xs text-green-200">{stat.subtitle}</div>
     </motion.div>
   );
 }
 
-// LiquidProgress: شريط تقدم "سائل" لذيذ بيعمل ويف لا نهائية
-function LiquidProgress({
-  progress /* 0..1 */,
-}: {
-  progress: number;
-}) {
+// LiquidProgress: شريط تقدم "سا  ل" لذيذ بيعمل ويف لا نهائية
+function LiquidProgress({ progress /* 0..1 */ }: { progress: number }) {
   return (
     <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
       <motion.div
@@ -919,32 +813,22 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   // qrModalOpen: فتح/قفل مودال سكان QR
   const [qrModalOpen, setQrModalOpen] = useState(false);
+  // loginModalOpen: فتح/قفل مودال تسجيل الدخول
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   // bottleCount: سلايدر عدد الزجاجات في الكالكوليتر
   const [bottleCount, setBottleCount] = useState(100);
-  // useScroll: متساب زي ما هو لو حبيت تستخدمه بعدين لانيميشنز مرتبطة بالسكرول
-  const { scrollYProgress } = useScroll();
 
   // listener بسيط للسكرول عشان النافبار يتغير
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
-    return () =>
-      window.removeEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // حسابات الكالكوليتر — متلفوفة بـ useMemo عشان الأداء وما تتحسبش على الفاضي
-  const calculatedValue = useMemo(
-    () => bottleCount * 0.5,
-    [bottleCount],
-  );
-  const calculatedPoints = useMemo(
-    () => bottleCount * 10,
-    [bottleCount],
-  );
-  const calculatedCO2 = useMemo(
-    () => bottleCount * 0.5,
-    [bottleCount],
-  );
+  const calculatedValue = useMemo(() => bottleCount * 0.5, [bottleCount]);
+  const calculatedPoints = useMemo(() => bottleCount * 10, [bottleCount]);
+  const calculatedCO2 = useMemo(() => bottleCount * 0.5, [bottleCount]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 relative overflow-hidden">
@@ -954,9 +838,7 @@ export default function LandingPage() {
       {/* ------------------------------- Navbar ------------------------------- */}
       <motion.nav
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
-          scrolled
-            ? "bg-white/80 backdrop-blur-xl shadow-xl"
-            : "bg-transparent"
+          scrolled ? "bg-white/80 backdrop-blur-xl shadow-xl" : "bg-transparent"
         }`}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -1000,18 +882,26 @@ export default function LandingPage() {
               ))}
             </div>
 
-            {/* زرار الداشبورد */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link
-                to="/dashboard"
-                className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/50 transition-all"
+            {/* أزرار الدخول والتسجيل */}
+            <div className="flex items-center gap-3">
+              <motion.button
+                onClick={() => setLoginModalOpen(true)}
+                className="hidden sm:block px-6 py-2 text-emerald-600 font-bold hover:bg-emerald-50 rounded-lg transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Dashboard
-              </Link>
-            </motion.div>
+                تسجيل الدخول
+              </motion.button>
+
+              <motion.button
+                onClick={() => setLoginModalOpen(true)}
+                className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-bold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                إنشاء حساب
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.nav>
@@ -1037,8 +927,8 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              Transform bottle recycling with QR verification,
-              AI matching, live tracking, and instant rewards
+              Transform bottle recycling with QR verification, AI matching, live
+              tracking, and instant rewards
             </motion.p>
 
             {/* أزرار CTA */}
@@ -1102,10 +992,7 @@ export default function LandingPage() {
       </section>
 
       {/* ------------------------------- Features ------------------------------ */}
-      <section
-        id="features"
-        className="relative z-10 py-20 px-4"
-      >
+      <section id="features" className="relative z-10 py-20 px-4">
         <div className="container mx-auto">
           <SectionHeading
             title="Powerful Features"
@@ -1113,11 +1000,7 @@ export default function LandingPage() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {FEATURES.map((feature, i) => (
-              <FeatureCard
-                key={i}
-                feature={feature}
-                index={i}
-              />
+              <FeatureCard key={i} feature={feature} index={i} />
             ))}
           </div>
         </div>
@@ -1173,10 +1056,7 @@ export default function LandingPage() {
       </section>
 
       {/* -------------------------- Rewards Calculator ------------------------- */}
-      <section
-        id="pricing"
-        className="relative z-10 py-20 px-4"
-      >
+      <section id="pricing" className="relative z-10 py-20 px-4">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -1189,9 +1069,7 @@ export default function LandingPage() {
               <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
                 Rewards Calculator
               </h2>
-              <p className="text-gray-600">
-                Calculate your potential earnings
-              </p>
+              <p className="text-gray-600">Calculate your potential earnings</p>
             </div>
 
             <div className="space-y-6">
@@ -1208,9 +1086,7 @@ export default function LandingPage() {
                   min="1"
                   max="1000"
                   value={bottleCount}
-                  onChange={(e) =>
-                    setBottleCount(Number(e.target.value))
-                  }
+                  onChange={(e) => setBottleCount(Number(e.target.value))}
                   className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
                 />
               </div>
@@ -1250,16 +1126,12 @@ export default function LandingPage() {
                       transition={{ delay: index * 0.1 }}
                       whileHover={{
                         y: -5,
-                        boxShadow:
-                          "0 10px 30px rgba(0,0,0,0.1)",
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
                       }}
                       className={`bg-gradient-to-br ${item.gradient} rounded-xl p-6 cursor-pointer`}
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <motion.div
-                          
-                          transition={{ duration: 0.6 }}
-                        >
+                        <motion.div transition={{ duration: 0.6 }}>
                           <Icon
                             className={`w-5 h-5 ${colorText[item.color as keyof typeof colorText]}`}
                           />
@@ -1310,10 +1182,20 @@ export default function LandingPage() {
         className="relative z-10 py-20 px-4 bg-gradient-to-br from-green-600 to-emerald-700 text-white overflow-hidden"
       >
         <div className="container mx-auto relative z-10">
-          <SectionHeading
-            title="Environmental Impact"
-            subtitle="Making a real difference for our planet"
-          />
+          {/* Custom heading for Impact section with white text */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Environmental Impact
+            </h2>
+            <p className="text-xl text-green-100 max-w-2xl mx-auto">
+              Making a real difference for our planet
+            </p>
+          </motion.div>
 
           {/* معادلة التأثير — كروت صغيرة جنب بعض */}
           <motion.div
@@ -1412,8 +1294,8 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              Join thousands of citizens making a difference.
-              Start earning rewards today!
+              Join thousands of citizens making a difference. Start earning
+              rewards today!
             </motion.p>
 
             {/* أزرار CTA تحت */}
@@ -1427,10 +1309,10 @@ export default function LandingPage() {
               <motion.button
                 whileHover={{
                   scale: 1.05,
-                  boxShadow:
-                    "0 20px 40px rgba(255,255,255,0.3)",
+                  boxShadow: "0 20px 40px rgba(255,255,255,0.3)",
                 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setLoginModalOpen(true)}
                 className="px-8 py-4 bg-white text-emerald-600 rounded-lg transition-all flex items-center gap-2 shadow-lg font-semibold group"
               >
                 Get Started Free
@@ -1474,13 +1356,11 @@ export default function LandingPage() {
                 <motion.div {...spinForever(20)}>
                   <Recycle className="w-6 h-6" />
                 </motion.div>
-                <span className="text-xl font-bold">
-                  RecycleHub
-                </span>
+                <span className="text-xl font-bold">RecycleHub</span>
               </div>
               <p className="text-gray-400 text-sm">
-                Smart bottle recycling system with AI
-                verification and instant rewards.
+                Smart bottle recycling system with AI verification and instant
+                rewards.
               </p>
             </motion.div>
 
@@ -1488,12 +1368,7 @@ export default function LandingPage() {
             {[
               {
                 title: "Product",
-                links: [
-                  "Features",
-                  "How It Works",
-                  "Pricing",
-                  "Dashboard",
-                ],
+                links: ["Features", "How It Works", "Pricing", "Dashboard"],
               },
               {
                 title: "Company",
@@ -1511,9 +1386,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <h4 className="font-semibold mb-4">
-                  {section.title}
-                </h4>
+                <h4 className="font-semibold mb-4">{section.title}</h4>
                 <ul className="space-y-2 text-sm text-gray-400">
                   {section.links.map((link) => (
                     <li key={link}>
@@ -1549,10 +1422,15 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* مودال سكان QR */}
+      {/* مودالات */}
       <QRScannerModal
         isOpen={qrModalOpen}
         onClose={() => setQrModalOpen(false)}
+      />
+
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
       />
     </div>
   );

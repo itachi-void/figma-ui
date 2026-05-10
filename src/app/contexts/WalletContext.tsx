@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
 type Bronze = 'Bronze';
@@ -80,7 +80,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('recyclehub_wallet', JSON.stringify(state));
   }, [state]);
 
-  const addPoints = (amount: number, description: string) => {
+  const addPoints = useCallback((amount: number, description: string) => {
     setState(prev => {
       const newLifetime = prev.lifetimeEarned + amount;
       const newTier = calculateTier(newLifetime);
@@ -101,15 +101,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             amount,
             type: 'earned',
             description,
-            date: new Date()
+            date: new Date(),
           },
-          ...prev.transactions
-        ]
+          ...prev.transactions,
+        ],
       };
     });
-  };
+  }, []);
 
-  const spendPoints = (amount: number, description: string) => {
+  const spendPoints = useCallback((amount: number, description: string): boolean => {
     if (state.balance < amount) {
       toast.error('Not enough points!');
       return false;
@@ -124,16 +124,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           amount,
           type: 'spent',
           description,
-          date: new Date()
+          date: new Date(),
         },
-        ...prev.transactions
-      ]
+        ...prev.transactions,
+      ],
     }));
     toast.success(`Redeemed ${amount} points for ${description}`);
     return true;
-  };
+  }, [state.balance]);
 
-  const getProgressToNextTier = () => {
+  const getProgressToNextTier = useCallback(() => {
     const { nextTier, required } = getNextTierTarget(state.tier);
     if (!nextTier) return { current: state.lifetimeEarned, required: state.lifetimeEarned, percentage: 100, nextTier: null };
     
@@ -151,10 +151,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         percentage: Math.min(100, Math.max(0, (pointsInCurrentTier / pointsNeededForNextTier) * 100)),
         nextTier
     };
-  };
+  }, [state.tier, state.lifetimeEarned]);
+
+  const ctxValue = useMemo(
+    () => ({ ...state, addPoints, spendPoints, getProgressToNextTier }),
+    [state, addPoints, spendPoints, getProgressToNextTier]
+  );
 
   return (
-    <WalletContext.Provider value={{ ...state, addPoints, spendPoints, getProgressToNextTier }}>
+    <WalletContext.Provider value={ctxValue}>
       {children}
     </WalletContext.Provider>
   );

@@ -1,5 +1,10 @@
-import SmartAlerts from '@/app/pages/dashboard/SmartAlerts';
+import SmartAlerts from '../../pages/dashboard/SmartAlerts';
+import { ListPageLoader } from '../../components/PageLoader';
 
 export default function SmartAlertsPage() {
-  return <SmartAlerts />;
+  return (
+    <ListPageLoader>
+      <SmartAlerts />
+    </ListPageLoader>
+  );
 }

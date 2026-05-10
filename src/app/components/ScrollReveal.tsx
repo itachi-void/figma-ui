@@ -1,5 +1,4 @@
-import { motion } from 'motion/react';
-import React, { ReactNode } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -16,33 +15,54 @@ export function ScrollReveal({
   delay = 0,
   once = true,
 }: ScrollRevealProps) {
-  const directions = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { x: 40, y: 0 },
-    right: { x: -40, y: 0 }
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            setIsVisible(true);
+          }, delay * 1000);
+          
+          if (once) {
+            observer.disconnect();
+          }
+        } else if (!once) {
+          setIsVisible(false);
+        }
+      },
+      {
+        rootMargin: '-50px',
+        threshold: 0.1,
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [delay, once]);
+
+  const directionClasses = {
+    up: 'translate-y-10',
+    down: '-translate-y-10',
+    left: 'translate-x-10',
+    right: '-translate-x-10'
   };
 
   return (
-    <motion.div
-      initial={{ 
-        opacity: 0, 
-        ...directions[direction] 
-      }}
-      whileInView={{ 
-        opacity: 1, 
-        x: 0, 
-        y: 0 
-      }}
-      viewport={{ once, margin: "-50px" }}
-      transition={{ 
-        duration: 0.7,
-        delay,
-        ease: [0.25, 0.1, 0.25, 1]
-      }}
-      className={className}
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        isVisible
+          ? 'opacity-100 translate-x-0 translate-y-0'
+          : `opacity-0 ${directionClasses[direction]}`
+      } ${className}`}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useEffect } from 'react';
 import { Shield, Users, Truck, User } from 'lucide-react';
-import { useRole } from '@/app/contexts/RoleContext';
+import { useRole } from '../contexts/RoleContext';
 
 const roleConfigs = [
   {
@@ -47,13 +47,17 @@ const roleConfigs = [
 
 export default function RoleSwitcher() {
   const { role, setRole } = useRole();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setIsVisible(true), 75);
+  }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="fixed bottom-6 right-6 z-[9999] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 p-4"
+    <div
+      className={`fixed bottom-6 right-6 z-[9999] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 p-4 transition-all duration-300 ${
+        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+      }`}
     >
       <div className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">
         Demo: Switch Role
@@ -65,12 +69,10 @@ export default function RoleSwitcher() {
           const isActive = role === r.id;
 
           return (
-            <motion.button
+            <button
               key={r.id}
               onClick={() => setRole(r.id as any)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl transition-all ${
+              className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl transition-all hover:scale-105 active:scale-95 ${
                 isActive
                   ? `${r.activeBg} ${r.activeText} shadow-lg`
                   : `${r.inactiveBg} ${r.inactiveText} ${r.hoverBg}`
@@ -78,10 +80,10 @@ export default function RoleSwitcher() {
             >
               <Icon className="w-5 h-5" />
               <span className="text-xs font-bold">{r.label}</span>
-            </motion.button>
+            </button>
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { useState, useEffect } from 'react';
 import { X, Navigation, Clock, Target, Zap } from "lucide-react";
 import { 
   BarChart, 
@@ -51,6 +51,12 @@ const parseTime = (time: string) => {
 };
 
 export default function RouteComparisonModal({ routes, onClose }: Props) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   if (!routes || routes.length === 0) return null;
 
   // Colors for each route
@@ -66,9 +72,6 @@ export default function RouteComparisonModal({ routes, onClose }: Props) {
   }));
 
   // Radar Chart Data (Normalized 0-100 for comparison)
-  // We want to normalize: higher efficiency is better (100 is 100).
-  // higher stops is better (max = 100).
-  // shorter distance is better? Or just raw amount. Let's just do raw amount scaled to max for visualization.
   const maxDistance = Math.max(...barData.map(d => d.distance)) || 1;
   const maxTime = Math.max(...barData.map(d => d.time)) || 1;
   const maxStops = Math.max(...barData.map(d => d.stops)) || 1;
@@ -104,11 +107,10 @@ export default function RouteComparisonModal({ routes, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-md">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white dark:bg-gray-900 w-full max-w-6xl max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800"
+      <div 
+        className={`bg-white dark:bg-gray-900 w-full max-w-6xl max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 transition-all duration-300 ${
+          isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
+        }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 md:p-8 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
@@ -123,7 +125,7 @@ export default function RouteComparisonModal({ routes, onClose }: Props) {
           </div>
           <button 
             onClick={onClose}
-            className="p-3 hover:bg-white dark:hover:bg-gray-800 rounded-full transition-colors shadow-sm"
+            className="p-3 hover:bg-white dark:hover:bg-gray-800 rounded-full transition-all hover:scale-105 active:scale-95 shadow-sm"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -227,7 +229,7 @@ export default function RouteComparisonModal({ routes, onClose }: Props) {
           </div>
 
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

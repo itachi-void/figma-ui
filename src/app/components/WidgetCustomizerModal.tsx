@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { X, Check } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Props {
   isOpen: boolean;
@@ -10,6 +10,16 @@ interface Props {
 }
 
 export default function WidgetCustomizerModal({ isOpen, onClose, availableWidgets, hiddenWidgets, setHiddenWidgets }: Props) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const toggleWidget = (label: string) => {
@@ -21,13 +31,8 @@ export default function WidgetCustomizerModal({ isOpen, onClose, availableWidget
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800"
-      >
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`bg-white dark:bg-gray-900 w-full max-w-md rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 transition-all duration-300 ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-5'}`}>
         <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Customize Dashboard</h2>
           <button 
@@ -51,7 +56,7 @@ export default function WidgetCustomizerModal({ isOpen, onClose, availableWidget
                   className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all ${isVisible ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl border ${isVisible ? 'bg-emerald-500 border-emerald-500' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}`}>
+                    <div className={`p-2 rounded-xl border transition-all ${isVisible ? 'bg-emerald-500 border-emerald-500' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}`}>
                       {isVisible && <Check className="w-4 h-4 text-white" />}
                       {!isVisible && <div className="w-4 h-4" />}
                     </div>
@@ -67,7 +72,7 @@ export default function WidgetCustomizerModal({ isOpen, onClose, availableWidget
             })}
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -1,14 +1,28 @@
-import { motion, animate, useMotionValue, useTransform } from 'motion/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AnimatedCounter({ value }: { value: number }) {
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, Math.round);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const animation = animate(count, value, { duration: 1.5 });
-    return animation.stop;
-  }, [value, count]);
+    const duration = 375;
+    const steps = 60;
+    const increment = value / steps;
+    let current = 0;
+    let step = 0;
 
-  return <motion.span>{rounded}</motion.span>;
+    const timer = setInterval(() => {
+      step++;
+      current = Math.min(Math.round(increment * step), value);
+      setCount(current);
+
+      if (step >= steps) {
+        clearInterval(timer);
+        setCount(value);
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
+  return <span>{count}</span>;
 }

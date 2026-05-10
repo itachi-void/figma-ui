@@ -1,5 +1,10 @@
-import Reports from '@/app/pages/dashboard/Reports';
+import Reports from '../../pages/dashboard/Reports';
+import { ChartPageLoader } from '../../components/PageLoader';
 
 export default function ReportsPage() {
-  return <Reports />;
+  return (
+    <ChartPageLoader>
+      <Reports />
+    </ChartPageLoader>
+  );
 }

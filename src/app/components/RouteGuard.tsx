@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router';
-import { useRole } from '@/app/contexts/RoleContext';
+import { useRole } from '../contexts/RoleContext';
 import { ReactNode } from 'react';
 
 // Define which roles can access which routes

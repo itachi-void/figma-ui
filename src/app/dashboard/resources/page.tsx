@@ -1,5 +1,10 @@
-import Resources from '@/app/pages/dashboard/Resources';
+import Resources from '../../pages/dashboard/Resources';
+import { StatsPageLoader } from '../../components/PageLoader';
 
 export default function ResourcesPage() {
-  return <Resources />;
+  return (
+    <StatsPageLoader>
+      <Resources />
+    </StatsPageLoader>
+  );
 }

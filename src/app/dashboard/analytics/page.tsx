@@ -1,5 +1,10 @@
-import Analytics from '@/app/pages/dashboard/Analytics';
+import Analytics from '../../pages/dashboard/Analytics';
+import { ChartPageLoader } from '../../components/PageLoader';
 
 export default function AnalyticsPage() {
-  return <Analytics />;
+  return (
+    <ChartPageLoader>
+      <Analytics />
+    </ChartPageLoader>
+  );
 }

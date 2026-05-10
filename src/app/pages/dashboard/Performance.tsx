@@ -215,13 +215,30 @@ const radarData = [
 ];
 
 export default function Performance() {
-  const [timeRange, setTimeRange] = useState<"week" | "month" | "quarter">(
-    "week",
-  );
+  const [timeRange, setTimeRange] = useState<
+    "week" | "month" | "quarter"
+  >("week");
   const [selectedMetric, setSelectedMetric] = useState<
     "all" | "collection" | "processing" | "revenue"
   >("all");
+  const [trendMetric, setTrendMetric] = useState<"efficiency" | "satisfaction" | "both">("both");
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await new Promise((r) => setTimeout(r, 200));
+    setIsRefreshing(false);
+  };
+
+  // Scale weekly values based on selected time range so the chart reflects scope
+  const rangeMultiplier = timeRange === "week" ? 1 : timeRange === "month" ? 4.3 : 13;
+  const displayedTrendData = weeklyData.map((d) => ({
+    ...d,
+    collected: Math.round(d.collected * rangeMultiplier),
+    processed: Math.round(d.processed * rangeMultiplier),
+    revenue: Math.round(d.revenue * rangeMultiplier),
+  }));
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -263,7 +280,9 @@ export default function Performance() {
         <div className="flex gap-3">
           <select
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as any)}
+            onChange={(e) =>
+              setTimeRange(e.target.value as any)
+            }
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             <option value="week">This Week</option>
@@ -271,12 +290,14 @@ export default function Performance() {
             <option value="quarter">This Quarter</option>
           </select>
           <motion.button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-60"
           >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            {isRefreshing ? "Refreshing..." : "Refresh"}
           </motion.button>
           <motion.button
             onClick={() => setIsExportDialogOpen(true)}
@@ -372,7 +393,8 @@ export default function Performance() {
               variants={itemVariants}
               whileHover={{
                 y: -5,
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+                boxShadow:
+                  "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
               }}
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
             >
@@ -393,9 +415,14 @@ export default function Performance() {
                   {kpi.trend}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 mb-1">{kpi.label}</p>
+              <p className="text-sm text-gray-600 mb-1">
+                {kpi.label}
+              </p>
               <p className="text-3xl font-bold text-gray-900 mb-3">
-                <AnimatedCounter end={kpi.value} suffix={kpi.suffix} />
+                <AnimatedCounter
+                  end={kpi.value}
+                  suffix={kpi.suffix}
+                />
               </p>
               <div className="space-y-2">
                 <div className="flex justify-between text-xs text-gray-500">
@@ -447,7 +474,7 @@ export default function Performance() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={weeklyData}>
+            <AreaChart data={displayedTrendData}>
               <defs>
                 <linearGradient
                   id="perfColorCollected"
@@ -456,8 +483,16 @@ export default function Performance() {
                   x2="0"
                   y2="1"
                 >
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor="#10B981"
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="#10B981"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
                 <linearGradient
                   id="perfColorProcessed"
@@ -466,11 +501,22 @@ export default function Performance() {
                   x2="0"
                   y2="1"
                 >
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor="#3B82F6"
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="#3B82F6"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#E5E7EB"
+              />
               <XAxis dataKey="day" stroke="#6B7280" />
               <YAxis stroke="#6B7280" />
               <Tooltip
@@ -478,7 +524,8 @@ export default function Performance() {
                   backgroundColor: "#fff",
                   border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  boxShadow:
+                    "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
               />
               <Legend />
@@ -521,8 +568,11 @@ export default function Performance() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <RechartsLine data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <RechartsLine data={displayedTrendData}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#E5E7EB"
+              />
               <XAxis dataKey="day" stroke="#6B7280" />
               <YAxis stroke="#6B7280" />
               <Tooltip
@@ -530,7 +580,8 @@ export default function Performance() {
                   backgroundColor: "#fff",
                   border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  boxShadow:
+                    "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
               />
               <Legend />
@@ -556,7 +607,9 @@ export default function Performance() {
               <h3 className="text-lg font-semibold text-gray-900">
                 Material Distribution
               </h3>
-              <p className="text-sm text-gray-600 mt-1">By category</p>
+              <p className="text-sm text-gray-600 mt-1">
+                By category
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <PieChart className="w-5 h-5 text-gray-400" />
@@ -577,7 +630,10 @@ export default function Performance() {
                 dataKey="value"
               >
                 {categoryData.map((entry) => (
-                  <Cell key={`cell-${entry.id}`} fill={entry.color} />
+                  <Cell
+                    key={`cell-${entry.id}`}
+                    fill={entry.color}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -585,7 +641,10 @@ export default function Performance() {
           </ResponsiveContainer>
           <div className="grid grid-cols-2 gap-3 mt-6">
             {categoryData.map((cat) => (
-              <div key={cat.name} className="flex items-center gap-2">
+              <div
+                key={cat.name}
+                className="flex items-center gap-2"
+              >
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: cat.color }}
@@ -619,8 +678,15 @@ export default function Performance() {
           <ResponsiveContainer width="100%" height={300}>
             <RadarChart data={radarData}>
               <PolarGrid stroke="#E5E7EB" />
-              <PolarAngleAxis dataKey="metric" stroke="#6B7280" />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#6B7280" />
+              <PolarAngleAxis
+                dataKey="metric"
+                stroke="#6B7280"
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                stroke="#6B7280"
+              />
               <Radar
                 name="Performance"
                 dataKey="value"
@@ -653,16 +719,26 @@ export default function Performance() {
           </div>
           <div className="flex gap-2">
             <motion.button
+              onClick={() => setTrendMetric(trendMetric === "efficiency" ? "both" : "efficiency")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium"
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                trendMetric === "efficiency"
+                  ? "bg-green-600 text-white"
+                  : "bg-green-100 text-green-700 hover:bg-green-200"
+              }`}
             >
               Efficiency
             </motion.button>
             <motion.button
+              onClick={() => setTrendMetric(trendMetric === "satisfaction" ? "both" : "satisfaction")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium"
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                trendMetric === "satisfaction"
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+              }`}
             >
               Satisfaction
             </motion.button>
@@ -670,7 +746,10 @@ export default function Performance() {
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={monthlyData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#E5E7EB"
+            />
             <XAxis dataKey="month" stroke="#6B7280" />
             <YAxis stroke="#6B7280" />
             <Tooltip
@@ -682,8 +761,20 @@ export default function Performance() {
               }}
             />
             <Legend />
-            <Bar dataKey="efficiency" fill="#10B981" radius={[8, 8, 0, 0]} />
-            <Bar dataKey="satisfaction" fill="#3B82F6" radius={[8, 8, 0, 0]} />
+            {(trendMetric === "efficiency" || trendMetric === "both") && (
+              <Bar
+                dataKey="efficiency"
+                fill="#10B981"
+                radius={[8, 8, 0, 0]}
+              />
+            )}
+            {(trendMetric === "satisfaction" || trendMetric === "both") && (
+              <Bar
+                dataKey="satisfaction"
+                fill="#3B82F6"
+                radius={[8, 8, 0, 0]}
+              />
+            )}
           </BarChart>
         </ResponsiveContainer>
       </motion.div>
@@ -758,7 +849,9 @@ export default function Performance() {
               <p className="text-xl font-bold text-gray-900 mb-2">
                 {insight.value}
               </p>
-              <p className="text-sm text-gray-600">{insight.description}</p>
+              <p className="text-sm text-gray-600">
+                {insight.description}
+              </p>
             </motion.div>
           );
         })}

@@ -1,10 +1,21 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { MapPin, Truck, Building2, Users, Info } from "lucide-react";
+import {
+  MapPin,
+  Truck,
+  Building2,
+  Users,
+  Info,
+} from "lucide-react";
 import FleetMap from "@/app/components/maps/FleetMap";
 import { useRole } from "@/app/contexts/RoleContext";
 import { getMapDataForRole } from "@/app/data/mockMapData";
-import { Driver, Route, Center, Community } from "@/app/components/maps/types";
+import {
+  Driver,
+  Route,
+  Center,
+  Community,
+} from "@/app/components/maps/types";
 import { notify } from "@/app/utils/notifications";
 import { Progress } from "../../components/ui/progress";
 
@@ -13,21 +24,22 @@ export default function FleetMapDemo() {
   const role = user?.role || "admin";
 
   // Get filtered data based on role
-  const { drivers, routes, centers, communities } = getMapDataForRole(
-    role,
-    user?.id,
-  );
+  const { drivers, routes, centers, communities } =
+    getMapDataForRole(role, user?.id);
 
-  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
-  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
-  const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
-  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(
-    null,
-  );
+  const [selectedDriver, setSelectedDriver] =
+    useState<Driver | null>(null);
+  const [selectedRoute, setSelectedRoute] =
+    useState<Route | null>(null);
+  const [selectedCenter, setSelectedCenter] =
+    useState<Center | null>(null);
+  const [selectedCommunity, setSelectedCommunity] =
+    useState<Community | null>(null);
 
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
-  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false);
+  const [isAnalyticsLoading, setIsAnalyticsLoading] =
+    useState(false);
 
   const handleOptimizeRoutes = () => {
     setIsOptimizing(true);
@@ -109,12 +121,17 @@ export default function FleetMapDemo() {
               Fleet & Operations Map
             </h1>
             <p className="text-emerald-50">
-              Real-time tracking and route management for RecycleHub
+              Real-time tracking and route management for
+              RecycleHub
             </p>
           </div>
           <div className="bg-white/20 backdrop-blur-lg rounded-xl px-6 py-3">
-            <div className="text-sm text-emerald-100">Current Role</div>
-            <div className="text-2xl font-bold capitalize">{role}</div>
+            <div className="text-sm text-emerald-100">
+              Current Role
+            </div>
+            <div className="text-2xl font-bold capitalize">
+              {role}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -133,8 +150,12 @@ export default function FleetMapDemo() {
                 <Truck className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{drivers.length}</div>
-                <div className="text-sm text-gray-600">Active Drivers</div>
+                <div className="text-2xl font-bold">
+                  {drivers.length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Active Drivers
+                </div>
               </div>
             </div>
           </motion.div>
@@ -152,8 +173,12 @@ export default function FleetMapDemo() {
                 <MapPin className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{routes.length}</div>
-                <div className="text-sm text-gray-600">Routes</div>
+                <div className="text-2xl font-bold">
+                  {routes.length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Routes
+                </div>
               </div>
             </div>
           </motion.div>
@@ -171,14 +196,20 @@ export default function FleetMapDemo() {
                 <Building2 className="w-6 h-6 text-cyan-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{centers.length}</div>
-                <div className="text-sm text-gray-600">Centers</div>
+                <div className="text-2xl font-bold">
+                  {centers.length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Centers
+                </div>
               </div>
             </div>
           </motion.div>
         )}
 
-        {role === "citizen" || role === "admin" || role === "manager" ? (
+        {role === "citizen" ||
+        role === "admin" ||
+        role === "manager" ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -190,8 +221,12 @@ export default function FleetMapDemo() {
                 <Users className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{communities.length}</div>
-                <div className="text-sm text-gray-600">Communities</div>
+                <div className="text-2xl font-bold">
+                  {communities.length}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Communities
+                </div>
               </div>
             </div>
           </motion.div>
@@ -207,11 +242,20 @@ export default function FleetMapDemo() {
       >
         <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
         <div className="text-sm text-blue-900">
-          <p className="font-semibold mb-1">Interactive Map Features</p>
+          <p className="font-semibold mb-1">
+            Interactive Map Features
+          </p>
           <ul className="list-disc list-inside space-y-1 text-blue-800">
-            <li>Click on markers to view detailed information</li>
-            <li>Use layer controls to toggle different data views</li>
-            <li>Routes are calculated using real road networks via OSRM</li>
+            <li>
+              Click on markers to view detailed information
+            </li>
+            <li>
+              Use layer controls to toggle different data views
+            </li>
+            <li>
+              Routes are calculated using real road networks via
+              OSRM
+            </li>
             <li>
               {role === "driver" &&
                 "You can only see your assigned route and vehicle"}
@@ -239,13 +283,17 @@ export default function FleetMapDemo() {
           selectedCenter ||
           selectedCommunity ? (
             <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
-              <h3 className="font-bold text-lg mb-3">Details</h3>
+              <h3 className="font-bold text-lg mb-3">
+                Details
+              </h3>
 
               {selectedDriver && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-emerald-600 mb-2">
                     <Truck size={20} />
-                    <span className="font-semibold">Driver Information</span>
+                    <span className="font-semibold">
+                      Driver Information
+                    </span>
                   </div>
                   <div className="space-y-1 text-sm">
                     <p>
@@ -253,7 +301,9 @@ export default function FleetMapDemo() {
                       {selectedDriver.name}
                     </p>
                     <p>
-                      <span className="font-medium">Status:</span>{" "}
+                      <span className="font-medium">
+                        Status:
+                      </span>{" "}
                       <span className="capitalize">
                         {selectedDriver.status}
                       </span>
@@ -264,7 +314,9 @@ export default function FleetMapDemo() {
                     </p>
                     {selectedDriver.vehicleType && (
                       <p>
-                        <span className="font-medium">Vehicle:</span>{" "}
+                        <span className="font-medium">
+                          Vehicle:
+                        </span>{" "}
                         {selectedDriver.vehicleType}
                       </p>
                     )}
@@ -273,8 +325,8 @@ export default function FleetMapDemo() {
                         <div className="text-xs text-gray-600 mb-1">
                           Load Progress
                         </div>
-                        <Progress
-                          value={selectedDriver.load}
+                        <Progress 
+                          value={selectedDriver.load} 
                           className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-teal-500"
                         />
                       </div>
@@ -287,7 +339,9 @@ export default function FleetMapDemo() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-blue-600 mb-2">
                     <MapPin size={20} />
-                    <span className="font-semibold">Route Information</span>
+                    <span className="font-semibold">
+                      Route Information
+                    </span>
                   </div>
                   <div className="space-y-1 text-sm">
                     <p>
@@ -295,22 +349,32 @@ export default function FleetMapDemo() {
                       {selectedRoute.name}
                     </p>
                     <p>
-                      <span className="font-medium">Status:</span>{" "}
-                      <span className="capitalize">{selectedRoute.status}</span>
+                      <span className="font-medium">
+                        Status:
+                      </span>{" "}
+                      <span className="capitalize">
+                        {selectedRoute.status}
+                      </span>
                     </p>
                     <p>
-                      <span className="font-medium">Stops:</span>{" "}
+                      <span className="font-medium">
+                        Stops:
+                      </span>{" "}
                       {selectedRoute.stops.length}
                     </p>
                     {selectedRoute.distance && (
                       <p>
-                        <span className="font-medium">Distance:</span>{" "}
+                        <span className="font-medium">
+                          Distance:
+                        </span>{" "}
                         {selectedRoute.distance} km
                       </p>
                     )}
                     {selectedRoute.duration && (
                       <p>
-                        <span className="font-medium">Duration:</span>{" "}
+                        <span className="font-medium">
+                          Duration:
+                        </span>{" "}
                         {selectedRoute.duration} min
                       </p>
                     )}
@@ -322,7 +386,9 @@ export default function FleetMapDemo() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-cyan-600 mb-2">
                     <Building2 size={20} />
-                    <span className="font-semibold">Center Information</span>
+                    <span className="font-semibold">
+                      Center Information
+                    </span>
                   </div>
                   <div className="space-y-1 text-sm">
                     <p>
@@ -331,15 +397,22 @@ export default function FleetMapDemo() {
                     </p>
                     <p>
                       <span className="font-medium">Type:</span>{" "}
-                      <span className="capitalize">{selectedCenter.type}</span>
+                      <span className="capitalize">
+                        {selectedCenter.type}
+                      </span>
                     </p>
                     <p>
-                      <span className="font-medium">Capacity:</span>{" "}
-                      {selectedCenter.currentLoad} / {selectedCenter.capacity}
+                      <span className="font-medium">
+                        Capacity:
+                      </span>{" "}
+                      {selectedCenter.currentLoad} /{" "}
+                      {selectedCenter.capacity}
                     </p>
                     {selectedCenter.operatingHours && (
                       <p>
-                        <span className="font-medium">Hours:</span>{" "}
+                        <span className="font-medium">
+                          Hours:
+                        </span>{" "}
                         {selectedCenter.operatingHours}
                       </p>
                     )}
@@ -348,12 +421,8 @@ export default function FleetMapDemo() {
                         <div className="text-xs text-gray-600 mb-1">
                           Capacity Usage
                         </div>
-                        <Progress
-                          value={
-                            (selectedCenter.currentLoad /
-                              selectedCenter.capacity) *
-                            100
-                          }
+                        <Progress 
+                          value={(selectedCenter.currentLoad / selectedCenter.capacity) * 100} 
                           className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-cyan-500 [&>div]:to-blue-500"
                         />
                       </div>
@@ -366,7 +435,9 @@ export default function FleetMapDemo() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-purple-600 mb-2">
                     <Users size={20} />
-                    <span className="font-semibold">Community Information</span>
+                    <span className="font-semibold">
+                      Community Information
+                    </span>
                   </div>
                   <div className="space-y-1 text-sm">
                     <p>
@@ -374,15 +445,21 @@ export default function FleetMapDemo() {
                       {selectedCommunity.name}
                     </p>
                     <p>
-                      <span className="font-medium">Members:</span>{" "}
+                      <span className="font-medium">
+                        Members:
+                      </span>{" "}
                       {selectedCommunity.members}
                     </p>
                     <p>
-                      <span className="font-medium">Bottles:</span>{" "}
+                      <span className="font-medium">
+                        Bottles:
+                      </span>{" "}
                       {selectedCommunity.totalBottles.toLocaleString()}
                     </p>
                     <p>
-                      <span className="font-medium">Level:</span>{" "}
+                      <span className="font-medium">
+                        Level:
+                      </span>{" "}
                       {selectedCommunity.level}
                     </p>
                     {selectedCommunity.isJoined && (
@@ -390,11 +467,12 @@ export default function FleetMapDemo() {
                         ✓ You are a member
                       </div>
                     )}
-                    {!selectedCommunity.isJoined && role === "citizen" && (
-                      <button className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
-                        Join Community
-                      </button>
-                    )}
+                    {!selectedCommunity.isJoined &&
+                      role === "citizen" && (
+                        <button className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                          Join Community
+                        </button>
+                      )}
                   </div>
                 </div>
               )}
@@ -411,7 +489,9 @@ export default function FleetMapDemo() {
           {/* Quick Actions */}
           {role === "admin" && (
             <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
-              <h3 className="font-bold text-sm mb-3">Quick Actions</h3>
+              <h3 className="font-bold text-sm mb-3">
+                Quick Actions
+              </h3>
               <div className="space-y-2">
                 <button
                   onClick={handleOptimizeRoutes}
@@ -428,7 +508,9 @@ export default function FleetMapDemo() {
                       className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                     />
                   ) : null}
-                  {isOptimizing ? "Optimizing..." : "Optimize All Routes"}
+                  {isOptimizing
+                    ? "Optimizing..."
+                    : "Optimize All Routes"}
                 </button>
                 <button
                   onClick={handleAssignDriver}
@@ -445,7 +527,9 @@ export default function FleetMapDemo() {
                       className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                     />
                   ) : null}
-                  {isAssigning ? "Assigning..." : "Assign New Driver"}
+                  {isAssigning
+                    ? "Assigning..."
+                    : "Assign New Driver"}
                 </button>
                 <button
                   onClick={handleViewAnalytics}

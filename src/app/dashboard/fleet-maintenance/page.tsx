@@ -1,5 +1,10 @@
-import FleetMaintenance from '@/app/pages/dashboard/FleetMaintenance';
+import FleetMaintenance from '../../pages/dashboard/FleetMaintenance';
+import { TablePageLoader } from '../../components/PageLoader';
 
 export default function FleetMaintenancePage() {
-  return <FleetMaintenance />;
+  return (
+    <TablePageLoader>
+      <FleetMaintenance />
+    </TablePageLoader>
+  );
 }

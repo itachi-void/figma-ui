@@ -1,5 +1,54 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
-@import 'leaflet/dist/leaflet.css';
-@import './leaflet-fix.css';
+
+/* ─── Phase 4: Stagger Animation System (GSAP-equivalent via CSS) ─── */
+@keyframes staggerFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes staggerFadeLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes staggerZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmerPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.stagger-in {
+  animation: staggerFadeUp 0.13s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stagger-left {
+  animation: staggerFadeLeft 0.12s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stagger-zoom {
+  animation: staggerZoomIn 0.11s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}

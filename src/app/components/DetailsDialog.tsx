@@ -1,5 +1,6 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { X, User, MapPin, Phone, Mail, Calendar, Package, TrendingUp, Award } from 'lucide-react';
+import { X, User, MapPin, Phone, Mail, Calendar, Package, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Progress } from './ui/progress';
 
 interface DetailsDialogProps {
   isOpen: boolean;
@@ -9,6 +10,25 @@ interface DetailsDialogProps {
 }
 
 export function DetailsDialog({ isOpen, onClose, type, data }: DetailsDialogProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [completionRate, setCompletionRate] = useState(0);
+  const [onTimeRate, setOnTimeRate] = useState(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      // Animate progress bars
+      setTimeout(() => {
+        setCompletionRate(98);
+        setOnTimeRate(95);
+      }, 100);
+    } else {
+      setIsVisible(false);
+      setCompletionRate(0);
+      setOnTimeRate(0);
+    }
+  }, [isOpen]);
+
   if (!data) return null;
 
   const renderDriverDetails = () => (
@@ -83,28 +103,20 @@ export function DetailsDialog({ isOpen, onClose, type, data }: DetailsDialogProp
               <span className="text-gray-600">Completion Rate</span>
               <span className="font-medium text-gray-900">98%</span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: '98%' }}
-                transition={{ duration: 1, delay: 0.2 }}
-                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600"
-              />
-            </div>
+            <Progress 
+              value={completionRate} 
+              className="h-2 bg-gray-200 dark:bg-gray-700 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600"
+            />
           </div>
           <div>
             <div className="flex justify-between text-sm mb-1">
               <span className="text-gray-600">On-Time Delivery</span>
               <span className="font-medium text-gray-900">95%</span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: '95%' }}
-                transition={{ duration: 1, delay: 0.3 }}
-                className="h-full bg-gradient-to-r from-blue-500 to-blue-600"
-              />
-            </div>
+            <Progress 
+              value={onTimeRate} 
+              className="h-2 bg-gray-200 dark:bg-gray-700 [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-blue-600"
+            />
           </div>
         </div>
       </div>
@@ -150,57 +162,47 @@ export function DetailsDialog({ isOpen, onClose, type, data }: DetailsDialogProp
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+    <>
+      {/* Backdrop */}
+      <div 
+        onClick={onClose}
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+      />
+
+      {/* Dialog */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="details-dialog-title"
+        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl z-50 p-6 transition-all duration-300 ${isVisible ? 'opacity-100 scale-100 translate-y-[-50%]' : 'opacity-0 scale-90 translate-y-[-45%]'}`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 id="details-dialog-title" className="text-2xl font-bold text-gray-900">Details</h2>
+          <button
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-          />
-
-          {/* Dialog */}
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="details-dialog-title"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl z-50 p-6"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 id="details-dialog-title" className="text-2xl font-bold text-gray-900">Details</h2>
-              <button
-                onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
 
-            {/* Content */}
-            {renderContent()}
+        {/* Content */}
+        {renderContent()}
 
-            {/* Actions */}
-            <div className="flex items-center gap-3 mt-8 pt-6 border-t">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onClose}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-medium"
-              >
-                Close
-              </motion.button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        {/* Actions */}
+        <div className="flex items-center gap-3 mt-8 pt-6 border-t">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-medium hover:scale-105 active:scale-95"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

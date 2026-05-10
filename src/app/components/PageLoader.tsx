@@ -11,7 +11,14 @@ import {
 
 interface PageLoaderProps {
   children: ReactNode;
-  type?: "dashboard" | "table" | "stats" | "chart" | "list" | "form" | "custom";
+  type?:
+    | "dashboard"
+    | "table"
+    | "stats"
+    | "chart"
+    | "list"
+    | "form"
+    | "custom";
   customSkeleton?: ReactNode;
   loadingTime?: number; // Minimum time to show skeleton (ms)
   simulatedDelay?: number; // Simulated data fetch delay (ms)
@@ -21,8 +28,8 @@ export function PageLoader({
   children,
   type = "dashboard",
   customSkeleton,
-  loadingTime = 800,
-  simulatedDelay = 1200,
+  loadingTime = 200,
+  simulatedDelay = 300,
 }: PageLoaderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -99,7 +106,7 @@ export function PageLoader({
 // Specific page loaders for common layouts
 export function OverviewPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="dashboard" loadingTime={300} simulatedDelay={200}>
+    <PageLoader type="dashboard" loadingTime={500} simulatedDelay={2000}>
       {children}
     </PageLoader>
   );
@@ -107,7 +114,7 @@ export function OverviewPageLoader({ children }: { children: ReactNode }) {
 
 export function TablePageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="table" loadingTime={300} simulatedDelay={200}>
+    <PageLoader type="table" loadingTime={500} simulatedDelay={2000}>
       {children}
     </PageLoader>
   );
@@ -115,7 +122,7 @@ export function TablePageLoader({ children }: { children: ReactNode }) {
 
 export function StatsPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="stats" loadingTime={300} simulatedDelay={200}>
+    <PageLoader type="stats" loadingTime={500} simulatedDelay={2000}>
       {children}
     </PageLoader>
   );
@@ -123,7 +130,7 @@ export function StatsPageLoader({ children }: { children: ReactNode }) {
 
 export function ChartPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="chart" loadingTime={300} simulatedDelay={200}>
+    <PageLoader type="chart" loadingTime={500} simulatedDelay={2000}>
       {children}
     </PageLoader>
   );
@@ -131,7 +138,7 @@ export function ChartPageLoader({ children }: { children: ReactNode }) {
 
 export function ListPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="list" loadingTime={300} simulatedDelay={200}>
+    <PageLoader type="list" loadingTime={500} simulatedDelay={2000}>
       {children}
     </PageLoader>
   );
@@ -139,7 +146,7 @@ export function ListPageLoader({ children }: { children: ReactNode }) {
 
 export function FormPageLoader({ children }: { children: ReactNode }) {
   return (
-    <PageLoader type="form" loadingTime={300} simulatedDelay={200}>
+    <PageLoader type="form" loadingTime={500} simulatedDelay={2000}>
       {children}
     </PageLoader>
   );

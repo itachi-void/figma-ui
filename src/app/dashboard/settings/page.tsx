@@ -1,5 +1,10 @@
-import Settings from '@/app/pages/dashboard/Settings';
+import Settings from '../../pages/dashboard/Settings';
+import { FormPageLoader } from '../../components/PageLoader';
 
 export default function SettingsPage() {
-  return <Settings />;
+  return (
+    <FormPageLoader>
+      <Settings />
+    </FormPageLoader>
+  );
 }

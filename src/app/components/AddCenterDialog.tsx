@@ -69,7 +69,7 @@ export function AddCenterDialog({
     if (isOpen && firstInputRef.current) {
       setTimeout(() => {
         firstInputRef.current?.focus();
-      }, 100);
+      }, 25);
     }
   }, [isOpen]);
 
@@ -204,7 +204,7 @@ export function AddCenterDialog({
     setIsSaving(true);
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
     const newCenter = {
       id: `CEN-${Date.now()}`,
@@ -238,7 +238,7 @@ export function AddCenterDialog({
 
     setTimeout(() => {
       onClose();
-    }, 1000);
+    }, 250);
   };
 
   // Handle close

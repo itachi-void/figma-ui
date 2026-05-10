@@ -21,7 +21,7 @@ export function Skeleton({
         variant === "circular" && "rounded-full",
         variant === "text" && "rounded-md h-4",
         variant === "default" && "rounded-lg",
-        className,
+        className
       )}
       {...props}
     />
@@ -43,25 +43,16 @@ export function SkeletonCard() {
 }
 
 // Table Skeleton
-export function SkeletonTable({
-  rows,
-  columns,
-}: {
-  rows?: number;
-  columns?: number;
-}) {
+export function SkeletonTable({ rows, columns }: { rows?: number; columns?: number }) {
   const rowsCount = rows ?? 5;
   const columnsCount = columns ?? 4;
   const gridTemplateStyle = `repeat(${columnsCount}, 1fr)`;
-
+  
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-800 p-4">
-        <div
-          className="grid gap-4"
-          style={{ gridTemplateColumns: gridTemplateStyle }}
-        >
+        <div className="grid gap-4" style={{ gridTemplateColumns: gridTemplateStyle }}>
           {Array.from({ length: columnsCount }).map((_, i) => (
             <Skeleton key={`header-${i}`} className="h-5 w-full" />
           ))}
@@ -69,19 +60,10 @@ export function SkeletonTable({
       </div>
       {/* Rows */}
       {Array.from({ length: rowsCount }).map((_, rowIndex) => (
-        <div
-          key={`row-${rowIndex}`}
-          className="border-b border-gray-200 dark:border-gray-800 p-4 last:border-0"
-        >
-          <div
-            className="grid gap-4"
-            style={{ gridTemplateColumns: gridTemplateStyle }}
-          >
+        <div key={`row-${rowIndex}`} className="border-b border-gray-200 dark:border-gray-800 p-4 last:border-0">
+          <div className="grid gap-4" style={{ gridTemplateColumns: gridTemplateStyle }}>
             {Array.from({ length: columnsCount }).map((_, colIndex) => (
-              <Skeleton
-                key={`cell-${rowIndex}-${colIndex}`}
-                className="h-4 w-full"
-              />
+              <Skeleton key={`cell-${rowIndex}-${colIndex}`} className="h-4 w-full" />
             ))}
           </div>
         </div>
@@ -94,7 +76,7 @@ export function SkeletonTable({
 export function SkeletonChart({ height }: { height?: string }) {
   const heightClass = height ?? "h-64";
   const fullClassName = `w-full ${heightClass}`;
-
+  
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
       <Skeleton className="h-6 w-40 mb-6" />
