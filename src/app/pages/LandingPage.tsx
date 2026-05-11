@@ -901,6 +901,12 @@ export default function LandingPage() {
               >
                 إنشاء حساب
               </motion.button>
+               <Link
+                to="/account"
+                className="hidden sm:block px-6 py-2 text-emerald-600 font-bold hover:bg-emerald-50 rounded-lg transition-all"
+              >
+                Try
+              </Link>
             </div>
           </div>
         </div>

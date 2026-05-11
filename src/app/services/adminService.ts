@@ -1,18 +1,7 @@
 import { apiRequest } from "../utils/api";
 
-// الأنواع (Interfaces)
-export interface UserFilterAdminDTO {
-  userId: number;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-  isActive: string;
-  walletPoints: number;
-}
-
 export const adminService = {
-  // جلب الإحصائيات
+  // Dashboard stats
   async getDashboardStats() {
     return {
       totalUsers: await apiRequest<number>("/api/admin/total-users"),
@@ -22,23 +11,49 @@ export const adminService = {
     };
   },
 
-  // إدارة المستخدمين
-  async getAllUsers(): Promise<UserFilterAdminDTO[]> {
-    // المسار المرجح لجلب قائمة المستخدمين كاملة للأدمن
-    return await apiRequest<UserFilterAdminDTO[]>("/api/admin/users-by-filter");
+  // Get users
+  async getAllUsers() {
+    return await apiRequest<any[]>("/api/admin/users-by-filter");
   },
 
-  async deleteUser(userId: number): Promise<void> {
-    return await apiRequest<void>(`/api/admin/delete-user?userId=${userId}`, {
-      method: "DELETE",
+  // Delete user
+  async deleteUser(userId: number) {
+    return await apiRequest<void>(
+      `/api/admin/delete-user?userId=${userId}`,
+      { method: "DELETE" }
+    );
+  },
+
+  // Create user (IMPORTANT FIX)
+  async createUser(data: {
+    FullName: string;
+    Email: string;
+    Password: string;
+    Address: string;
+    ProfilePictureUrl?: File;
+  }) {
+    const formData = new FormData();
+
+    formData.append("FullName", data.FullName);
+    formData.append("Email", data.Email);
+    formData.append("Password", data.Password);
+    formData.append("Address", data.Address);
+
+    if (data.ProfilePictureUrl) {
+      formData.append("ProfilePictureUrl", data.ProfilePictureUrl);
+    }
+
+    return await apiRequest("/api/admin/create-user", {
+      method: "POST",
+      body: formData,
     });
   },
 
-  // إدارة الفئات
-  async createWasteCategory(data: any): Promise<any> {
-    return await apiRequest<any>("/api/admin/create-waste-category", {
+  // Waste category
+  async createWasteCategory(data: any) {
+    return await apiRequest("/api/admin/create-waste-category", {
       method: "POST",
       body: JSON.stringify(data),
     });
-  }
+  },
 };

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../../imports/button";
 import { Input } from "../../imports/input";
-import { Label } from "../../imports/label";
 import { Card } from "../../imports/card";
 import { Alert } from "../../imports/alert";
 import { LoadingSpinner } from "../../imports/LoadingSpinner";
-import { userService, UserCreationData, UserData } from "../services/userService";
+import {
+  userService,
+  UserCreationData,
+  UserData,
+} from "../services/userService";
 import { adminService } from "../services/adminService";
 
 interface UserFormProps {
@@ -21,13 +24,12 @@ export const UserForm: React.FC<UserFormProps> = ({
   onSuccess,
   onError,
 }) => {
-  const [formData, setFormData] = useState<UserCreationData & { CurrentPasswordHash?: string }>({
+  const [formData, setFormData] = useState<UserCreationData>({
     FullName: "",
     Email: "",
     Password: "",
     Address: "",
     ProfilePictureUrl: undefined,
-    CurrentPasswordHash: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -35,11 +37,8 @@ export const UserForm: React.FC<UserFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
-  // Stores the full original user record so required backend fields
-  // (walletPoints, status, role, etc.) are preserved on update
   const [originalUser, setOriginalUser] = useState<UserData | null>(null);
 
-  // Load user data if editing
   useEffect(() => {
     if (mode === "edit" && userId) {
       loadUserData(userId);
@@ -50,23 +49,22 @@ export const UserForm: React.FC<UserFormProps> = ({
     setLoadingUser(true);
     try {
       const user = await userService.getUserById(id);
-      // Keep the full record so we can merge it back on submit
+
       setOriginalUser(user);
+
       setFormData({
         FullName: user.fullName,
         Email: user.email,
         Password: "",
         Address: user.address,
         ProfilePictureUrl: undefined,
-        CurrentPasswordHash: user.passwordHash || "",
       });
+
       if (user.profilePictureUrl) {
         setProfilePreview(user.profilePictureUrl);
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load user data";
-      setError(errorMessage);
+      setError(err instanceof Error ? err.message : "Failed to load user");
     } finally {
       setLoadingUser(false);
     }
@@ -82,7 +80,7 @@ export const UserForm: React.FC<UserFormProps> = ({
           ...prev,
           ProfilePictureUrl: file,
         }));
-        // Preview image
+
         const reader = new FileReader();
         reader.onloadend = () => {
           setProfilePreview(reader.result as string);
@@ -97,55 +95,19 @@ export const UserForm: React.FC<UserFormProps> = ({
     }
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     if (
       !formData.FullName ||
       !formData.Email ||
-      !formData.Address
+      !formData.Address ||
+      !formData.Password
     ) {
-      setError("Please fill in all required fields");
+      setError("All fields are required");
       return false;
     }
 
-    // Password is always required — the backend hashes it server-side on every save
-    if (!formData.Password) {
-      setError(mode === "create" ? "Password is required" : "Password is required to update your profile");
-      return false;
-    }
-
-    // Validate full name min length (backend requires > 5)
-    if (formData.FullName.trim().length < 5) {
-      setError("Full name must be at least 5 characters");
-      return false;
-    }
-
-    // Validate full name characters
-    const nameRegex = /^[a-zA-Z\s]+$/;
-    if (!nameRegex.test(formData.FullName)) {
-      setError("Full name should only contain letters and spaces");
-      return false;
-    }
-
-    // Validate email format
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(formData.Email)) {
-      setError("Please enter a valid email address");
-      return false;
-    }
-
-    // Validate address length (backend requires > 30 chars for both modes)
-    if (formData.Address.trim().length < 30) {
+    if (formData.Address.length < 30) {
       setError("Address must be at least 30 characters");
-      return false;
-    }
-
-    // Validate password complexity (required for both create and edit)
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(formData.Password)) {
-      setError(
-        "Password must be at least 8 characters with uppercase, lowercase, number, and special character"
-      );
       return false;
     }
 
@@ -155,9 +117,7 @@ export const UserForm: React.FC<UserFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     setError(null);
@@ -167,58 +127,42 @@ export const UserForm: React.FC<UserFormProps> = ({
       let response;
 
       if (mode === "create") {
-        // If no profile picture provided, fetch the default image and append it
-        let payload = formData;
-        if (!formData.ProfilePictureUrl) {
-          try {
-            const res = await fetch("/default-profile.svg");
-            const blob = await res.blob();
-            const file = new File([blob], "default-profile.svg", {
-              type: blob.type || "image/svg+xml",
-            });
-            payload = { ...formData, ProfilePictureUrl: file };
-            // show default preview
-            setProfilePreview("/default-profile.svg");
-          } catch (fetchErr) {
-            console.warn("Could not load default profile image:", fetchErr);
-          }
+        const form = new FormData();
+        form.append("FullName", formData.FullName);
+        form.append("Email", formData.Email);
+        form.append("Password", formData.Password);
+        form.append("Address", formData.Address);
+
+        if (formData.ProfilePictureUrl) {
+          form.append("ProfilePictureUrl", formData.ProfilePictureUrl);
         }
 
-        response = await adminService.createUser(payload);
+        response = await adminService.createUser(form);
       } else {
-        // Edit mode: merge edited fields onto the original user record so the
-        // backend receives every required field (walletPoints, status, role…)
-        // with its real current value — not a default/zero.
-        const updateData: UserData = {
-          ...originalUser,           // preserve walletPoints, status, role, etc.
-          userId: userId,
-          fullName: formData.FullName,
-          email: formData.Email,
-          address: formData.Address,
-          passwordHash: formData.Password,
-        };
-        response = await userService.updateUser(updateData);
+        if (!userId) {
+          throw new Error("User ID is missing");
+        }
+
+        const form = new FormData();
+        form.append("UserId", String(userId));
+        form.append("FullName", formData.FullName);
+        form.append("Email", formData.Email);
+        form.append("Password", formData.Password);
+        form.append("Address", formData.Address);
+
+        if (formData.ProfilePictureUrl) {
+          form.append("ProfilePictureUrl", formData.ProfilePictureUrl);
+        }
+
+        response = await userService.updateUser(userId, form);
       }
 
       setSuccess(true);
       onSuccess?.(response);
-
-      if (mode === "create") {
-        setFormData({
-          FullName: "",
-          Email: "",
-          Password: "",
-          Address: "",
-          ProfilePictureUrl: undefined,
-          CurrentPasswordHash: "",
-        });
-        setProfilePreview(null);
-      }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      setError(errorMessage);
-      onError?.(errorMessage);
+      const msg = err instanceof Error ? err.message : "Error occurred";
+      setError(msg);
+      onError?.(msg);
     } finally {
       setLoading(false);
     }
@@ -227,142 +171,65 @@ export const UserForm: React.FC<UserFormProps> = ({
   return (
     <Card className="w-full max-w-lg mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">
-        {mode === "create" ? "Create User Account" : "Edit User Profile"}
+        {mode === "create" ? "Create User" : "Edit User"}
       </h2>
 
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert className="mb-4 bg-green-50 text-green-800 border-green-200">
-          {mode === "create"
-            ? "User account created successfully!"
-            : "User profile updated successfully!"}
-        </Alert>
-      )}
+      {error && <Alert variant="destructive">{error}</Alert>}
+      {success && <Alert className="bg-green-100">Success!</Alert>}
 
       {loadingUser ? (
-        <div className="flex justify-center">
-          <LoadingSpinner />
-        </div>
+        <LoadingSpinner />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Profile Picture */}
-          <div className="space-y-2">
-            <Label htmlFor="profilePicture">Profile Picture</Label>
-            <div className="flex gap-4">
-              {profilePreview && (
-                <img
-                  src={profilePreview}
-                  alt="Profile preview"
-                  className="w-24 h-24 rounded-lg object-cover"
-                />
-              )}
-              <Input
-                id="profilePicture"
-                name="profilePicture"
-                type="file"
-                accept="image/*"
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-          </div>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleChange}
+          />
 
-          {/* Full Name */}
-          <div className="space-y-2">
-            <Label htmlFor="FullName">
-              Full Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="FullName"
-              name="FullName"
-              type="text"
-              placeholder="Enter your full name"
-              value={formData.FullName}
-              onChange={handleChange}
-              disabled={loading}
-              pattern="^[a-zA-Z\s]+$"
-              title="Only letters and spaces allowed"
-              required
+          {profilePreview && (
+            <img
+              src={profilePreview}
+              alt="preview"
+              className="w-24 h-24 rounded object-cover"
             />
-            <p className="text-xs text-gray-500">Min 5 characters, max 50</p>
-          </div>
+          )}
 
-          {/* Email */}
-          <div className="space-y-2">
-            <Label htmlFor="Email">
-              Email <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="Email"
-              name="Email"
-              type="email"
-              placeholder="Enter your email address"
-              value={formData.Email}
-              onChange={handleChange}
-              disabled={loading}
-              required
-            />
-          </div>
+          <Input
+            name="FullName"
+            value={formData.FullName}
+            onChange={handleChange}
+            placeholder="Full Name"
+          />
 
-          {/* Password */}
-          <div className="space-y-2">
-            <Label htmlFor="Password">
-              {mode === "create" ? (
-                <>Password <span className="text-red-500">*</span></>
-              ) : (
-                <>Password <span className="text-red-500">*</span> <span className="text-gray-400 font-normal text-xs">(required to save changes)</span></>
-              )}
-            </Label>
-            <Input
-              id="Password"
-              name="Password"
-              type="password"
-              placeholder={mode === "create" ? "Enter a strong password" : "Enter your password to confirm changes"}
-              value={formData.Password}
-              onChange={handleChange}
-              disabled={loading}
-              required
-            />
-            <p className="text-xs text-gray-500">
-              Min 8 characters: uppercase, lowercase, number, and special
-              character
-            </p>
-          </div>
+          <Input
+            name="Email"
+            value={formData.Email}
+            onChange={handleChange}
+            placeholder="Email"
+          />
 
-          {/* Address */}
-          <div className="space-y-2">
-            <Label htmlFor="Address">
-              Address <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="Address"
-              name="Address"
-              type="text"
-              placeholder="Enter your complete address"
-              value={formData.Address}
-              onChange={handleChange}
-              disabled={loading}
-              required
-            />
-            <p className="text-xs text-gray-500">Min 30 characters</p>
-          </div>
+          <Input
+            name="Password"
+            type="password"
+            value={formData.Password}
+            onChange={handleChange}
+            placeholder="Password"
+          />
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <LoadingSpinner />
-                {mode === "create" ? "Creating Account..." : "Updating..."}
-              </div>
-            ) : mode === "create" ? (
-              "Create Account"
-            ) : (
-              "Update Profile"
-            )}
+          <Input
+            name="Address"
+            value={formData.Address}
+            onChange={handleChange}
+            placeholder="Address"
+          />
+
+          <Button disabled={loading} type="submit">
+            {loading
+              ? "Loading..."
+              : mode === "create"
+              ? "Create"
+              : "Update"}
           </Button>
         </form>
       )}

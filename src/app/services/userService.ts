@@ -1,4 +1,3 @@
-// API Service for User endpoints
 const API_BASE_URL = "/api";
 
 export interface UserData {
@@ -11,7 +10,7 @@ export interface UserData {
   walletPoints?: number;
   profilePictureUrl?: string;
   role?: string;
-  createdAt?: string;   // returned by the API, must be echoed back on PUT
+  createdAt?: string;
 }
 
 export interface UserCreationData {
@@ -22,113 +21,78 @@ export interface UserCreationData {
   ProfilePictureUrl?: File;
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// ─── Headers ─────────────────────────────────────────────
 
 function getHeaders(): Record<string, string> {
   const token = localStorage.getItem("authToken");
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+  const headers: Record<string, string> = {};
+
   if (token) headers["Authorization"] = `Bearer ${token}`;
+
   return headers;
 }
 
-/** Safely reads a response body and parses it as JSON if possible. */
-async function parseResponse(response: Response): Promise<any> {
+// ─── Helpers ─────────────────────────────────────────────
+
+async function parseResponse(response: Response) {
   const text = await response.text();
   if (!text) return null;
   try {
     return JSON.parse(text);
   } catch {
-    return text; // plain-text body
+    return text;
   }
 }
 
-/** Extracts a human-readable error message from a parsed response body. */
-function extractError(parsed: any, fallback: string, status: number): string {
-  const body =
-    (typeof parsed === "string" ? parsed : null) ||
+function extractError(parsed: any, fallback: string, status: number) {
+  const msg =
     parsed?.message ||
-    (parsed?.errors
-      ? Object.values(parsed.errors as Record<string, string[]>).flat().join(", ")
-      : null) ||
     parsed?.title ||
-    "";
+    (typeof parsed === "string" ? parsed : null);
 
-  if (!body) {
-    if (status === 401) return `Unauthorized — please log in first (HTTP 401)`;
-    if (status === 403) return `Forbidden — you don't have permission to do this (HTTP 403)`;
-    return `${fallback} (HTTP ${status})`;
-  }
-  return `${body} (HTTP ${status})`;
+  return `${msg || fallback} (HTTP ${status})`;
 }
 
-// ─── Service ─────────────────────────────────────────────────────────────────
+// ─── SERVICE ─────────────────────────────────────────────
 
 export const userService = {
-  // GET all users
+  // GET ALL
   async getAllUsers(): Promise<UserData[]> {
-    const response = await fetch(`${API_BASE_URL}/User`, {
-      method: "GET",
+    const res = await fetch(`${API_BASE_URL}/User`, {
       headers: getHeaders(),
     });
 
-    if (!response.ok) {
-      const parsed = await parseResponse(response);
-      throw new Error(extractError(parsed, "Failed to fetch users", response.status));
-    }
+    const data = await parseResponse(res);
 
-    return response.json();
+    if (!res.ok) throw new Error(extractError(data, "Failed users", res.status));
+
+    return data;
   },
 
-  // GET user by ID
+  // GET BY ID
   async getUserById(id: number): Promise<UserData> {
-    const response = await fetch(`${API_BASE_URL}/User/${id}`, {
-      method: "GET",
+    if (!id) throw new Error("User ID is missing ❌");
+
+    const res = await fetch(`${API_BASE_URL}/User/${id}`, {
       headers: getHeaders(),
     });
 
-    if (!response.ok) {
-      const parsed = await parseResponse(response);
-      throw new Error(extractError(parsed, "Failed to fetch user", response.status));
-    }
+    const data = await parseResponse(res);
 
-    return response.json();
+    if (!res.ok) throw new Error(extractError(data, "Failed user", res.status));
+
+    return data;
   },
 
-  // GET user by email
-  async getUserByEmail(email: string): Promise<UserData> {
-    const response = await fetch(`${API_BASE_URL}/User/by-email/${email}`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      const parsed = await parseResponse(response);
-      throw new Error(extractError(parsed, "Failed to fetch user by email", response.status));
-    }
-
-    return response.json();
-  },
-
-  // GET all users as DTO
-  async getAllUsersAsDto(): Promise<UserData[]> {
-    const response = await fetch(`${API_BASE_URL}/User/GetallbyDto`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      const parsed = await parseResponse(response);
-      throw new Error(extractError(parsed, "Failed to fetch users", response.status));
-    }
-
-    return response.json();
-  },
-
-  // CREATE new user
+  // CREATE
   async createUser(data: UserCreationData): Promise<UserData> {
-    const response = await fetch(`${API_BASE_URL}/User`, {
+    const res = await fetch(`${API_BASE_URL}/User`, {
       method: "POST",
-      headers: getHeaders(),
+      headers: {
+        ...getHeaders(),
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         userId: 0,
         fullName: data.FullName,
@@ -137,61 +101,60 @@ export const userService = {
         address: data.Address,
         status: "active",
         walletPoints: 0,
-        createdAt: new Date().toISOString(),
         role: "user",
+        createdAt: new Date().toISOString(),
       }),
     });
 
-    const parsed = await parseResponse(response);
+    const parsed = await parseResponse(res);
 
-    if (!response.ok) {
-      throw new Error(extractError(parsed, "Failed to create user", response.status));
-    }
+    if (!res.ok) throw new Error(extractError(parsed, "Create failed", res.status));
 
-    return parsed ?? ({} as UserData);
+    return parsed;
   },
 
-  // UPDATE user
-  // All fields are sent (backend requires WalletPoints, Status, Role, etc.)
-  // The caller should spread the original user data so these fields carry their
-  // real current values \u2014 not defaults.
-  async updateUser(data: UserData): Promise<UserData> {
+  // UPDATE (FIXED 🚨)
+  async updateUser(id: number, data: Partial<UserData>): Promise<UserData> {
+    if (!id) throw new Error("User ID is missing ❌");
+
     const payload = {
-      userId: data.userId ?? 0,
+      userId: id,
       fullName: data.fullName,
       email: data.email,
-      passwordHash: (data.passwordHash as string) || "",
+      passwordHash: data.passwordHash || "",
       address: data.address,
       status: data.status || "active",
       walletPoints: data.walletPoints ?? 0,
       role: data.role || "user",
     };
 
-    const response = await fetch(`${API_BASE_URL}/User/${data.userId}`, {
+    const res = await fetch(`${API_BASE_URL}/User/${id}`, {
       method: "PUT",
-      headers: getHeaders(),
+      headers: {
+        ...getHeaders(),
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(payload),
     });
 
-    const parsed = await parseResponse(response);
+    const parsed = await parseResponse(res);
 
-    if (!response.ok) {
-      throw new Error(extractError(parsed, "Failed to update user", response.status));
-    }
+    if (!res.ok) throw new Error(extractError(parsed, "Update failed", res.status));
 
-    return parsed ?? ({} as UserData);
+    return parsed;
   },
 
-  // DELETE user
-  async deleteUser(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/User/${id}`, {
+  // DELETE
+  async deleteUser(id: number) {
+    if (!id) throw new Error("User ID is missing ❌");
+
+    const res = await fetch(`${API_BASE_URL}/User/${id}`, {
       method: "DELETE",
       headers: getHeaders(),
     });
 
-    if (!response.ok) {
-      const parsed = await parseResponse(response);
-      throw new Error(extractError(parsed, "Failed to delete user", response.status));
-    }
+    const parsed = await parseResponse(res);
+
+    if (!res.ok) throw new Error(extractError(parsed, "Delete failed", res.status));
   },
 };
