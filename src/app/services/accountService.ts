@@ -1,4 +1,3 @@
-// API Service for Account endpoints
 const API_BASE_URL = "/api";
 
 export interface LoginCredentials {
@@ -17,7 +16,6 @@ export interface LoginResponse {
   };
 }
 
-// Login endpoint
 export const accountService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/Account/Login`, {
@@ -28,29 +26,26 @@ export const accountService = {
       body: JSON.stringify(credentials),
     });
 
-    // اقرأ الرد كنص الأول
+    // السيرفر بيرجع string (JWT token) مش JSON
     const text = await response.text();
 
-    let parsed: any = null;
-
-    // حاول تحوله JSON لو ينفع
-    try {
-      parsed = text ? JSON.parse(text) : null;
-    } catch {
-      parsed = text;
-    }
-
-    // لو فيه error
+    // لو في خطأ
     if (!response.ok) {
-      throw new Error(
-        parsed?.message ||
-        parsed?.title ||
-        parsed ||
-        "Login failed"
-      );
+      throw new Error(text || "Login failed");
     }
 
-    // لو الرد فاضي
-    return parsed ?? ({} as LoginResponse);
+    // تنظيف التوكن لو جاي بين quotes
+    const token = text.replace(/"/g, "");
+
+    // نرجع شكل متوافق مع التطبيق
+    return {
+      token,
+      user: {
+        userId: 0,
+        email: "",
+        fullName: credentials.name,
+        role: credentials.role || "",
+      },
+    };
   },
 };
