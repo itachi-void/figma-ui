@@ -57,6 +57,13 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    proxy: {
+      '/api': {
+        target: 'https://smartwaste.runasp.net',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     hmr: {
       overlay: true,
       protocol: "ws",

@@ -14,6 +14,16 @@ const lazyWithDelay = (importFunc: () => Promise<any>) => {
 // Lazy load pages for better performance with 0.5 second delay
 const LandingPage = lazyWithDelay(() => import('./pages/LandingPage'));
 const CitizenPortalPage = lazyWithDelay(() => import('./citizen-portal/page'));
+const AccountPage = lazyWithDelay(() =>
+  import('./pages/AccountPage.tsx').then((moduleExports) => ({
+    default: moduleExports.AccountPage,
+  }))
+);
+const AdminDashboard = lazyWithDelay(() =>
+  import('./components/AdminDashboard.tsx').then((moduleExports) => ({
+    default: moduleExports.AdminDashboard,
+  }))
+);
 const NotFoundPage = lazyWithDelay(() => import('./pages/NotFound'));
 
 // Dashboard layout
@@ -44,6 +54,14 @@ export const router = createBrowserRouter([
   {
     path: '/',
     Component: LandingPage,
+  },
+  {
+    path: '/account',
+    Component: AccountPage,
+  },
+  {
+    path: '/admin',
+    Component: AdminDashboard,
   },
   {
     path: '/citizen-portal',

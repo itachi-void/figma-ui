@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 
-export default function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
+export const LoadingSpinner = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-16 h-16',
@@ -16,4 +16,4 @@ export default function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | '
       />
     </div>
   );
-}
+};
