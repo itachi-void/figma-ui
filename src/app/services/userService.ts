@@ -167,7 +167,7 @@ export const userService = {
       role: data.role || "user",
     };
 
-    const response = await fetch(`${API_BASE_URL}/User`, {
+    const response = await fetch(`${API_BASE_URL}/User/${data.userId}`, {
       method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(payload),
