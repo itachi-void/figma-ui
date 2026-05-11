@@ -164,7 +164,6 @@ export const userService = {
       address: data.address,
       status: data.status || "active",
       walletPoints: data.walletPoints ?? 0,
-      createdAt: data.createdAt || new Date().toISOString(),
       role: data.role || "user",
     };
 
