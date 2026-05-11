@@ -28,11 +28,29 @@ export const accountService = {
       body: JSON.stringify(credentials),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Login failed");
+    // اقرأ الرد كنص الأول
+    const text = await response.text();
+
+    let parsed: any = null;
+
+    // حاول تحوله JSON لو ينفع
+    try {
+      parsed = text ? JSON.parse(text) : null;
+    } catch {
+      parsed = text;
     }
 
-    return response.json();
+    // لو فيه error
+    if (!response.ok) {
+      throw new Error(
+        parsed?.message ||
+        parsed?.title ||
+        parsed ||
+        "Login failed"
+      );
+    }
+
+    // لو الرد فاضي
+    return parsed ?? ({} as LoginResponse);
   },
 };
