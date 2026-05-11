@@ -23,28 +23,30 @@ export const accountService = {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(credentials),
+
+      // ❌ مهم: حذفنا role نهائيًا
+      body: JSON.stringify({
+        name: credentials.name,
+        password: credentials.password,
+      }),
     });
 
-    // السيرفر بيرجع string (JWT token) مش JSON
     const text = await response.text();
 
-    // لو في خطأ
     if (!response.ok) {
       throw new Error(text || "Login failed");
     }
 
-    // تنظيف التوكن لو جاي بين quotes
+    // السيرفر بيرجع JWT string
     const token = text.replace(/"/g, "");
 
-    // نرجع شكل متوافق مع التطبيق
     return {
       token,
       user: {
         userId: 0,
         email: "",
         fullName: credentials.name,
-        role: credentials.role || "",
+        role: "",
       },
     };
   },
